@@ -5,7 +5,7 @@ const { protect } = require("../middlewares/authMiddleware");
 const {validateUser, userSchema} = require('../validators/userValidate');
 const isAuthenticated = require('../middlewares/isAuthenticatedMiddleware');
 
-const passport = require('passport');
+// const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 router.post("/register", validateUser(userSchema), registerUser);
@@ -18,21 +18,21 @@ router.post('/change-password/:email', changePassword);
 router.get("/me", protect, getMe);
 
 // step1 - redirect to google login
-router.get("/google", passport.authenticate("google", {scope: ["profile", "email"]}));
+// router.get("/google", passport.authenticate("google", {scope: ["profile", "email"]}));
 
-router.get("/google/callback",
-    passport.authenticate("google", {session:false}),
-    (req, res) => {
-        try {
-            const token = jwt.sign({id: req.user._id, email: req.user.email}, process.env.JWT_SECRET, {expiresIn: "7d"});
+// router.get("/google/callback",
+//     passport.authenticate("google", {session:false}),
+//     (req, res) => {
+//         try {
+//             const token = jwt.sign({id: req.user._id, email: req.user.email}, process.env.JWT_SECRET, {expiresIn: "7d"});
 
-            res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`)
-        } catch (error) {
-            console.error("Google login error:", error);
-            res.redirect(`${process.env.CLIENT_URL}/login?error=google_failed`);
-        }
-    }
-);
+//             res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`)
+//         } catch (error) {
+//             console.error("Google login error:", error);
+//             res.redirect(`${process.env.CLIENT_URL}/login?error=google_failed`);
+//         }
+//     }
+// );
 
 
 
