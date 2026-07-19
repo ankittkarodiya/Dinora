@@ -1,7 +1,12 @@
+const dns = require("dns");
+const nodemailer = require("nodemailer");
 const fs = require('fs');
 const path = require('node:path');
 const handlebars = require('handlebars');
-const transporter = require("../config/mailer");
+
+// Same fix as sendOtpMail.js — safe to call this more than once across
+// files, it just sets a process-wide default each time.
+dns.setDefaultResultOrder("ipv4first");
 
 const verifyMail = async (token, email) => {
   const emailTemplateSource = fs.readFileSync(
@@ -10,6 +15,17 @@ const verifyMail = async (token, email) => {
   )
   const template = handlebars.compile(emailTemplateSource);
   const htmlToSend = template({token: encodeURIComponent(token)});
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASSWORD,
+    },
+    family: 4,
+  });
 
   const mailConfigurations = {
     from: process.env.MAIL_USER,
@@ -30,6 +46,63 @@ const verifyMail = async (token, email) => {
 };
 
 module.exports = verifyMail;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const fs = require('fs');
+// const path = require('node:path');
+// const handlebars = require('handlebars');
+// const transporter = require("../config/mailer");
+
+// const verifyMail = async (token, email) => {
+//   const emailTemplateSource = fs.readFileSync(
+//     path.join(__dirname, "template.hbs"),
+//     "utf-8"
+//   )
+//   const template = handlebars.compile(emailTemplateSource);
+//   const htmlToSend = template({token: encodeURIComponent(token)});
+
+//   const mailConfigurations = {
+//     from: process.env.MAIL_USER,
+//     to: email,
+//     subject: "Email Verification",
+//     html: htmlToSend,
+//   }
+
+//   try {
+//     const info = await transporter.sendMail(mailConfigurations);
+//     console.log("✅ Verification email sent successfully:", info.messageId);
+//     return info;
+//   } catch (err) {
+//     console.error("🔴 VERIFICATION EMAIL SEND FAILED. Full error:", err);
+//     console.error("🔴 Error code:", err.code);
+//     throw err;
+//   }
+// };
+
+// module.exports = verifyMail;
 
 
 
