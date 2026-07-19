@@ -7,11 +7,29 @@ const app = express();
 
 app.use(helmet());
 app.use(morgan("dev"));
+
+const allowedOrigins = [
+  "https://dinora.in",
+  "https://www.dinora.in",
+];
+
 app.use(cors({
-  // origin: "http://localhost:5173",
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, or same-origin requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
 }));
+
+// app.use(cors({
+//   // origin: "http://localhost:5173",
+//   origin: process.env.CLIENT_URL || "http://localhost:5173",
+//   credentials: true
+// }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
