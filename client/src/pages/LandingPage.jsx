@@ -279,7 +279,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/login")}
               className="px-8 py-4 bg-[#c1440e] hover:bg-[#a83a0c] text-white rounded-full font-bold text-base transition-all hover:-translate-y-0.5 shadow-[0_10px_30px_-10px_rgba(193,68,14,0.8)] w-full sm:w-auto"
             >
               Login to Dashboard →
