@@ -23,6 +23,14 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (creatingAccount) return;
+
+
+    // ← THE FIX: validate before ever hitting the API
+  if (!formData.username.trim() || !formData.email.trim() || !formData.password.trim()) {
+    toast.error("All fields are required");
+    return;
+  }
+
     setCreatingAccount(true);
     try {
       const data = await registerApi(formData);
