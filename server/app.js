@@ -11,6 +11,7 @@ app.use(morgan("dev"));
 const allowedOrigins = [
   "https://dinora.in",
   "https://www.dinora.in",
+  "http://localhost:5173", // ← local development
 ];
 
 app.use(cors({
