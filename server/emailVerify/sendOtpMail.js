@@ -5,7 +5,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const sendOtpMail = async (email, otp) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: "Dinora <onboarding@resend.dev>", // ← Resend's shared testing domain, works immediately with no setup
+      // from: "Dinora <onboarding@resend.dev>", // ← Resend's shared testing domain, works immediately with no setup
+      from: "Dinora <noreply@dinora.in>",
       to: email,
       subject: "Password Reset OTP",
       html: `<p>Your OTP for password reset is: <b>${otp}</b>. It is valid for 10 minutes.</p>`,

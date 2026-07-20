@@ -15,7 +15,8 @@ const verifyMail = async (token, email) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Dinora <onboarding@resend.dev>",
+      // from: "Dinora <onboarding@resend.dev>",
+      from: "Dinora <noreply@dinora.in>",
       to: email,
       subject: "Email Verification",
       html: htmlToSend,
