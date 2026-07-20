@@ -92,10 +92,19 @@
         please verify your email address by clicking the button below.
       </p>
 
-      <p style="text-align: center;">
+      {{!-- <p style="text-align: center;">
         <a 
           href="http://localhost:5173/verification/{{token}}" 
           {{!-- href="http://localhost:5173/verification"  --}}
+          target="_blank" 
+          class="verify-button"
+        >
+          Verify Email
+        </a>
+      </p> --}}
+      <p style="text-align: center;">
+        <a 
+          href="{{clientUrl}}/verification/{{token}}" 
           target="_blank" 
           class="verify-button"
         >
