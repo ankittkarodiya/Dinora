@@ -1,254 +1,50 @@
-const dns = require("dns");
+// oldest
 const nodemailer = require("nodemailer");
+// const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('node:path');
+const { fileURLToPath } = require('node:url');
 const handlebars = require('handlebars');
 
-// Same fix as sendOtpMail.js — safe to call this more than once across
-// files, it just sets a process-wide default each time.
-dns.setDefaultResultOrder("ipv4first");
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// dotenv.config();
 
 const verifyMail = async (token, email) => {
+
   const emailTemplateSource = fs.readFileSync(
     path.join(__dirname, "template.hbs"),
     "utf-8"
   )
+
   const template = handlebars.compile(emailTemplateSource);
   const htmlToSend = template({token: encodeURIComponent(token)});
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    service: "gmail",
     auth: {
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASSWORD,
     },
-    family: 4,
   });
 
   const mailConfigurations = {
-    from: process.env.MAIL_USER,
-    to: email,
-    subject: "Email Verification",
-    html: htmlToSend,
-  }
+        from: process.env.MAIL_USER,
+        to: email, 
+        subject: "Email Verification", 
+        html: htmlToSend,
+    }
 
-  try {
-    const info = await transporter.sendMail(mailConfigurations);
-    console.log("✅ Verification email sent successfully:", info.messageId);
-    return info;
-  } catch (err) {
-    console.error("🔴 VERIFICATION EMAIL SEND FAILED. Full error:", err);
-    console.error("🔴 Error code:", err.code);
-    throw err;
-  }
+    transporter.sendMail(mailConfigurations, (err, info) => {
+        if(err){
+            throw new Error(err);
+        }
+        else{
+         console.log('mail sent');
+         console.log(info);
+        }
+    });
 };
 
 module.exports = verifyMail;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const fs = require('fs');
-// const path = require('node:path');
-// const handlebars = require('handlebars');
-// const transporter = require("../config/mailer");
-
-// const verifyMail = async (token, email) => {
-//   const emailTemplateSource = fs.readFileSync(
-//     path.join(__dirname, "template.hbs"),
-//     "utf-8"
-//   )
-//   const template = handlebars.compile(emailTemplateSource);
-//   const htmlToSend = template({token: encodeURIComponent(token)});
-
-//   const mailConfigurations = {
-//     from: process.env.MAIL_USER,
-//     to: email,
-//     subject: "Email Verification",
-//     html: htmlToSend,
-//   }
-
-//   try {
-//     const info = await transporter.sendMail(mailConfigurations);
-//     console.log("✅ Verification email sent successfully:", info.messageId);
-//     return info;
-//   } catch (err) {
-//     console.error("🔴 VERIFICATION EMAIL SEND FAILED. Full error:", err);
-//     console.error("🔴 Error code:", err.code);
-//     throw err;
-//   }
-// };
-
-// module.exports = verifyMail;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const nodemailer = require("nodemailer");
-// // const dotenv = require('dotenv');
-// const fs = require('fs');
-// const path = require('node:path');
-// const { fileURLToPath } = require('node:url');
-// const handlebars = require('handlebars');
-// // const __filename = fileURLToPath(import.meta.url);
-// // const __dirname = path.dirname(__filename);
-// // dotenv.config();
-
-// const verifyMail = async (token, email) => {
-//   const emailTemplateSource = fs.readFileSync(
-//     path.join(__dirname, "template.hbs"),
-//     "utf-8"
-//   )
-//   const template = handlebars.compile(emailTemplateSource);
-//   const htmlToSend = template({token: encodeURIComponent(token)});
-
-//   const transporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",
-//     port: 465,
-//     secure: true,
-//     auth: {
-//       user: process.env.MAIL_USER,
-//       pass: process.env.MAIL_PASSWORD,
-//     },
-//     // ← THE FIX: force IPv4, since Render's outbound network doesn't
-//     // properly support IPv6, causing ENETUNREACH errors on connect
-//     family: 4,
-//   });
-
-//   const mailConfigurations = {
-//     from: process.env.MAIL_USER,
-//     to: email,
-//     subject: "Email Verification",
-//     html: htmlToSend,
-//   }
-
-//   try {
-//     const info = await transporter.sendMail(mailConfigurations);
-//     console.log("✅ Verification email sent successfully:", info.messageId);
-//     return info;
-//   } catch (err) {
-//     console.error("🔴 VERIFICATION EMAIL SEND FAILED. Full error:", err);
-//     console.error("🔴 Error code:", err.code);
-//     throw err;
-//   }
-// };
-
-// module.exports = verifyMail;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// oldest
-// const nodemailer = require("nodemailer");
-// // const dotenv = require('dotenv');
-// const fs = require('fs');
-// const path = require('node:path');
-// const { fileURLToPath } = require('node:url');
-// const handlebars = require('handlebars');
-
-// // const __filename = fileURLToPath(import.meta.url);
-// // const __dirname = path.dirname(__filename);
-
-// // dotenv.config();
-
-// const verifyMail = async (token, email) => {
-
-//   const emailTemplateSource = fs.readFileSync(
-//     path.join(__dirname, "template.hbs"),
-//     "utf-8"
-//   )
-
-//   const template = handlebars.compile(emailTemplateSource);
-//   const htmlToSend = template({token: encodeURIComponent(token)});
-
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: process.env.MAIL_USER,
-//       pass: process.env.MAIL_PASSWORD,
-//     },
-//   });
-
-//   const mailConfigurations = {
-//         from: process.env.MAIL_USER,
-//         to: email, 
-//         subject: "Email Verification", 
-//         html: htmlToSend,
-//     }
-
-//     transporter.sendMail(mailConfigurations, (err, info) => {
-//         if(err){
-//             throw new Error(err);
-//         }
-//         else{
-//          console.log('mail sent');
-//          console.log(info);
-//         }
-//     });
-// };
-
-// module.exports = verifyMail;
