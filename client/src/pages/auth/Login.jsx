@@ -153,7 +153,7 @@ const handleSubmit = async (e) => {
           <button
             type="submit"
             disabled={submitting} //new to fix logout
-            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5"
+            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {/* Login */}
             {submitting ? "Logging in..." : "Login"}
