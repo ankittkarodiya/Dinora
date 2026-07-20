@@ -537,7 +537,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[#f6efe3]/10 pt-14 pb-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
             {/* Brand column */}
             <div>
               <span className="font-display font-semibold text-xl tracking-tight text-[#f6efe3]">
@@ -574,7 +575,7 @@ export default function LandingPage() {
             </div>
 
             {/* Social */}
-            <div>
+            {/* <div>
               <div className="text-[#f6efe3] font-semibold text-sm mb-4 font-mono tracking-wide uppercase">
                 Follow
               </div>
@@ -643,7 +644,7 @@ export default function LandingPage() {
                   </svg>
                 </a>
               </div>
-            </div>
+            </div> */}
 
             {/* Product links */}
             <div>
@@ -678,6 +679,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      
     </div>
   );
 }
