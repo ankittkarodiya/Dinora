@@ -277,7 +277,7 @@ export default function MenuManager() {
             <button
               onClick={() => setDeleteModal(null)}
               disabled={deleting}
-              className="flex-1 py-3 border border-white/20 bg-white/10 text-slate-300 rounded-xl font-bold text-sm disabled:opacity-50"
+              className="flex-1 py-3 border border-white/20 bg-white/10 text-slate-300 rounded-xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>

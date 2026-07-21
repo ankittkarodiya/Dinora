@@ -66,7 +66,11 @@ export default function Settings() {
   const [restaurant, setRestaurant] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+
+
+  // const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false); // ← renamed from `saving`
+  const [linkingRazorpay, setLinkingRazorpay] = useState(false); // ← new, separate state
   const [payingPlan, setPayingPlan] = useState(null);
   const [billingCycle, setBillingCycle] = useState("monthly"); // ← new toggle state
 
@@ -118,7 +122,7 @@ export default function Settings() {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    setSaving(true);
+    setSavingProfile(true);
     try {
       if (logoFile) await uploadLogoApi(logoFile);
       const data = await updateRestaurantApi(profileForm);
@@ -136,7 +140,8 @@ export default function Settings() {
     if (!razorpayForm.keyId || !razorpayForm.keySecret) {
       return toast.error("Both Key ID and Secret are required");
     }
-    setSaving(true);
+    // setSaving(true);
+    setLinkingRazorpay(true);
     try {
       await addRazorpayKeysApi(razorpayForm);
       toast.success("Razorpay linked! Customers can now pay online.");
@@ -284,8 +289,9 @@ export default function Settings() {
                 </div>
               </div>
 
-              <button type="submit" disabled={saving} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm disabled:opacity-50">
-                {saving ? "Saving..." : "Save Profile"}
+              <button type="submit" disabled={savingProfile} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm disabled:opacity-50">
+                {/* {saving ? "Saving..." : "Save Profile"} */}
+                {savingProfile ? "Saving..." : "Save Profile"}
               </button>
             </form>
           </div>
@@ -440,10 +446,12 @@ export default function Settings() {
               />
               <button
                 type="submit"
-                disabled={saving || !razorpayForm.keyId}
+                disabled={linkingRazorpay || !razorpayForm.keyId}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs disabled:opacity-50"
               >
-                {saving ? "Linking..." : restaurant?.razorpayLinked ? "Update Keys" : "Link Account"}
+                {/* {saving ? "Linking..." : restaurant?.razorpayLinked ? "Update Keys" : "Link Account"} */}
+                {linkingRazorpay ? "Linking..." : restaurant?.razorpayLinked ? "Update Keys" : "Link Account"}
+
               </button>
 
               <div className="flex items-start gap-2 mt-3">
