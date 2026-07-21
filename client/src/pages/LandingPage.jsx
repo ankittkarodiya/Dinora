@@ -430,7 +430,7 @@ export default function LandingPage() {
           Simple pricing
         </h2>
         <p className="text-[#8a8378] text-center mb-8 font-mono text-xs sm:text-sm tracking-wide px-4">
-          10-DAY FREE TRIAL · NO CARD REQUIRED
+          10-AY FREE TRIAL · NO CARD REQUIRED
         </p>
 
         {/* Monthly / Yearly toggle */}
