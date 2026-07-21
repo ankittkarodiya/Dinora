@@ -13,7 +13,9 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
 
   const handlePrint = () => {
     const printContent = slipRef.current.innerHTML;
-    const printWindow = window.open("", "_blank", "width=380,height=700");
+    const printWindow = window.open("", "width=380,height=700");
+    // const printWindow = window.open("", "_blank", "width=380,height=700");
+
     printWindow.document.write(`
       <!DOCTYPE html><html><head><title>Bill — ${order._id.slice(-6).toUpperCase()}</title>
       <style>

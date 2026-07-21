@@ -35,7 +35,8 @@ function Register() {
     try {
       const data = await registerApi(formData);
       if (data.success) {
-        toast.success(data.message);
+        // toast.success(data.message);
+        toast.success("Verify your email to register");
         // localStorage.setItem("token", data.user.token);
         navigate("/register-verification");
         // navigate(`/verify-email/${formData.email}`);

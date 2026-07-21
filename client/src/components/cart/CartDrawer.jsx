@@ -36,7 +36,7 @@ export default function CartDrawer({
 
   const [screen, setScreen] = useState("cart");
 
-  // const [placing, setPlacing] = useState(false);
+  const [placing, setPlacing] = useState(false);
   const [payingOnline, setPayingOnline] = useState(false);
   const [payingCash, setPayingCash] = useState(false);
 

@@ -16,7 +16,7 @@ export default function Tables() {
   // useEffect(() => {
   //   fetchData();
   // }, []);
-  
+
   const hasFetchedRef = useRef(false);
 useEffect(() => {
   if (hasFetchedRef.current) return;
@@ -224,7 +224,10 @@ useEffect(() => {
             </div>
           ))
         )}
-      </div> 
+      </div>
+
+
+
       {/* QR Modal */}
       {qrTable && (
         <div
@@ -293,6 +296,8 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      
     </div>
   );
 }

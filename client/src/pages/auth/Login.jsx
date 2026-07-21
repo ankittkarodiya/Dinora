@@ -36,7 +36,11 @@ const handleSubmit = async (e) => {
   try {
     const data = await loginApi(formData);
     if (data.success) {
-      toast.success(data.message);
+      // if(!getMyRestaurantApi()){
+      //   toast.success("Setup your restaurant to proceed");
+      // } else{
+      //   toast.success(data.message);
+      // }
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
       if (data.user.role === "customer") {
@@ -44,8 +48,12 @@ const handleSubmit = async (e) => {
       } else if (data.user.role === "restaurant_admin") {
         try {
           const res = await getMyRestaurantApi();
-          if (res.restaurant) navigate("/restaurant/dashboard");
+          if (res.restaurant) {
+            toast.success(data.message);
+            navigate("/restaurant/dashboard");
+          }
           else navigate("/restaurant/setup");
+          
         } catch {
           navigate("/restaurant/setup");
         }
