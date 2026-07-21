@@ -131,7 +131,8 @@ export default function Settings() {
     } catch {
       toast.error("Failed to update");
     } finally {
-      setSaving(false);
+      // setSaving(false);
+      setSavingProfile(false);
     }
   };
 
@@ -150,7 +151,8 @@ export default function Settings() {
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to link Razorpay");
     } finally {
-      setSaving(false);
+      // setSaving(false);
+      setLinkingRazorpay(false);
     }
   };
 
