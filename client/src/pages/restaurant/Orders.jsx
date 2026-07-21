@@ -21,14 +21,23 @@ const STATUS_STYLE = {
   Cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 const STATUS_ICON = {
-  Pending: "🕐",
-  Accepted: "✅",
-  Preparing: "⏳",
-  Ready: "♨",
-  Served: "𓌉◯𓇋",
-  Completed: "✨",
+  Pending: "",
+  Accepted: "",
+  Preparing: "",
+  Ready: "",
+  Served: "",
+  Completed: "✓",
   Cancelled: "🚫",
 };
+// const STATUS_ICON = {
+//   Pending: "🕐",
+//   Accepted: "✅",
+//   Preparing: "⏳",
+//   Ready: "♨",
+//   Served: "𓌉◯𓇋",
+//   Completed: "✨",
+//   Cancelled: "🚫",
+// };
 const ALL_STATUSES = [
   "all",
   "Pending",
@@ -569,7 +578,7 @@ useEffect(() => {
                           onClick={() => handleAccept(order._id)}
                           className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold"
                         >
-                          ✅ Accept
+                          Accept
                         </button>
                         <button
                           onClick={() => setCancelModal(order)}
@@ -592,7 +601,7 @@ useEffect(() => {
                         onClick={() => handleStatusUpdate(order._id, "Ready")}
                         className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold"
                       >
-                        ♨ Mark Ready
+                        Mark Ready
                       </button>
                     )}
                     {order.status === "Ready" && (
@@ -600,7 +609,7 @@ useEffect(() => {
                         onClick={() => handleStatusUpdate(order._id, "Served")}
                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold"
                       >
-                        𓌉◯𓇋 Mark Served
+                        Mark Served
                       </button>
                     )}
                     {isCashPending && (
@@ -608,7 +617,7 @@ useEffect(() => {
                         onClick={() => handleConfirmCash(order._id)}
                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold"
                       >
-                        💵 Confirm Cash Received
+                        ₹ Confirm Cash Received
                       </button>
                     )}
                   </div>
