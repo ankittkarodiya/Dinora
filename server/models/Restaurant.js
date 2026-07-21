@@ -43,7 +43,7 @@ const restaurantSchema = new mongoose.Schema(
     subscriptionExpiresAt: {
       type: Date,
       // default: () => new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
-      default: () => new Date(Date.now() + 2 * 60 * 1000),
+      default: () => new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days trial
     },
     subscriptionPaymentId: { type: String, default: "" },
 

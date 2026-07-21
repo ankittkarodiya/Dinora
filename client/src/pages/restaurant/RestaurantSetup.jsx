@@ -187,7 +187,7 @@ export default function RestaurantSetup() {
     try {
       await createRestaurantApi({ ...form, plan: "trial" });
       sessionStorage.removeItem("restaurantSetupForm"); // ← draft no longer needed once setup is done
-      toast.success("4-day free trial started!");
+      toast.success("10-day free trial started!");
       navigate("/restaurant/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Could not start trial");
@@ -464,7 +464,7 @@ export default function RestaurantSetup() {
             {/* Trial option */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
               <span className="text-slate-300 text-sm">Start with a </span>
-              <span className="text-white font-bold">4-day free trial</span>
+              <span className="text-white font-bold">10-day free trial</span>
               <span className="text-slate-300 text-sm">
                 {" "}
                 to explore the platform

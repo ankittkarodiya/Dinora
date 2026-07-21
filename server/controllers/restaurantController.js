@@ -56,7 +56,13 @@ const updateRestaurant = async (req, res) => {
     const { name, description, phone, address, gstNumber, gstPercent } = req.body;
     const updateData = { name, description, phone, address, gstNumber };
     if (gstPercent !== undefined && gstPercent !== "") {
-      updateData.gstPercent = Number(gstPercent);
+      // updateData.gstPercent = Number(gstPercent);
+
+      // new
+      const gst = Number(gstPercent);
+      updateData.gstPercent = gst;
+      updateData.cgstPercent = gst / 2; // ← keep these in sync whenever gstPercent changes
+      updateData.sgstPercent = gst / 2;
     }
     const restaurant = await Restaurant.findOneAndUpdate(
       { userId: req.user._id },

@@ -261,7 +261,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 bg-[#e8a33d]/10 border border-[#e8a33d]/25 rounded-full px-4 py-1.5 mb-6 sm:mb-7">
             <span className="w-1.5 h-1.5 rounded-full bg-[#e8a33d] pulse-dot" />
             <span className="text-[#e8a33d] text-[10px] sm:text-xs font-mono tracking-wide">
-              4-DAY FREE TRIAL · NO CARD REQUIRED
+              10-DAY FREE TRIAL · NO CARD REQUIRED
             </span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl md:text-[3.4rem] leading-[1.1] md:leading-[1.08] font-semibold text-[#f6efe3] mb-5 sm:mb-6">
@@ -430,7 +430,7 @@ export default function LandingPage() {
           Simple pricing
         </h2>
         <p className="text-[#8a8378] text-center mb-8 font-mono text-xs sm:text-sm tracking-wide px-4">
-          4-DAY FREE TRIAL · NO CARD REQUIRED
+          10-DAY FREE TRIAL · NO CARD REQUIRED
         </p>
 
         {/* Monthly / Yearly toggle */}
