@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+// import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom"; // ← add useLocation
 import { useSelector } from "react-redux";
 import { getMyRestaurantApi } from "../api/restaurantApi";
 import { getTablesApi } from "../api/tableApi";
@@ -79,6 +80,8 @@ const navItems = [
 // Nav icons above are plain UI glyphs, not content photos — left as-is.
 export default function RestaurantLayout({ children }) {
   const navigate = useNavigate();
+  const location = useLocation(); // ← add this alongside your existing useNavigate()
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [restaurant, setRestaurant] = useState(null);
   const [previewTableId, setPreviewTableId] = useState(null);
@@ -88,6 +91,7 @@ export default function RestaurantLayout({ children }) {
   const orders = useSelector((s) => s.orders.orders);
   const pendingCount = orders.filter((o) => o.status === "Pending").length;
   const user = JSON.parse(localStorage.getItem("user") || "null");
+
   useEffect(() => {
     const fetchRestaurant = async () => {
       try {
@@ -98,7 +102,10 @@ export default function RestaurantLayout({ children }) {
         setRestaurant(restaurantData.restaurant);
         if (tablesData.tables?.length > 0) {
           setPreviewTableId(tablesData.tables[0]._id);
+        } else {
+        setPreviewTableId(null); // ← also handle the reverse case (last table deleted)
         }
+
       } catch (err) {
         console.error(err);
         // ← THE FIX: if fetching the restaurant fails (deleted, or genuinely
@@ -113,7 +120,9 @@ export default function RestaurantLayout({ children }) {
       }
     };
     fetchRestaurant();
-  }, []);
+  }, [location.pathname]);
+
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
