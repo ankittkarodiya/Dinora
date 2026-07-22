@@ -82,6 +82,18 @@ export default function Settings() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [fetchError, setFetchError] = useState(false);
 
+  // derived value — recalculates on every render, no extra state needed
+  // to disable the save profile btn when nothing changed in form
+const hasChanges = restaurant && (
+  profileForm.name !== (restaurant.name || "") ||
+  profileForm.description !== (restaurant.description || "") ||
+  profileForm.phone !== (restaurant.phone || "") ||
+  profileForm.address !== (restaurant.address || "") ||
+  profileForm.gstNumber !== (restaurant.gstNumber || "") ||
+  profileForm.gstPercent !== String(restaurant.gstPercent ?? "5") ||
+  logoFile !== null // ← also counts as a change if they picked a new logo
+);
+
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -137,7 +149,7 @@ export default function Settings() {
       gstNumber: data.restaurant.gstNumber || "",
       gstPercent: String(data.restaurant.gstPercent ?? "5"),
     });
-    
+
       toast.success("Profile updated");
     } catch {
       toast.error("Failed to update");
@@ -302,10 +314,14 @@ export default function Settings() {
                 </div>
               </div>
 
-              <button type="submit" disabled={savingProfile} className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm disabled:opacity-50">
+              <button type="submit"
+              // disabled={savingProfile}
+              disabled={savingProfile || !hasChanges}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm disabled:opacity-50">
                 {/* {saving ? "Saving..." : "Save Profile"} */}
                 {savingProfile ? "Saving..." : "Save Profile"}
               </button>
+
             </form>
           </div>
 

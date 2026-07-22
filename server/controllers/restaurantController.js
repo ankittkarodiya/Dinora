@@ -39,6 +39,8 @@ const createRestaurant = async (req, res) => {
       gstPercent: gstPercent ? Number(gstPercent) : 5,
       gstNumber: gstNumber || "",
       subscriptionPlan: plan,
+      subscriptionBillingCycle: plan === "trial" ? "none" : "monthly", // ← THE FIX: trial has no real billing cycle; paid plans default to monthly here and get corrected to the real cycle once verifySubscription runs
+
       // for trial, expiry is set by schema default (4 days from now)
       // for basic/pro, subscription is not "active" until payment verifies —
       // see verifySubscription in subscriptionController for that transition

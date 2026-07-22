@@ -32,7 +32,7 @@ const restaurantSchema = new mongoose.Schema(
     },
     subscriptionBillingCycle: {
       type: String,
-      enum: ["monthly", "yearly"],
+      enum: ["none", "monthly", "yearly"], // "none" for trial
       default: "monthly",
     },
     subscriptionStatus: {
