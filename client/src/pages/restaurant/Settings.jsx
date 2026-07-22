@@ -127,6 +127,17 @@ export default function Settings() {
       if (logoFile) await uploadLogoApi(logoFile);
       const data = await updateRestaurantApi(profileForm);
       setRestaurant(data.restaurant);
+      // ← THE FIX: also sync profileForm with the actual saved values,
+    // since that's what the input fields are genuinely bound to
+    setProfileForm({
+      name: data.restaurant.name || "",
+      description: data.restaurant.description || "",
+      phone: data.restaurant.phone || "",
+      address: data.restaurant.address || "",
+      gstNumber: data.restaurant.gstNumber || "",
+      gstPercent: String(data.restaurant.gstPercent ?? "5"),
+    });
+    
       toast.success("Profile updated");
     } catch {
       toast.error("Failed to update");
