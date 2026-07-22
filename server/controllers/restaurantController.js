@@ -37,6 +37,11 @@ const createRestaurant = async (req, res) => {
       userId: req.user._id,
       name, slug, description, phone, address,
       gstPercent: gstPercent ? Number(gstPercent) : 5,
+
+      // new
+      cgstPercent: gstPercent ? Number(gstPercent) : 5 / 2, // ← THE FIX: derive from the actual chosen GST%, not the schema default
+      sgstPercent: gstPercent ? Number(gstPercent) : 5 / 2,
+
       gstNumber: gstNumber || "",
       subscriptionPlan: plan,
       subscriptionBillingCycle: plan === "trial" ? "none" : "monthly", // ← THE FIX: trial has no real billing cycle; paid plans default to monthly here and get corrected to the real cycle once verifySubscription runs
