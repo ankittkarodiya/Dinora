@@ -107,6 +107,13 @@ useEffect(() => {
             // img { width: 220px; height: 220px; }
             img { width: 300px; height: 300px; }
 
+            .link {
+              font-size: 12px;
+              color: #666;
+              word-break: break-all;
+              margin-top: 8px;
+            }
+
             .footer { font-size: 15px; color: #888; margin-top: 20px; }
           </style>
         </head>
@@ -115,6 +122,8 @@ useEffect(() => {
           <div class="table-name">${qrTable.name}</div>
           <div class="subtitle">Scan to open menu</div>
           <img src="${qrUrl(qrTable._id)}" alt="QR Code" />
+          
+          <p class="link">${menuUrl(qrTable._id)}</p>
           <div class="footer">Powered by Dinora · dinora.in</div>
         </body>
       </html>
