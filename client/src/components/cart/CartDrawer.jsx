@@ -487,8 +487,12 @@ export default function CartDrawer({
                 className="w-full bg-white/5 border border-white/10 hover:border-[#FC8019]/40 rounded-2xl p-4 mb-3 flex items-center justify-between transition-all disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center text-xl">
-                    💳
+                  <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-white flex items-center justify-center text-xl">
+                    {/* 💳 */}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5 shrink-0">
+  <rect x="2" y="5" width="20" height="14" rx="2" />
+  <path d="M2 10h20" />
+</svg>
                   </div>
                   <div className="text-left">
                     <div className="text-white font-bold text-sm">
@@ -510,8 +514,9 @@ export default function CartDrawer({
                 disabled={payingCash}
                 className="w-full bg-white/5 border border-white/10 hover:border-white/20 rounded-2xl p-4 flex items-center gap-3 transition-all disabled:opacity-50"
               >
-                <div className="w-11 h-11 rounded-xl bg-green-500/20 flex items-center justify-center text-xl">
-                  💵
+                <div className="w-11 h-11 rounded-xl bg-green-500/20 text-white flex items-center justify-center text-xl">
+                  {/* 💵 */}
+                  ₹
                 </div>
                 <div className="text-left">
                   <div className="text-white font-bold text-sm">
@@ -544,7 +549,8 @@ export default function CartDrawer({
             </div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 text-left">
               <div className="text-amber-300 font-bold text-sm mb-1">
-                💵 Cash Payment
+                {/* 💵 Cash Payment */}
+                ₹ Cash Payment
               </div>
               <div className="text-gray-300 text-sm">
                 Please pay{" "}

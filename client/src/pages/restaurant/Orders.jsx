@@ -564,9 +564,24 @@ useEffect(() => {
                     {order.status === "Accepted" && (
                       <button
                         onClick={() => setSlipOrder(order)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+                        // className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap"
+
                       >
-                        🖨️ Print & Send to Kitchen
+                         <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-3.5 h-3.5 shrink-0"
+                        >
+                          <path d="M6 9V3h12v6M6 18h12v4H6zM4 9h16a2 2 0 012 2v6h-4M2 17v-6a2 2 0 012-2" />
+                        </svg>
+                        <span>Print &amp; Send to Kitchen</span>
+                        {/* Print & Send to Kitchen */}
+                        {/* 🖨️ Print & Send to Kitchen */}
                       </button>
                     )}
                     {order.status === "Preparing" && (
