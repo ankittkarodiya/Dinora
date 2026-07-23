@@ -26,8 +26,12 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
       <head>
         <meta charset="utf-8" />
         <style>
+          @page { size: 80mm auto; margin: 0; } /* 80mm wide, height grows to fit content automatically */
+
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; max-width: 300px; margin: 0 auto; padding: 14px; }
+          /* body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; max-width: 300px; margin: 0 auto; padding: 14px; } */
+          body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; max-width: 80mm; margin: 0 auto; padding: 6px; }
+
           table { width: 100%; font-size: 12px; border-collapse: collapse; }
           .center { text-align: center; }
           .bold { font-weight: bold; }

@@ -33,14 +33,16 @@ const createRestaurant = async (req, res) => {
       return res.status(400).json({ success: false, message: "A plan must be selected" });
     }
 
+    const finalGstPercent = gstPercent ? Number(gstPercent) : 5;
+    
     const restaurant = await Restaurant.create({
       userId: req.user._id,
       name, slug, description, phone, address,
       gstPercent: gstPercent ? Number(gstPercent) : 5,
-
+      
       // new
-      cgstPercent: gstPercent ? Number(gstPercent) : 5 / 2, // ← THE FIX: derive from the actual chosen GST%, not the schema default
-      sgstPercent: gstPercent ? Number(gstPercent) : 5 / 2,
+      cgstPercent: finalGstPercent / 2, // ← THE FIX: derive from the actual chosen GST%, not the schema default
+      sgstPercent: finalGstPercent / 2,
 
       gstNumber: gstNumber || "",
       subscriptionPlan: plan,
