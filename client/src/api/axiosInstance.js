@@ -7,7 +7,8 @@ const axiosInstance = axios.create({
 });
 
 // Routes that belong to the customer flow — must ONLY ever get the customer token
-const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
+// const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
+const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/"];
 const isCustomerRoute = (url) => CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
 
 // ── Request interceptor — attaches the correct token per route type ──

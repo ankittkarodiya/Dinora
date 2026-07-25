@@ -79,7 +79,38 @@ export const selectItemCartId =
     state.cart.items.find(
       (i) => (i._id || i.id) === itemId && (i.portion || null) === portion,
     )?.cartId || null;
+
+
+// ← new: total quantity across ALL portions of this item combined —
+// used to show a single count badge even when Half and Full are both in cart
+export const selectItemTotalCartQty = (itemId) => (state) =>
+  state.cart.items
+    .filter((i) => (i._id || i.id) === itemId)
+    .reduce((sum, i) => sum + i.qty, 0);
+
 export default cartSlice.reducer;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import { createSlice } from "@reduxjs/toolkit";
 

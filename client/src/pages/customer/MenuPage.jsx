@@ -10,6 +10,7 @@ import {
   updateQty,
   selectItemCartQty,
   selectItemCartId,
+  selectItemTotalCartQty
 } from "../../features/cart/cartSlice";
 import {
   selectCurrentCustomer,
@@ -44,10 +45,205 @@ import { optimizeImage } from "../../utils/imageOptimize";
   // };
 
 // ── Item Row — Swiggy style, Cloudinary photo, no emoji fallback ──
+// function ItemRow({ item, onOpen }) {
+//   const dispatch = useDispatch();
+//   const cartQty = useSelector(selectItemCartQty(item._id));
+//   const cartId = useSelector(selectItemCartId(item._id));
+
+//   const handleAdd = (e) => {
+//     e.stopPropagation();
+//     dispatch(addToCart({ ...item, qty: 1 }));
+//   };
+
+//   const handleMinus = (e) => {
+//     e.stopPropagation();
+//     dispatch(updateQty({ cartId, delta: -1 }));
+//   };
+
+//   const handlePlus = (e) => {
+//     e.stopPropagation();
+//     dispatch(addToCart({ ...item, qty: 1 }));
+//   };
+
+//   return (
+//     <div
+//       onClick={() => onOpen(item)}
+//       className={`flex items-start gap-3 px-4 py-4 cursor-pointer active:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${!item.isAvailable ? "opacity-50" : ""}`}
+//     >
+//       <div className="flex-1 min-w-0 pr-2">
+//         <div className="flex items-center gap-2 mb-1.5">
+//           <div
+//             className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${item.isVeg ? "border-green-500" : "border-red-500"}`}
+//           >
+//             <div
+//               className={`w-2 h-2 rounded-full ${item.isVeg ? "bg-green-500" : "bg-red-500"}`}
+//             />
+//           </div>
+//           {item.isBestseller && (
+//             <span className="text-[#FF7043] text-[10px] font-bold border border-[#FF7043]/60 rounded px-1.5 py-0.5 uppercase tracking-wide">
+//               Bestseller
+//             </span>
+//           )}
+
+//         </div>
+
+//         <h3 className="text-white font-semibold text-[15px] leading-snug">
+//           {item.name}
+//         </h3>
+
+//         {/* <div className="text-white font-bold text-sm mt-1">₹{item.price}</div> */}
+
+//         {/* new */}
+//         {item.halfPrice ? (
+//   <div className="text-white font-bold text-sm mt-1">
+//     ₹{item.halfPrice} <span className="text-gray-500 font-normal text-xs">Half</span>
+//     <span className="text-gray-600 mx-1.5">·</span>
+//     ₹{item.price} <span className="text-gray-500 font-normal text-xs">Full</span>
+//   </div>
+// ) : (
+//   <div className="text-white font-bold text-sm mt-1">₹{item.price}</div>
+// )}
+
+//         {item.description && (
+//           <p className="text-gray-500 text-xs mt-1.5 leading-relaxed line-clamp-2">
+//             {item.description}
+//           </p>
+//         )}
+
+//         {!item.isAvailable && (
+//           <span className="text-red-400 text-xs font-semibold mt-1.5 block">
+//             Currently unavailable
+//           </span>
+//         )}
+//       </div>
+
+//       {/* Right — Cloudinary image + button */}
+//       <div className="shrink-0 relative">
+//         <div className="w-28 h-24 rounded-2xl overflow-hidden bg-[#2C2C2E]">
+//           {item.image ? (
+//             <img
+//               // src={item.image}
+//               src={optimizeImage(item.image, 200)}
+//               alt={item.name}
+//               className="w-full h-full object-cover"
+//               loading="lazy"
+//             />
+//           ) : (
+//             <div className="w-full h-full flex items-center justify-center text-gray-700">
+//               <svg
+//                 width="28"
+//                 height="28"
+//                 viewBox="0 0 24 24"
+//                 fill="none"
+//                 stroke="currentColor"
+//                 strokeWidth="1.5"
+//               >
+//                 <rect x="3" y="3" width="18" height="18" rx="2" />
+//                 <circle cx="8.5" cy="8.5" r="1.5" />
+//                 <polyline points="21,15 16,10 5,21" />
+//               </svg>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* {item.isAvailable && (
+//           <div
+//             className="absolute -bottom-3 left-1/2 -translate-x-1/2"
+//             onClick={(e) => e.stopPropagation()}
+//           >
+//             {cartQty > 0 ? (
+//               <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
+//                 <button
+//                   onClick={handleMinus}
+//                   className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+//                 >
+//                   −
+//                 </button>
+//                 <span className="w-7 text-center text-white font-black text-sm">
+//                   {cartQty}
+//                 </span>
+//                 <button
+//                   onClick={handlePlus}
+//                   className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+//                 >
+//                   +
+//                 </button>
+//               </div>
+//             ) : (
+//               <button
+//                 onClick={handleAdd}
+//                 className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
+//               >
+//                 ADD
+//               </button>
+//             )}
+//           </div>
+//         )} */}
+
+//         {/* new */}
+//         {item.isAvailable && (
+//   <div
+//     className="absolute -bottom-3 left-1/2 -translate-x-1/2"
+//     onClick={(e) => e.stopPropagation()}
+//   >
+//     {item.halfPrice ? (
+//       <button
+//         onClick={() => onOpen(item)}
+//         className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
+//       >
+//         ADD
+//       </button>
+//     ) : cartQty > 0 ? (
+//       <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
+//         <button
+//           onClick={handleMinus}
+//           className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+//         >
+//           −
+//         </button>
+//         <span className="w-7 text-center text-white font-black text-sm">
+//           {cartQty}
+//         </span>
+//         <button
+//           onClick={handlePlus}
+//           className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+//         >
+//           +
+//         </button>
+//       </div>
+//     ) : (
+//       <button
+//         onClick={handleAdd}
+//         className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
+//       >
+//         ADD
+//       </button>
+//     )}
+//   </div>
+// )}
+
+
+//       </div>
+//     </div>
+//   );
+// }
+
+
+// ── Item Row — Swiggy style, Cloudinary photo, no emoji fallback ──
 function ItemRow({ item, onOpen }) {
   const dispatch = useDispatch();
+  const hasHalfFull = !!item.halfPrice;
+
+  // for ordinary items (no half/full)
   const cartQty = useSelector(selectItemCartQty(item._id));
   const cartId = useSelector(selectItemCartId(item._id));
+
+  // for half/full items — each portion tracked independently, plus a combined total for the collapsed badge
+  const halfQty = useSelector(selectItemCartQty(item._id, "half"));
+  const fullQty = useSelector(selectItemCartQty(item._id, "full"));
+  const totalQty = useSelector(selectItemTotalCartQty(item._id));
+
+  const [showSheet, setShowSheet] = useState(false);
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -62,6 +258,23 @@ function ItemRow({ item, onOpen }) {
   const handlePlus = (e) => {
     e.stopPropagation();
     dispatch(addToCart({ ...item, qty: 1 }));
+  };
+
+  const halfCartId = useSelector(selectItemCartId(item._id, "half"));
+  const fullCartId = useSelector(selectItemCartId(item._id, "full"));
+
+  // ← new: each portion adds/adjusts independently — adding a Half never
+  // touches Full's quantity and vice versa, so both can sit in the cart
+  // as two genuinely separate lines at the same time
+  const addPortion = (e, portion) => {
+    e.stopPropagation();
+    const price = portion === "half" ? item.halfPrice : item.price;
+    dispatch(addToCart({ ...item, price, portion, qty: 1 }));
+  };
+  const adjustPortion = (e, portion, delta) => {
+    e.stopPropagation();
+    const targetCartId = portion === "half" ? halfCartId : fullCartId;
+    dispatch(updateQty({ cartId: targetCartId, delta }));
   };
 
   return (
@@ -83,25 +296,21 @@ function ItemRow({ item, onOpen }) {
               Bestseller
             </span>
           )}
-
         </div>
 
         <h3 className="text-white font-semibold text-[15px] leading-snug">
           {item.name}
         </h3>
 
-        {/* <div className="text-white font-bold text-sm mt-1">₹{item.price}</div> */}
-
-        {/* new */}
-        {item.halfPrice ? (
-  <div className="text-white font-bold text-sm mt-1">
-    ₹{item.halfPrice} <span className="text-gray-500 font-normal text-xs">Half</span>
-    <span className="text-gray-600 mx-1.5">·</span>
-    ₹{item.price} <span className="text-gray-500 font-normal text-xs">Full</span>
-  </div>
-) : (
-  <div className="text-white font-bold text-sm mt-1">₹{item.price}</div>
-)}
+        {hasHalfFull ? (
+          <div className="text-white font-bold text-sm mt-1">
+            ₹{item.halfPrice} <span className="text-gray-500 font-normal text-xs">Half</span>
+            <span className="text-gray-600 mx-1.5">·</span>
+            ₹{item.price} <span className="text-gray-500 font-normal text-xs">Full</span>
+          </div>
+        ) : (
+          <div className="text-white font-bold text-sm mt-1">₹{item.price}</div>
+        )}
 
         {item.description && (
           <p className="text-gray-500 text-xs mt-1.5 leading-relaxed line-clamp-2">
@@ -121,7 +330,6 @@ function ItemRow({ item, onOpen }) {
         <div className="w-28 h-24 rounded-2xl overflow-hidden bg-[#2C2C2E]">
           {item.image ? (
             <img
-              // src={item.image}
               src={optimizeImage(item.image, 200)}
               alt={item.name}
               className="w-full h-full object-cover"
@@ -145,12 +353,29 @@ function ItemRow({ item, onOpen }) {
           )}
         </div>
 
-        {/* {item.isAvailable && (
+        {item.isAvailable && (
           <div
             className="absolute -bottom-3 left-1/2 -translate-x-1/2"
             onClick={(e) => e.stopPropagation()}
           >
-            {cartQty > 0 ? (
+            {hasHalfFull ? (
+              // ← the collapsed control just opens/reopens the sheet — since
+              // two independent quantities can't be represented as one +/-
+              // pair, tapping always goes to the sheet where each is adjusted
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowSheet(true);
+                }}
+                className={`font-black text-sm px-6 py-1.5 rounded-xl shadow-lg transition-colors ${
+                  totalQty > 0
+                    ? "bg-[#FC8019] text-white border-2 border-[#FC8019]"
+                    : "bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] active:bg-[#FC8019] active:text-white"
+                }`}
+              >
+                {totalQty > 0 ? totalQty : "ADD"}
+              </button>
+            ) : cartQty > 0 ? (
               <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
                 <button
                   onClick={handleMinus}
@@ -177,55 +402,113 @@ function ItemRow({ item, onOpen }) {
               </button>
             )}
           </div>
-        )} */}
-
-        {/* new */}
-        {item.isAvailable && (
-  <div
-    className="absolute -bottom-3 left-1/2 -translate-x-1/2"
-    onClick={(e) => e.stopPropagation()}
-  >
-    {item.halfPrice ? (
-      <button
-        onClick={() => onOpen(item)}
-        className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
-      >
-        ADD
-      </button>
-    ) : cartQty > 0 ? (
-      <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
-        <button
-          onClick={handleMinus}
-          className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
-        >
-          −
-        </button>
-        <span className="w-7 text-center text-white font-black text-sm">
-          {cartQty}
-        </span>
-        <button
-          onClick={handlePlus}
-          className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
-        >
-          +
-        </button>
+        )}
       </div>
-    ) : (
-      <button
-        onClick={handleAdd}
-        className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
-      >
-        ADD
-      </button>
-    )}
-  </div>
-)}
 
+      {/* ── Swiggy-style customisation sheet — Half and Full each have
+           their OWN independent add/stepper, so both can be in the cart
+           at once, in whatever quantities the customer wants ── */}
+      {showSheet && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowSheet(false);
+          }}
+          className="fixed inset-0 bg-black/70 z-200 flex items-end justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-120 bg-[#1C1C1E] rounded-t-3xl p-5 pb-8"
+          >
+            <div className="flex justify-center mb-4">
+              <div className="w-10 h-1 bg-white/20 rounded-full" />
+            </div>
+            <div className="text-gray-500 text-xs font-bold uppercase tracking-wide mb-1">
+              Customisable
+            </div>
+            <h3 className="text-white font-bold text-lg mb-4">{item.name}</h3>
 
-      </div>
+            {/* Half row */}
+            <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl border border-white/10 bg-white/5 mb-2.5">
+              <div>
+                <div className="text-white font-medium text-sm">Half</div>
+                <div className="text-gray-500 text-xs mt-0.5">₹{item.halfPrice}</div>
+              </div>
+              {halfQty > 0 ? (
+                <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden">
+                  <button
+                    onClick={(e) => adjustPortion(e, "half", -1)}
+                    className="w-8 h-8 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center text-white font-black text-sm">
+                    {halfQty}
+                  </span>
+                  <button
+                    onClick={(e) => adjustPortion(e, "half", 1)}
+                    className="w-8 h-8 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => addPortion(e, "half")}
+                  className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-xs px-5 py-1.5 rounded-xl active:bg-[#FC8019] active:text-white transition-colors"
+                >
+                  ADD
+                </button>
+              )}
+            </div>
+
+            {/* Full row */}
+            <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl border border-white/10 bg-white/5">
+              <div>
+                <div className="text-white font-medium text-sm">Full</div>
+                <div className="text-gray-500 text-xs mt-0.5">₹{item.price}</div>
+              </div>
+              {fullQty > 0 ? (
+                <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden">
+                  <button
+                    onClick={(e) => adjustPortion(e, "full", -1)}
+                    className="w-8 h-8 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center text-white font-black text-sm">
+                    {fullQty}
+                  </span>
+                  <button
+                    onClick={(e) => adjustPortion(e, "full", 1)}
+                    className="w-8 h-8 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => addPortion(e, "full")}
+                  className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-xs px-5 py-1.5 rounded-xl active:bg-[#FC8019] active:text-white transition-colors"
+                >
+                  ADD
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowSheet(false)}
+              className="w-full mt-5 bg-white/10 text-gray-300 rounded-2xl py-3 font-bold text-sm"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ── Main MenuPage ─────────────────────────────────────────────────
 export default function MenuPage() {
