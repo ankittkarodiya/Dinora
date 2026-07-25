@@ -1,18 +1,14 @@
 import axios from "axios";
 import toast from "react-hot-toast";
-
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
-
 let sessionInvalidatedHandled = false; // ← add this near the top of the file, outside any function
-
 // Routes that belong to the customer flow — must ONLY ever get the customer token
 // const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
 const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/"];
-const isCustomerRoute = (url) =>
-  CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
+const isCustomerRoute = (url) => CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
 // ── Request interceptor — attaches the correct token per route type ──
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -29,7 +25,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 // ── Response interceptor — ONE consolidated handler, no leftover duplicates ──
 axiosInstance.interceptors.response.use(
@@ -48,9 +44,8 @@ axiosInstance.interceptors.response.use(
       // ← THE FIX: several requests can fail with this same code within
       // milliseconds of each other (RestaurantLayout + the page's own
       // fetch, all firing in parallel with the same invalidated token).
-      // Without this guard, each one independently shows its own toast
-      // and redirect before the page actually navigates away — this
-      // ensures only the FIRST one to arrive actually does anything.
+      // This guard ensures only the FIRST one to arrive actually does
+      // anything — every later one is silently ignored.
       if (sessionInvalidatedHandled) {
         return Promise.reject(error);
       }
@@ -59,32 +54,26 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      // clear anything already showing, then show ONLY this one message
+      // clear anything currently showing, then show ONLY this one message
       toast.dismiss();
+      toast.error("You were logged out because your account was signed in on another device.", {
+        duration: 4000,
+      });
 
-      toast.error(
-        "You were logged out because your account was signed in on another device.",
-        {
-          duration: 2000,
-        },
-      );
-
-      // ← THE FIX: once this specific toast has fired, silence every other
-      // toast call anywhere in the app until the redirect completes — other
-      // components' own catch blocks (e.g. "Failed to load menu") are just
-      // downstream side effects of this same invalidated session and would
-      // otherwise stack on top of the real message, making it unreadable
+      // silence every other toast anywhere in the app until the redirect
+      // completes — other components' own catch blocks are just downstream
+      // side effects of this same invalidated session and would otherwise
+      // stack on top of the real message, making it unreadable
       toast.error = () => {};
       toast.success = () => {};
       toast.dismiss = () => {};
 
       // small delay so the toast actually has time to render and be seen
-      // before the page navigates away — without this, redirect can outrace
-      // the toast's own render, so it barely flashes before vanishing
-      // window.location.href = "/login";
+      // before the page navigates away
       setTimeout(() => {
         window.location.href = "/login";
       }, 600);
+
       return Promise.reject(error);
     }
     if (error.response?.status === 401) {
@@ -125,9 +114,178 @@ axiosInstance.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 export default axiosInstance;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import axios from "axios";
+// import toast from "react-hot-toast";
+
+// const axiosInstance = axios.create({
+//   baseURL: import.meta.env.VITE_API_URL,
+//   headers: { "Content-Type": "application/json" },
+// });
+
+// let sessionInvalidatedHandled = false; // ← add this near the top of the file, outside any function
+
+// // Routes that belong to the customer flow — must ONLY ever get the customer token
+// // const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
+// const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/"];
+// const isCustomerRoute = (url) =>
+//   CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
+// // ── Request interceptor — attaches the correct token per route type ──
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     if (isCustomerRoute(config.url)) {
+//       const customerToken = sessionStorage.getItem("customerToken");
+//       if (customerToken) {
+//         config.headers.Authorization = `Bearer ${customerToken}`;
+//       }
+//     } else {
+//       const adminToken = localStorage.getItem("token");
+//       if (adminToken) {
+//         config.headers.Authorization = `Bearer ${adminToken}`;
+//       }
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error),
+// );
+// // ── Response interceptor — ONE consolidated handler, no leftover duplicates ──
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     // subscription expiry — redirect to renew, unrelated to session/token logic
+//     if (error.response?.data?.code === "SUBSCRIPTION_EXPIRED") {
+//       if (window.location.pathname !== "/restaurant/setup") {
+//         window.location.href = "/restaurant/setup?renew=true";
+//       }
+//       return Promise.reject(error);
+//     }
+//     // a genuine, confirmed second-device login — always a real logout,
+//     // never subject to retry, since this means another session took over
+//     if (error.response?.data?.code === "SESSION_INVALIDATED") {
+//       // ← THE FIX: several requests can fail with this same code within
+//       // milliseconds of each other (RestaurantLayout + the page's own
+//       // fetch, all firing in parallel with the same invalidated token).
+//       // Without this guard, each one independently shows its own toast
+//       // and redirect before the page actually navigates away — this
+//       // ensures only the FIRST one to arrive actually does anything.
+//       if (sessionInvalidatedHandled) {
+//         return Promise.reject(error);
+//       }
+//       sessionInvalidatedHandled = true;
+
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+
+//       // clear anything already showing, then show ONLY this one message
+//       toast.dismiss();
+
+//       toast.error(
+//         "You were logged out because your account was signed in on another device.",
+//         {
+//           duration: 2000,
+//         },
+//       );
+
+//       // ← THE FIX: once this specific toast has fired, silence every other
+//       // toast call anywhere in the app until the redirect completes — other
+//       // components' own catch blocks (e.g. "Failed to load menu") are just
+//       // downstream side effects of this same invalidated session and would
+//       // otherwise stack on top of the real message, making it unreadable
+//       toast.error = () => {};
+//       toast.success = () => {};
+//       toast.dismiss = () => {};
+
+//       // small delay so the toast actually has time to render and be seen
+//       // before the page navigates away — without this, redirect can outrace
+//       // the toast's own render, so it barely flashes before vanishing
+//       // window.location.href = "/login";
+//       setTimeout(() => {
+//         window.location.href = "/login";
+//       }, 600);
+//       return Promise.reject(error);
+//     }
+//     if (error.response?.status === 401) {
+//       const originalRequest = error.config;
+//       // Customer routes: no retry, no redirect. A customer's session
+//       // expiring quietly is low-stakes — they can just log in again
+//       // if they want to leave a review.
+//       if (isCustomerRoute(originalRequest.url)) {
+//         sessionStorage.removeItem("customerToken");
+//         return Promise.reject(error);
+//       }
+//       // ── THE ACTUAL FIX for the sleep/wake false-logout problem ──
+//       // On the FIRST 401 for a given admin request, don't assume the
+//       // session is really dead. Wait briefly for the network to settle
+//       // after a laptop wake event, then retry this exact request once.
+//       if (!originalRequest._retriedAfter401) {
+//         originalRequest._retriedAfter401 = true;
+//         await new Promise((resolve) => setTimeout(resolve, 1200));
+//         try {
+//           return await axiosInstance(originalRequest);
+//         } catch (retryError) {
+//           // retry failed too — this is very likely a genuine expired/invalid
+//           // token, fall through to the real logout below
+//           localStorage.removeItem("token");
+//           localStorage.removeItem("user");
+//           if (!window.location.pathname.includes("/login")) {
+//             window.location.href = "/login";
+//           }
+//           return Promise.reject(retryError);
+//         }
+//       }
+//       // safety net — should rarely be reached given the retry above
+//       // already handles both outcomes, but kept as a fallback
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       if (!window.location.pathname.includes("/login")) {
+//         window.location.href = "/login";
+//       }
+//     }
+//     return Promise.reject(error);
+//   },
+// );
+// export default axiosInstance;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import axios from "axios";
 // import toast from "react-hot-toast";
