@@ -42,6 +42,11 @@ const menuItemSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    portionSize: {
+      type: String,
+      enum: ["", "half", "full"], // ← empty string = not applicable, the default for most items
+      default: "",
+},
   },
   { timestamps: true }
 );

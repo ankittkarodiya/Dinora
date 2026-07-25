@@ -414,7 +414,7 @@ export default function RestaurantSetup() {
               </div>
               <div>
                 <label className="block text-white mb-2 font-medium">
-                  Description
+                  Description (optional)
                 </label>
                 <textarea
                   value={form.description}

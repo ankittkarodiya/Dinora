@@ -20,6 +20,7 @@ const BLANK = {
   isAvailable: true,
   isBestseller: false,
   description: "",
+  portionSize: "", // ← new: "", "half", or "full"
 };
 
 export default function MenuManager() {
@@ -118,6 +119,7 @@ export default function MenuManager() {
       isVeg: form.isVeg,
       isAvailable: form.isAvailable,
       isBestseller: form.isBestseller,
+      portionSize: form.portionSize, // ← new
     };
 
     if (imageFile) {
@@ -166,6 +168,7 @@ export default function MenuManager() {
       isVeg: item.isVeg,
       isAvailable: item.isAvailable,
       isBestseller: item.isBestseller,
+      portionSize: item.portionSize || "", // ← new
     });
     setImagePreview(item.image || null);
     setImageFile(null);
@@ -346,7 +349,8 @@ export default function MenuManager() {
               {imagePreview ? (
                 <>
                   <img
-                    src={imagePreview}
+                    // src={imagePreview}
+                    src={optimizeImage(imagePreview, 300)}
                     alt="Preview"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
@@ -463,9 +467,25 @@ export default function MenuManager() {
             </select>
           </div>
 
+          {/* new for portion size */}
+          <div>
+  <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
+    Portion Size <span className="text-slate-500 normal-case font-normal">(optional)</span>
+  </label>
+  <select
+    value={form.portionSize}
+    onChange={(e) => set("portionSize", e.target.value)}
+    className="w-full rounded-xl border border-white/20 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
+  >
+    <option value="">Not applicable</option>
+    <option value="half">Half Plate</option>
+    <option value="full">Full Plate</option>
+  </select>
+</div>
+
           <div>
             <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
-              Description
+              Description <span className="text-slate-500 normal-case font-normal">(optional)</span>
             </label>
             <textarea
               value={form.description}
@@ -606,6 +626,15 @@ export default function MenuManager() {
                       Bestseller
                     </span>
                   )}
+
+                  {/* new for portion size */}
+                  {item.portionSize && (
+  <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-500/20 text-blue-400">
+    {item.portionSize === "half" ? "Half Plate" : "Full Plate"}
+  </span>
+)}
+
+
                 </div>
                 <div className="text-slate-400 text-xs mt-0.5">
                   {catName(item)} · ₹{item.price}

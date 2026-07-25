@@ -83,6 +83,14 @@ function ItemRow({ item, onOpen }) {
               Bestseller
             </span>
           )}
+
+          {/* new for portion size */}
+          {item.portionSize && (
+    <span className="text-gray-400 text-[10px] font-bold border border-gray-600 rounded px-1.5 py-0.5 uppercase tracking-wide">
+      {item.portionSize === "half" ? "Half Plate" : "Full Plate"}
+    </span>
+  )}
+
         </div>
 
         <h3 className="text-white font-semibold text-[15px] leading-snug">

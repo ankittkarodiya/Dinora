@@ -37,7 +37,7 @@ const createMenuItem = async (req, res) => {
       return res.status(404).json({ success: false, message: "Restaurant not found" });
     }
 
-    const { name, description, price, categoryId, isVeg, isAvailable, isBestseller, image } = req.body;
+    const { name, description, price, categoryId, isVeg, isAvailable, isBestseller, image, portionSize } = req.body;
     if (!name || !price || !categoryId) {
       return res.status(400).json({ success: false, message: "Name, price and category are required" });
     }
@@ -52,6 +52,8 @@ const createMenuItem = async (req, res) => {
       isVeg: !!isVeg,
       isAvailable: !!isAvailable,
       isBestseller: !!isBestseller,
+      portionSize: portionSize || "", // ← new added
+
     });
 
     res.status(201).json({ success: true, item });
@@ -63,7 +65,7 @@ const createMenuItem = async (req, res) => {
 const updateMenuItem = async (req, res) => {
   try {
     const restaurantId = await getRestaurantId(req.user._id);
-    const { name, description, price, categoryId, isVeg, isAvailable, isBestseller, image } = req.body;
+    const { name, description, price, categoryId, isVeg, isAvailable, isBestseller, image, portionSize } = req.body;
 
     const existing = await MenuItem.findOne({ _id: req.params.id, restaurantId }).select("image");
     if (!existing) {
@@ -75,6 +77,8 @@ const updateMenuItem = async (req, res) => {
       isVeg: !!isVeg,
       isAvailable: !!isAvailable,
       isBestseller: !!isBestseller,
+      portionSize: portionSize || "", // ← new added
+
     };
 
     let oldImageToClean = null;
