@@ -1,14 +1,28 @@
 import axios from "axios";
 import toast from "react-hot-toast";
+
+
+
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
+
+
+
+
 let sessionInvalidatedHandled = false; // ← add this near the top of the file, outside any function
+
+
+
 // Routes that belong to the customer flow — must ONLY ever get the customer token
 // const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
 const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/"];
 const isCustomerRoute = (url) => CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
+
+
+
 // ── Request interceptor — attaches the correct token per route type ──
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -27,6 +41,10 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+
+
+
 // ── Response interceptor — ONE consolidated handler, no leftover duplicates ──
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -116,6 +134,8 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
 export default axiosInstance;
 
 
