@@ -1,8 +1,8 @@
 const Restaurant = require("../models/Restaurant");
 
 const PLAN_LIMITS = {
-  trial: { maxTables: 5, analytics: false, reviews: false, onlinePayments: false },
-  basic: { maxTables: 10, analytics: false, reviews: false, onlinePayments: true },
+  trial: { maxTables: 10, analytics: false, reviews: false, onlinePayments: false },
+  basic: { maxTables: 15, analytics: false, reviews: false, onlinePayments: true },
   // basic: { maxTables: 10, analytics: false, reviews: false, onlinePayments: true },
   pro:   { maxTables: 30, analytics: true,  reviews: true,  onlinePayments: true  },
 };

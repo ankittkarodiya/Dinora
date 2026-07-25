@@ -39,7 +39,7 @@ const PLANS = [
       "Table management",
       "Order history with date-range filtering",
       "Cash and online payments (your own Razorpay)",
-      "Up to 10 tables",
+      "Up to 15 tables",
     ],
   },
   {
@@ -521,7 +521,8 @@ export default function RestaurantSetup() {
                 <span className="text-white font-bold">10-day free trial</span>
                 <span className="text-slate-300 text-sm">
                   {" "}
-                  to explore the platform
+                  {/* to explore the platform */}
+                  — up to 10 tables, explore the platform
                 </span>
                 <button
                   onClick={handleStartTrial}

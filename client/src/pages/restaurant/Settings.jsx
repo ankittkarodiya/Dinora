@@ -31,7 +31,7 @@ const PLANS = [
       "Table management",
       "Order history with date-range filtering",
       "Cash and online payments (your own Razorpay)",
-      "Up to 10 tables",
+      "Up to 15 tables",
     ],
   },
   {
