@@ -377,6 +377,12 @@ export default function LandingPage() {
               10-DAY FREE TRIAL · UP TO 10 TABLES · NO CARD REQUIRED
             </span>
           </div>
+          
+          {/* ← NEW: founder credential badge */}
+          <div className="text-[#8a8378] text-xs font-mono tracking-wide mb-6 sm:mb-7">
+            BUILT BY AN IIT BOMBAY UNDERGRADUATE
+          </div>
+
           <h1 className="font-display text-3xl sm:text-4xl md:text-[3.4rem] leading-[1.1] md:leading-[1.08] font-semibold text-[#f6efe3] mb-5 sm:mb-6">
             Every table,
             <br />
