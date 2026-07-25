@@ -24,4 +24,6 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+categorySchema.index({ restaurantId: 1 });
+
 module.exports = mongoose.model("Category", categorySchema);
