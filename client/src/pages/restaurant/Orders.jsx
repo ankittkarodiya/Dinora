@@ -198,6 +198,7 @@ useEffect(() => {
     next.setDate(next.getDate() + 1);
     return orderDate >= d && orderDate < next;
   };
+  
   const filtered = useMemo(() => {
     return orders.filter(
       (o) =>
@@ -216,6 +217,7 @@ useEffect(() => {
       o.paymentStatus !== "paid" &&
       o.status === "Served",
   );
+
   if (loading)
     return (
       <div className="flex items-center justify-center h-64">
@@ -337,6 +339,8 @@ useEffect(() => {
           </button>
         </div>
       )}
+
+
       {/* Date filter — two buttons only */}
       <div className="flex items-center gap-2">
         <div className="relative">
@@ -384,6 +388,8 @@ useEffect(() => {
           All Time
         </button>
       </div>
+
+
       <div
         className="flex gap-2 overflow-x-auto pb-1"
         style={{ scrollbarWidth: "none" }}
@@ -403,6 +409,7 @@ useEffect(() => {
           </button>
         ))}
       </div>
+
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center text-slate-400">
           <div className="text-4xl mb-3">📋</div>
