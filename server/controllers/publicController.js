@@ -6,20 +6,54 @@ const Session = require("../models/Session");
 const Order = require("../models/Order");
 const Review = require("../models/Review");
 
+// const getMenu = async (req, res) => {
+//   try {
+//     const { slug, tableId } = req.params;
+//     const restaurant = await Restaurant.findOne({ slug, isActive: true });
+//     if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
+//     const table = await Table.findOne({ _id: tableId, restaurantId: restaurant._id });
+//     if (!table) return res.status(404).json({ success: false, message: "Table not found" });
+//     const categories = await Category.find({ restaurantId: restaurant._id }).sort({ order: 1 });
+//     const menuItems = await MenuItem.find({ restaurantId: restaurant._id });
+//     res.json({
+//       success: true,
+//       restaurant: { _id: restaurant._id, name: restaurant.name, slug: restaurant.slug, description: restaurant.description, logo: restaurant.logo,
+//       gstPercent: restaurant.gstPercent, // ← this line was very likely missing
+//       subscriptionPlan: restaurant.subscriptionPlan, // ← for pro
+//       },
+//       table: { _id: table._id, name: table.name, capacity: table.capacity },
+//       categories,
+//       menuItems,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// new
 const getMenu = async (req, res) => {
   try {
     const { slug, tableId } = req.params;
     const restaurant = await Restaurant.findOne({ slug, isActive: true });
     if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
-    const table = await Table.findOne({ _id: tableId, restaurantId: restaurant._id });
+
+    // ← THE FIX: table, categories, and menu items don't depend on each other —
+    // run all three simultaneously instead of one after another
+    const [table, categories, menuItems] = await Promise.all([
+      Table.findOne({ _id: tableId, restaurantId: restaurant._id }),
+      Category.find({ restaurantId: restaurant._id }).sort({ order: 1 }),
+      MenuItem.find({ restaurantId: restaurant._id }),
+    ]);
+
     if (!table) return res.status(404).json({ success: false, message: "Table not found" });
-    const categories = await Category.find({ restaurantId: restaurant._id }).sort({ order: 1 });
-    const menuItems = await MenuItem.find({ restaurantId: restaurant._id });
+
     res.json({
       success: true,
-      restaurant: { _id: restaurant._id, name: restaurant.name, slug: restaurant.slug, description: restaurant.description, logo: restaurant.logo,
-      gstPercent: restaurant.gstPercent, // ← this line was very likely missing
-      subscriptionPlan: restaurant.subscriptionPlan, // ← for pro
+      restaurant: {
+        _id: restaurant._id, name: restaurant.name, slug: restaurant.slug,
+        description: restaurant.description, logo: restaurant.logo,
+        gstPercent: restaurant.gstPercent,
+        subscriptionPlan: restaurant.subscriptionPlan,
       },
       table: { _id: table._id, name: table.name, capacity: table.capacity },
       categories,
@@ -29,6 +63,8 @@ const getMenu = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 
 const createSession = async (req, res) => {
   try {
