@@ -20,16 +20,10 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
   const dispatch = useDispatch();
   const hasHalfFull = !!item.halfPrice;
 
-  // ordinary items only
+  // ordinary items only — half/full items have no add mechanism in this
+  // modal at all; that lives exclusively in ItemRow's own picker sheet
   const cartQty = useSelector(selectItemCartQty(item._id));
   const cartId = useSelector(selectItemCartId(item._id));
-
-  // half/full items — each portion tracked and controlled independently,
-  // same pattern as ItemRow's sheet, so both can be added at once
-  const halfQty = useSelector(selectItemCartQty(item._id, "half"));
-  const fullQty = useSelector(selectItemCartQty(item._id, "full"));
-  const halfCartId = useSelector(selectItemCartId(item._id, "half"));
-  const fullCartId = useSelector(selectItemCartId(item._id, "full"));
 
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(null);
@@ -55,15 +49,6 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
 
   const handleMinus = () => dispatch(updateQty({ cartId, delta: -1 }));
   const handlePlus = () => dispatch(updateQty({ cartId, delta: 1 }));
-
-  const addPortion = (portion) => {
-    const price = portion === "half" ? item.halfPrice : item.price;
-    dispatch(addToCart({ ...item, price, portion, qty: 1 }));
-  };
-  const adjustPortion = (portion, delta) => {
-    const targetCartId = portion === "half" ? halfCartId : fullCartId;
-    dispatch(updateQty({ cartId: targetCartId, delta }));
-  };
 
   return (
     <div onClick={onClose} className="fixed inset-0 bg-black/80 z-100 flex items-end justify-center">
@@ -116,6 +101,18 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
               )}
             </div>
 
+            {/* ← plain, non-interactive pricing line for half/full items —
+                informational only, so the price is still visible while
+                reading reviews; adding happens exclusively from the row's
+                own ADD button/sheet, not from here */}
+            {hasHalfFull && (
+              <div className="text-white font-bold text-sm mb-3">
+                ₹{item.halfPrice} <span className="text-gray-500 font-normal text-xs">Half</span>
+                <span className="text-gray-600 mx-1.5">·</span>
+                ₹{item.price} <span className="text-gray-500 font-normal text-xs">Full</span>
+              </div>
+            )}
+
             {/* Rating summary — only meaningful when reviews are actually enabled here */}
             {restaurantIsPro && avgRating && (
               <div className="flex items-center gap-2 mb-3">
@@ -133,50 +130,6 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
             {!item.isAvailable && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 text-red-400 text-sm font-semibold mb-4 text-center">
                 Currently Unavailable
-              </div>
-            )}
-
-            {/* ← new: Half / Full rows, each independently addable — replaces
-                the old toggle-then-single-price approach entirely */}
-            {hasHalfFull && item.isAvailable && (
-              <div className="mb-5">
-                <div className="text-gray-500 text-xs font-bold uppercase tracking-wide mb-2">
-                  Choose Portion
-                </div>
-                <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl border border-white/10 bg-white/5 mb-2.5">
-                  <div>
-                    <div className="text-white font-medium text-sm">Half</div>
-                    <div className="text-gray-500 text-xs mt-0.5">₹{item.halfPrice}</div>
-                  </div>
-                  {halfQty > 0 ? (
-                    <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden">
-                      <button onClick={() => adjustPortion("half", -1)} className="w-9 h-9 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]">−</button>
-                      <span className="w-7 text-center text-white font-black text-sm">{halfQty}</span>
-                      <button onClick={() => adjustPortion("half", 1)} className="w-9 h-9 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]">+</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => addPortion("half")} className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-xs px-5 py-2 rounded-xl active:bg-[#FC8019] active:text-white transition-colors">
-                      ADD
-                    </button>
-                  )}
-                </div>
-                <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl border border-white/10 bg-white/5">
-                  <div>
-                    <div className="text-white font-medium text-sm">Full</div>
-                    <div className="text-gray-500 text-xs mt-0.5">₹{item.price}</div>
-                  </div>
-                  {fullQty > 0 ? (
-                    <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden">
-                      <button onClick={() => adjustPortion("full", -1)} className="w-9 h-9 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]">−</button>
-                      <span className="w-7 text-center text-white font-black text-sm">{fullQty}</span>
-                      <button onClick={() => adjustPortion("full", 1)} className="w-9 h-9 text-white font-black text-lg flex items-center justify-center active:bg-[#e07018]">+</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => addPortion("full")} className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-xs px-5 py-2 rounded-xl active:bg-[#FC8019] active:text-white transition-colors">
-                      ADD
-                    </button>
-                  )}
-                </div>
               </div>
             )}
 
@@ -237,7 +190,7 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
         </div>
 
         {/* Sticky bottom — Add to cart. Only shown for ordinary (non half/full)
-            items, since half/full items add directly via the rows above */}
+            items, since half/full items add exclusively via ItemRow's sheet */}
         {item.isAvailable && !hasHalfFull && (
           <div className="px-4 pb-8 pt-3 border-t border-white/5 shrink-0 bg-[#1C1C1E]">
             {cartQty > 0 ? (
@@ -272,8 +225,8 @@ export default function ItemDetailModal({ item, restaurantIsPro, onClose, onRevi
           </div>
         )}
 
-        {/* For half/full items, just give a simple Done/Close button instead,
-            since adding already happened inline in the rows above */}
+        {/* For half/full items, just a plain Done/close button — no pricing
+            or add controls here at all */}
         {item.isAvailable && hasHalfFull && (
           <div className="px-4 pb-8 pt-3 border-t border-white/5 shrink-0 bg-[#1C1C1E]">
             <button

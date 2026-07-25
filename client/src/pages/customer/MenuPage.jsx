@@ -228,7 +228,6 @@ import { optimizeImage } from "../../utils/imageOptimize";
 //   );
 // }
 
-
 // ── Item Row — Swiggy style, Cloudinary photo, no emoji fallback ──
 function ItemRow({ item, onOpen }) {
   const dispatch = useDispatch();
@@ -242,6 +241,8 @@ function ItemRow({ item, onOpen }) {
   const halfQty = useSelector(selectItemCartQty(item._id, "half"));
   const fullQty = useSelector(selectItemCartQty(item._id, "full"));
   const totalQty = useSelector(selectItemTotalCartQty(item._id));
+  const halfCartId = useSelector(selectItemCartId(item._id, "half"));
+  const fullCartId = useSelector(selectItemCartId(item._id, "full"));
 
   const [showSheet, setShowSheet] = useState(false);
 
@@ -260,21 +261,24 @@ function ItemRow({ item, onOpen }) {
     dispatch(addToCart({ ...item, qty: 1 }));
   };
 
-  const halfCartId = useSelector(selectItemCartId(item._id, "half"));
-  const fullCartId = useSelector(selectItemCartId(item._id, "full"));
-
-  // ← new: each portion adds/adjusts independently — adding a Half never
-  // touches Full's quantity and vice versa, so both can sit in the cart
-  // as two genuinely separate lines at the same time
   const addPortion = (e, portion) => {
     e.stopPropagation();
     const price = portion === "half" ? item.halfPrice : item.price;
     dispatch(addToCart({ ...item, price, portion, qty: 1 }));
   };
+
   const adjustPortion = (e, portion, delta) => {
     e.stopPropagation();
     const targetCartId = portion === "half" ? halfCartId : fullCartId;
     dispatch(updateQty({ cartId: targetCartId, delta }));
+  };
+
+  // ← updated: the collapsed −, number, and + are ALL just entry points into
+  // the sheet now — none of them adjust quantity directly. Actual add/remove
+  // only ever happens inside the sheet, on the specific Half or Full row.
+  const openSheet = (e) => {
+    e.stopPropagation();
+    setShowSheet(true);
   };
 
   return (
@@ -359,22 +363,37 @@ function ItemRow({ item, onOpen }) {
             onClick={(e) => e.stopPropagation()}
           >
             {hasHalfFull ? (
-              // ← the collapsed control just opens/reopens the sheet — since
-              // two independent quantities can't be represented as one +/-
-              // pair, tapping always goes to the sheet where each is adjusted
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSheet(true);
-                }}
-                className={`font-black text-sm px-6 py-1.5 rounded-xl shadow-lg transition-colors ${
-                  totalQty > 0
-                    ? "bg-[#FC8019] text-white border-2 border-[#FC8019]"
-                    : "bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] active:bg-[#FC8019] active:text-white"
-                }`}
-              >
-                {totalQty > 0 ? totalQty : "ADD"}
-              </button>
+              totalQty > 0 ? (
+                // ← − , number, and + all open the sheet — the actual
+                // add/remove happens on the Half or Full row inside it
+                <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
+                  <button
+                    onClick={openSheet}
+                    className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    −
+                  </button>
+                  <button
+                    onClick={openSheet}
+                    className="w-7 text-center text-white font-black text-sm"
+                  >
+                    {totalQty}
+                  </button>
+                  <button
+                    onClick={openSheet}
+                    className="w-9 h-9 text-white font-black text-xl flex items-center justify-center active:bg-[#e07018]"
+                  >
+                    +
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={openSheet}
+                  className="bg-[#1C1C1E] border-2 border-[#FC8019] text-[#FC8019] font-black text-sm px-6 py-1.5 rounded-xl shadow-lg active:bg-[#FC8019] active:text-white transition-colors"
+                >
+                  ADD
+                </button>
+              )
             ) : cartQty > 0 ? (
               <div className="flex items-center bg-[#FC8019] rounded-xl overflow-hidden shadow-lg shadow-[#FC8019]/30 border border-[#FC8019]">
                 <button
@@ -508,6 +527,7 @@ function ItemRow({ item, onOpen }) {
     </div>
   );
 }
+
 
 
 // ── Main MenuPage ─────────────────────────────────────────────────
