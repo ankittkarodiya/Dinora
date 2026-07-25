@@ -1,14 +1,18 @@
 import axios from "axios";
 import toast from "react-hot-toast";
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
+
 let sessionInvalidatedHandled = false; // ← add this near the top of the file, outside any function
+
 // Routes that belong to the customer flow — must ONLY ever get the customer token
 // const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
 const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/"];
-const isCustomerRoute = (url) => CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
+const isCustomerRoute = (url) =>
+  CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.includes(pattern));
 // ── Request interceptor — attaches the correct token per route type ──
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -25,7 +29,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 // ── Response interceptor — ONE consolidated handler, no leftover duplicates ──
 axiosInstance.interceptors.response.use(
@@ -54,8 +58,33 @@ axiosInstance.interceptors.response.use(
 
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      toast.error("You were logged out because your account was signed in on another device.");
-      window.location.href = "/login";
+
+      // clear anything already showing, then show ONLY this one message
+      toast.dismiss();
+
+      toast.error(
+        "You were logged out because your account was signed in on another device.",
+        {
+          duration: 2000,
+        },
+      );
+
+      // ← THE FIX: once this specific toast has fired, silence every other
+      // toast call anywhere in the app until the redirect completes — other
+      // components' own catch blocks (e.g. "Failed to load menu") are just
+      // downstream side effects of this same invalidated session and would
+      // otherwise stack on top of the real message, making it unreadable
+      toast.error = () => {};
+      toast.success = () => {};
+      toast.dismiss = () => {};
+
+      // small delay so the toast actually has time to render and be seen
+      // before the page navigates away — without this, redirect can outrace
+      // the toast's own render, so it barely flashes before vanishing
+      // window.location.href = "/login";
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 600);
       return Promise.reject(error);
     }
     if (error.response?.status === 401) {
@@ -96,47 +125,9 @@ axiosInstance.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 export default axiosInstance;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import axios from "axios";
 // import toast from "react-hot-toast";
@@ -147,7 +138,6 @@ export default axiosInstance;
 // });
 
 // let sessionInvalidatedHandled = false; // ← add this near the top of the file, outside any function
-
 
 // // Routes that belong to the customer flow — must ONLY ever get the customer token
 // // const CUSTOMER_ROUTE_PATTERNS = ["/customer/", "/public/reviews", "/public/orders", "/public/payment"];
@@ -241,30 +231,6 @@ export default axiosInstance;
 // );
 
 // export default axiosInstance;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // // import axios from "axios";
 // // import toast from "react-hot-toast";
@@ -370,30 +336,6 @@ export default axiosInstance;
 
 // // export default axiosInstance;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // import axios from "axios";
 
 // // const axiosInstance = axios.create({
@@ -442,7 +384,6 @@ export default axiosInstance;
 // //     if (error.response?.status === 401) {
 // //       localStorage.removeItem("token");
 // //       window.location.href = "/login";
-
 
 // //       const isCustomerRoute =
 // //         error.config.url.includes("/customer/") ||
