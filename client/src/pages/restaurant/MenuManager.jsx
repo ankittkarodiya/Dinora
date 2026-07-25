@@ -10,6 +10,8 @@ import { getCategoriesApi } from "../../api/categoryApi";
 import { uploadToCloudinary } from "../../utils/cloudinaryUpload";
 import toast from "react-hot-toast";
 
+import { optimizeImage } from "../../utils/imageOptimize";
+
 const BLANK = {
   name: "",
   categoryId: "",
@@ -567,7 +569,8 @@ export default function MenuManager() {
               <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/10 shrink-0">
                 {item.image ? (
                   <img
-                    src={item.image}
+                    // src={item.image}
+                    src={optimizeImage(item.image, 100)}
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />
