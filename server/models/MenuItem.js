@@ -26,6 +26,12 @@ const menuItemSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: 0,
     },
+
+    halfPrice: {
+      type: Number,
+      default: null
+    },
+
     image: {
       type: String,
       default: "",
@@ -42,10 +48,7 @@ const menuItemSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    halfPrice: {
-      type: Number,
-      default: null
-    },
+    
   },
   { timestamps: true }
 );
