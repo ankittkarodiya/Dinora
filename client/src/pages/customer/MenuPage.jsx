@@ -865,9 +865,14 @@ export default function MenuPage() {
               </span> */}
               <span className="font-['Poppins'] text-gray-300 text-sm">
                 Welcome!{" "}
-                <span className="font-semibold text-white">
+                {/* <span className="font-semibold text-white">
                  {currentCustomer.username}
+                </span> */}
+                <span className="font-semibold text-white">
+                  {currentCustomer.username?.charAt(0).toUpperCase() +
+                  currentCustomer.username?.slice(1).toLowerCase()}
                 </span>
+                
               </span>
 
               <div className="flex gap-3">
