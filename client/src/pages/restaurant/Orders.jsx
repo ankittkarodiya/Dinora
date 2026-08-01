@@ -54,7 +54,8 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [dateMode, setDateMode] = useState("all"); // "all" | "pick"
+  // const [dateMode, setDateMode] = useState("all"); // "all" | "pick"
+  const [dateMode, setDateMode] = useState("pick"); // "all" | "pick"
   const [pickedDate, setPickedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
