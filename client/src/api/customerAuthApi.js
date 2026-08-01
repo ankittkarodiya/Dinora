@@ -25,6 +25,11 @@ export const getCustomerMeApi = async () => {
   return res.data;
 };
 
+// new
+export const identifyCustomerApi = async (data) => {
+  const res = await axiosInstance.post("/customer/identify", data);
+  return res.data;
+};
 
 
 

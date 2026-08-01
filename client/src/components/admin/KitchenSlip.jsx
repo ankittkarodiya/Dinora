@@ -14,6 +14,9 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
   const now = new Date();
   const receiptNo = `INV-${now.getFullYear()}-${order._id.slice(-4).toUpperCase()}`;
   const customerName = order.customerId?.username || "Walk-in Guest";
+  // const customerPhone = order.customerId?.phone || ""; // ← new
+  const customerPhone = order.customerId?.phone?.replace(/^\+?91/, "") || ""; // ← strips the +91 prefix for display only
+
   const paymentMode = order.paymentMethod === "online" ? "Online" : "Cash";
   const cgstPercent = order.gstPercent / 2;
   const sgstPercent = order.gstPercent / 2;
@@ -54,6 +57,9 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
         <table>
           <tr><td>RECEIPT NO</td><td class="right bold">${receiptNo}</td></tr>
           <tr><td>CUSTOMER</td><td class="right">${customerName}</td></tr>
+          ${customerPhone ? `<tr><td>PHONE</td><td class="right">${customerPhone}</td></tr>` : ""}
+
+
           <tr><td>PAYMENT MODE</td><td class="right">${paymentMode}</td></tr>
           ${restaurant?.gstNumber ? `<tr><td>GSTIN</td><td class="right">${restaurant.gstNumber}</td></tr>` : ""}
         </table>
@@ -139,6 +145,13 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
               <span>CUSTOMER</span>
               <span>{customerName}</span>
             </div>
+            {customerPhone && (
+  <div className="flex justify-between">
+    <span>PHONE</span>
+    <span>{customerPhone}</span>
+  </div>
+)}
+
             <div className="flex justify-between">
               <span>PAYMENT MODE</span>
               <span>{paymentMode}</span>
@@ -186,12 +199,45 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
           >
             Cancel
           </button>
-          <button
+
+          {/* <button
             onClick={handlePrint}
-            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all"
+            className="flex flex-1 items-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all"
           >
-            🖨️ Print Bill
-          </button>
+            🖨️ Print Bill 
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-3.5 h-3.5 shrink-0"
+            >
+              <path d="M6 9V3h12v6M6 18h12v4H6zM4 9h16a2 2 0 012 2v6h-4M2 17v-6a2 2 0 012-2" />
+            </svg>
+            <span>Print Bill</span>
+          </button> */}
+
+          <button
+  onClick={handlePrint}
+  className="flex flex-1 items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all"
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-4 h-4 shrink-0"
+  >
+    <path d="M6 9V3h12v6M6 18h12v4H6zM4 9h16a2 2 0 012 2v6h-4M2 17v-6a2 2 0 012-2" />
+  </svg>
+
+  <span className="whitespace-nowrap">Print Bill</span>
+</button>
+
         </div>
         <p className="text-center text-slate-500 text-xs mt-3">
           Printing moves order to "Preparing"

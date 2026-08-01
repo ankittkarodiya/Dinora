@@ -53,6 +53,8 @@ const acceptOrder = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
+    await order.populate("customerId", "username phone"); // ← new
+
     res.json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -76,6 +78,8 @@ const markSlipPrinted = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
+    await order.populate("customerId", "username phone"); // ← new
+
     res.json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -134,6 +138,8 @@ const updateOrderStatus = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
+    await order.populate("customerId", "username phone"); // ← new
+
 
     res.json({ success: true, order });
   } catch (error) {
@@ -161,6 +167,8 @@ const cancelOrder = async (req, res) => {
     order.cancellationReason = reason || "Cancelled by restaurant";
     await order.save();
     await order.populate("tableId", "name capacity");
+    await order.populate("customerId", "username phone"); // new
+
     res.json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

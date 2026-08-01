@@ -141,4 +141,60 @@ const getCustomerMe = async (req, res) => {
   }
 };
 
-module.exports = { checkPhone, registerHandler, loginHandler, logoutHandler, getCustomerMe };
+// ── POST /api/customer/identify ───────────────────────────────────
+// Combined register-or-login by phone, used at checkout. A customer
+// never explicitly "registers" anymore — providing name + phone to pay
+// IS their account: created transparently the first time, recognized
+// automatically every time after, on this same restaurant.
+const identifyCustomer = async (req, res) => {
+  try {
+    const { phone, username, restaurantId } = req.body;
+    if (!phone || !username || !restaurantId) {
+      return res.status(400).json({ success: false, message: "Phone, name and restaurantId are required" });
+    }
+
+    const normalizedPhone = normalizePhone(phone);
+    const digits = normalizedPhone.replace(/\D/g, "");
+    if (digits.length < 12) {
+      return res.status(400).json({ success: false, message: "Invalid phone number" });
+    }
+
+    let customer = await Customer.findOne({ phone: normalizedPhone, restaurantId });
+    let isNew = false;
+
+    if (customer) {
+      if (!customer.isActive) {
+        return res.status(403).json({ success: false, message: "Account is deactivated" });
+      }
+      customer.isOnline = true;
+      await customer.save();
+    } else {
+      customer = await Customer.create({
+        phone: normalizedPhone,
+        username: username.trim(),
+        restaurantId,
+        isOnline: true,
+      });
+      isNew = true;
+    }
+
+    const token = generateCustomerToken(customer._id);
+    res.status(isNew ? 201 : 200).json({
+      success: true,
+      message: isNew ? `Welcome, ${customer.username}!` : `Welcome back, ${customer.username}!`,
+      token,
+      customer: {
+        _id: customer._id,
+        username: customer.username,
+        phone: customer.phone,
+        restaurantId: customer.restaurantId,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { checkPhone, registerHandler, loginHandler, logoutHandler, getCustomerMe, identifyCustomer };
+
+// module.exports = { checkPhone, registerHandler, loginHandler, logoutHandler, getCustomerMe };

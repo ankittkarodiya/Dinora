@@ -1119,10 +1119,23 @@ export default function MenuPage() {
       {showAuth && (
         <CustomerAuthModal
           restaurantId={restaurantId}
+          // onClose={() => {
+          //   setShowAuth(false);
+          //   setPendingReviewItem(null);
+          // }}
+
+          // new
           onClose={() => {
-            setShowAuth(false);
-            setPendingReviewItem(null);
-          }}
+      setShowAuth(false);
+      // ← removed setPendingReviewItem(null) here: clearing it unconditionally
+      // on every close meant a SUCCESSFUL login would wipe out the pending
+      // review before the useEffect below ever got a chance to open it.
+      // The existing useEffect already correctly consumes and clears
+      // pendingReviewItem once currentCustomer is set — this line was only
+      // ever needed for the old "navigate to a separate page" flow, which
+      // no longer applies now that login happens inline in this same modal.
+    }}
+
           onLoginClick={() => {
             setShowAuth(false);
             handleGoToLogin();

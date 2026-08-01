@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   customerRegisterApi, customerLoginApi,
-  customerLogoutApi, getCustomerMeApi,
+  customerLogoutApi, getCustomerMeApi, identifyCustomerApi
 } from "../../api/customerAuthApi";
 
 // import {
@@ -50,6 +50,22 @@ export const loginCustomer = createAsyncThunk(
   }
 );
 
+// new
+export const identifyCustomer = createAsyncThunk(
+  "customerAuth/identify",
+  async (payload, thunkAPI) => {
+    try {
+      const data = await identifyCustomerApi(payload); // new API fn — see below
+      setToken(data.token);
+      return data.customer;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Could not continue");
+    }
+  }
+);
+
+
+
 export const logoutCustomer = createAsyncThunk(
   "customerAuth/logout",
   async () => {
@@ -90,7 +106,11 @@ const customerAuthSlice = createSlice({
     builder
       .addCase(sendCustomerOtp.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(sendCustomerOtp.fulfilled, (state) => { state.loading = false; state.otpSent = true; })
-      .addCase(sendCustomerOtp.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
+      .addCase(sendCustomerOtp.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // new
+  .addCase(identifyCustomer.pending, (state) => { state.loading = true; state.error = null; })
+  .addCase(identifyCustomer.fulfilled, (state, action) => { state.loading = false; state.currentCustomer = action.payload; })
+  .addCase(identifyCustomer.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
 
     builder
       .addCase(registerCustomer.pending, (state) => { state.loading = true; state.error = null; })

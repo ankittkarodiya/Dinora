@@ -266,6 +266,8 @@ const confirmCashPayment = async (req, res) => {
     }
 
     await order.populate("tableId", "name");
+    await order.populate("customerId", "username phone"); // ← new
+
     res.json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });

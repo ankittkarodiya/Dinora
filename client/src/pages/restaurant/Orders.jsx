@@ -49,6 +49,8 @@ const ALL_STATUSES = [
 ];
 const NEXT_LABEL = { Preparing: "Mark Ready", Ready: "Mark Served" };
 export default function Orders() {
+  const latestFetchIdRef = useRef(0); // ← add this alongside your other refs
+
   const [orders, setOrders] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -58,7 +60,14 @@ export default function Orders() {
   );
   const datePickerRef = useRef(null);
   const [loading, setLoading] = useState(true);
-  const [slipOrder, setSlipOrder] = useState(null);
+
+  // const [slipOrder, setSlipOrder] = useState(null);
+  const [slipOrderId, setSlipOrderId] = useState(null); // ← replaces slipOrder as raw state
+  // ← derived fresh on every render — always reflects the latest data for
+// this order ID, automatically, whenever `orders` updates from a poll
+const slipOrder = orders.find((o) => o._id === slipOrderId) || null;
+
+
   const [cancelModal, setCancelModal] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
@@ -70,15 +79,21 @@ export default function Orders() {
   //   return () => clearInterval(interval);
   // }, []);
   const hasFetchedRef = useRef(false);
+
+
 useEffect(() => {
   if (hasFetchedRef.current) return;
   hasFetchedRef.current = true;
   fetchAll(); // ← your initial fetch function
 }, []);
+
+
 useEffect(() => {
   const interval = setInterval(fetchOrders, 10000); // ← leave this one exactly as-is, no guard needed
   return () => clearInterval(interval);
 }, []);
+
+
   const fetchAll = async () => {
     try {
       const [ordersData, restaurantData] = await Promise.all([
@@ -95,9 +110,19 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
+
   const fetchOrders = async () => {
+    const fetchId = ++latestFetchIdRef.current; // ← this fetch's unique sequence number
+
+
     try {
       const data = await getOrdersApi();
+      // ← THE FIX: if a newer fetch has started since this one began, a
+      // slower/older request finishing later must never overwrite fresher
+      // data that already arrived — ignore this result entirely.
+      if (fetchId !== latestFetchIdRef.current) return;
+
       const newOrders = data.orders || [];
 
       // only run new-order detection once we have a real baseline —
@@ -198,7 +223,7 @@ useEffect(() => {
     next.setDate(next.getDate() + 1);
     return orderDate >= d && orderDate < next;
   };
-  
+
   const filtered = useMemo(() => {
     return orders.filter(
       (o) =>
@@ -231,7 +256,9 @@ useEffect(() => {
       {slipOrder && (
         <KitchenSlip
           order={slipOrder}
-          onClose={() => setSlipOrder(null)}
+          // onClose={() => setSlipOrder(null)}
+          onClose={() => setSlipOrderId(null)}
+
           onPrinted={() => handlePrintDone(slipOrder)}
         />
       )}
@@ -452,7 +479,9 @@ useEffect(() => {
                         #{order._id.slice(-6).toUpperCase()}
                       </span>
                     </div>
-                    <div className="text-slate-400 text-xs mt-0.5">
+
+
+                    {/* <div className="text-slate-400 text-xs mt-0.5">
                       {order.customerId?.username || "Guest"} ·{" "}
                       {new Date(order.createdAt).toLocaleDateString("en-IN", {
                         day: "2-digit",
@@ -463,7 +492,29 @@ useEffect(() => {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                    </div>
+                    </div> */}
+
+                    <div className="text-slate-400 text-xs mt-0.5">
+  {order.customerId?.username || "Guest"}
+  {order.customerId?.phone && (
+    // <span className="text-slate-500"> · {order.customerId.phone}</span>
+    <span className="text-slate-500"> · {order.customerId.phone.replace(/^\+?91/, "")}</span>
+
+  )}
+  {" "}·{" "}
+  {new Date(order.createdAt).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+  })}{" "}
+  at{" "}
+  {new Date(order.createdAt).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</div>
+
+
+
                   </div>
                   <span
                     className={`text-xs font-bold px-3 py-1 rounded-full border ${STATUS_STYLE[order.status]}`}
@@ -570,7 +621,8 @@ useEffect(() => {
                     )}
                     {order.status === "Accepted" && (
                       <button
-                        onClick={() => setSlipOrder(order)}
+                        // onClick={() => setSlipOrder(order)}
+                        onClick={() => setSlipOrderId(order._id)}
                         // className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap"
 
