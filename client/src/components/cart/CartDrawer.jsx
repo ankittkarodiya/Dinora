@@ -7,7 +7,10 @@ import {
   updateQty,
   clearCart,
 } from "../../features/cart/cartSlice";
-import { selectCurrentCustomer, identifyCustomer } from "../../features/customerAuth/customerAuthSlice";
+import {
+  selectCurrentCustomer,
+  identifyCustomer,
+} from "../../features/customerAuth/customerAuthSlice";
 import {
   placeOrderApi,
   createPaymentOrderApi,
@@ -60,7 +63,11 @@ export default function CartDrawer({
   // ← new: small helper so the "Half"/"Full" label is built the same way
   // everywhere it's shown, instead of repeating the ternary three times
   const portionLabel = (item) =>
-    item.portion === "half" ? " (Half)" : item.portion === "full" ? " (Full)" : "";
+    item.portion === "half"
+      ? " (Half)"
+      : item.portion === "full"
+        ? " (Full)"
+        : "";
 
   const handleClose = () => {
     setScreen("cart");
@@ -91,12 +98,18 @@ export default function CartDrawer({
     setIdentifying(true);
     try {
       await dispatch(
-        identifyCustomer({ username: identifyName, phone: identifyPhone, restaurantId }),
+        identifyCustomer({
+          username: identifyName,
+          phone: identifyPhone,
+          restaurantId,
+        }),
       ).unwrap();
       setShowIdentify(false);
       setScreen("payment");
     } catch (error) {
-      toast.error(error || "Could not continue. Check your details and try again.");
+      toast.error(
+        error || "Could not continue. Check your details and try again.",
+      );
     } finally {
       setIdentifying(false);
     }
@@ -272,7 +285,8 @@ export default function CartDrawer({
               {/* <div className="text-4xl mb-3">📱</div> */}
               <h3 className="text-white font-bold text-lg">Almost there!</h3>
               <p className="text-gray-400 text-sm mt-2">
-                Just your name and number so the restaurant can reach you if needed.
+                Just your name and number so the restaurant can reach you if
+                needed.
               </p>
             </div>
             <form onSubmit={handleIdentifySubmit} className="space-y-3">
@@ -283,13 +297,32 @@ export default function CartDrawer({
                 placeholder="Your name"
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 outline-none focus:border-[#FC8019]"
               />
-              <input
+              {/* <input
                 type="tel"
                 value={identifyPhone}
                 onChange={(e) => setIdentifyPhone(e.target.value)}
                 placeholder="Phone number"
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-gray-500 outline-none focus:border-[#FC8019]"
-              />
+              /> */}
+              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 focus-within:border-[#FC8019]">
+                <span className="text-gray-300 font-bold text-sm shrink-0">
+                  +91
+                </span>
+                <div className="w-px h-5 bg-white/10 mx-3" />
+                <input
+                  type="tel"
+                  value={identifyPhone}
+                  onChange={(e) =>
+                    setIdentifyPhone(
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
+                  }
+                  placeholder="Phone number"
+                  maxLength={10}
+                  className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
+                />
+              </div>
+              
               <button
                 type="submit"
                 disabled={identifying}
@@ -377,7 +410,9 @@ export default function CartDrawer({
                         {item.name}
                         {/* ← new: shows "(Half)" / "(Full)" right after the name, only when relevant */}
                         {item.portion && (
-                          <span className="text-gray-500 font-normal">{portionLabel(item)}</span>
+                          <span className="text-gray-500 font-normal">
+                            {portionLabel(item)}
+                          </span>
                         )}
                       </div>
                       <div className="text-[#FC8019] font-bold text-sm mt-0.5">
@@ -479,9 +514,11 @@ export default function CartDrawer({
                       {item.name}
                       {/* ← new: same label in the bill summary */}
                       {item.portion && (
-                        <span className="text-gray-500">{portionLabel(item)}</span>
-                      )}
-                      {" "}× {item.qty}
+                        <span className="text-gray-500">
+                          {portionLabel(item)}
+                        </span>
+                      )}{" "}
+                      × {item.qty}
                     </span>
                     <span className="text-white font-semibold">
                       ₹{item.price * item.qty}
@@ -533,10 +570,18 @@ export default function CartDrawer({
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-white flex items-center justify-center text-xl">
                     {/* 💳 */}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5 shrink-0">
-  <rect x="2" y="5" width="20" height="14" rx="2" />
-  <path d="M2 10h20" />
-</svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-4.5 h-4.5 shrink-0"
+                    >
+                      <rect x="2" y="5" width="20" height="14" rx="2" />
+                      <path d="M2 10h20" />
+                    </svg>
                   </div>
                   <div className="text-left">
                     <div className="text-white font-bold text-sm">
@@ -559,8 +604,7 @@ export default function CartDrawer({
                 className="w-full bg-white/5 border border-white/10 hover:border-white/20 rounded-2xl p-4 flex items-center gap-3 transition-all disabled:opacity-50"
               >
                 <div className="w-11 h-11 rounded-xl bg-green-500/20 text-white flex items-center justify-center text-xl">
-                  {/* 💵 */}
-                  ₹
+                  {/* 💵 */}₹
                 </div>
                 <div className="text-left">
                   <div className="text-white font-bold text-sm">
@@ -593,8 +637,7 @@ export default function CartDrawer({
             </div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 text-left">
               <div className="text-amber-300 font-bold text-sm mb-1">
-                {/* 💵 Cash Payment */}
-                ₹ Cash Payment
+                {/* 💵 Cash Payment */}₹ Cash Payment
               </div>
               <div className="text-gray-300 text-sm">
                 Please pay{" "}
@@ -619,45 +662,6 @@ export default function CartDrawer({
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { useState } from "react";
 // import { useDispatch, useSelector } from "react-redux";
