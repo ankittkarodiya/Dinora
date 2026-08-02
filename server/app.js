@@ -8,12 +8,7 @@ const app = express();
 app.use(helmet());
 app.use(morgan("dev"));
 
-const allowedOrigins = [
-  "https://dinora.in",
-  "https://www.dinora.in",
-  "https://dinora-frontend.onrender.com",
-  "http://localhost:5173", // ← local development
-];
+const allowedOrigins = require("./config/allowedOrigins");
 
 app.use(cors({
   origin: function (origin, callback) {

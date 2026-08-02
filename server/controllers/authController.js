@@ -150,12 +150,12 @@ const verification = async(req, res) => {
     }
 
     const token = authHeader.split(" ")[1];
-    console.log("TOKEN:", token);
+    // console.log("TOKEN:", token);
 
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("SECRET:", process.env.JWT_SECRET);
+      // console.log("SECRET:", process.env.JWT_SECRET);
 
     } catch (error) {
       if(error.name === 'TokenExpiredError'){
@@ -172,11 +172,18 @@ const verification = async(req, res) => {
     }
 
     const user = await User.findById(decoded.id);
+    // console.log("🔍 Full decoded token payload:", decoded);
 
     if(!user){
       return res.status(404).json({
           success: false,
-          message: "User not found"
+          // message: "User not found"
+
+          // ← clearer than a generic "User not found": explains WHY, since
+          // this exact case only happens when someone registered again with
+          // the same email/username before verifying, which deletes the
+          // earlier unverified account this specific link was created for
+        message: "This verification link is no longer valid — it looks like you registered again since this email was sent. Please use the most recent verification email, or register again to get a fresh link."
       })
     }
 

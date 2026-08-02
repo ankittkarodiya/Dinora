@@ -32,7 +32,9 @@ const Verification = () => {
         }
       } catch (error) {
         console.log(error);
-        setStatus("Verification failed, please try again");
+        // setStatus("Verification failed, please try again");
+        setStatus(error.response?.data?.message || "Verification failed, please try again");
+
       }
     };
 

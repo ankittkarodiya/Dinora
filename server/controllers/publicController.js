@@ -1,3 +1,5 @@
+const { getIO } = require("../config/socket");
+
 const Restaurant = require("../models/Restaurant");
 const Category = require("../models/Category");
 const MenuItem = require("../models/MenuItem");
@@ -35,7 +37,10 @@ const getMenu = async (req, res) => {
   try {
     const { slug, tableId } = req.params;
     const restaurant = await Restaurant.findOne({ slug, isActive: true });
-    if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
+    if (!restaurant)
+      return res
+        .status(404)
+        .json({ success: false, message: "Restaurant not found" });
 
     // ← THE FIX: table, categories, and menu items don't depend on each other —
     // run all three simultaneously instead of one after another
@@ -45,13 +50,19 @@ const getMenu = async (req, res) => {
       MenuItem.find({ restaurantId: restaurant._id }),
     ]);
 
-    if (!table) return res.status(404).json({ success: false, message: "Table not found" });
+    if (!table)
+      return res
+        .status(404)
+        .json({ success: false, message: "Table not found" });
 
     res.json({
       success: true,
       restaurant: {
-        _id: restaurant._id, name: restaurant.name, slug: restaurant.slug,
-        description: restaurant.description, logo: restaurant.logo,
+        _id: restaurant._id,
+        name: restaurant.name,
+        slug: restaurant.slug,
+        description: restaurant.description,
+        logo: restaurant.logo,
         gstPercent: restaurant.gstPercent,
         subscriptionPlan: restaurant.subscriptionPlan,
       },
@@ -63,8 +74,6 @@ const getMenu = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 const createSession = async (req, res) => {
   try {
@@ -102,22 +111,30 @@ const placeOrder = async (req, res) => {
     const { restaurantId, sessionId, tableId, items } = req.body;
 
     if (!items || items.length === 0) {
-      return res.status(400).json({ success: false, message: "No items in order" });
+      return res
+        .status(400)
+        .json({ success: false, message: "No items in order" });
     }
 
     const restaurant = await Restaurant.findById(restaurantId);
     if (!restaurant) {
-      return res.status(404).json({ success: false, message: "Restaurant not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Restaurant not found" });
     }
 
     // fetch real, current prices from the DB — never trust client-sent prices
     const menuItemIds = items.map((i) => i.menuItemId);
-    const dbItems = await MenuItem.find({ _id: { $in: menuItemIds }, restaurantId });
+    const dbItems = await MenuItem.find({
+      _id: { $in: menuItemIds },
+      restaurantId,
+    });
     const dbItemMap = new Map(dbItems.map((m) => [m._id.toString(), m]));
 
     const orderItems = items.map((i) => {
       const dbItem = dbItemMap.get(i.menuItemId.toString());
-      if (!dbItem) throw new Error(`One of the items in your cart is no longer available`);
+      if (!dbItem)
+        throw new Error(`One of the items in your cart is no longer available`);
       return {
         menuItemId: dbItem._id,
         name: dbItem.name,
@@ -132,15 +149,44 @@ const placeOrder = async (req, res) => {
     const gstAmount = Math.round(((subtotal * gstPercent) / 100) * 100) / 100;
     const totalAmount = Math.round((subtotal + gstAmount) * 100) / 100;
 
+    // const order = await Order.create({
+    //   restaurantId, sessionId, tableId,
+    //   customerId: req.customer?._id || null,
+    //   items: orderItems,
+    //   subtotal, gstPercent, gstAmount, totalAmount,
+    //   status: "Pending",
+    // });
+    // await Session.findByIdAndUpdate(sessionId, { $inc: { totalAmount } });
+    // res.status(201).json({ success: true, order });
+
+    // new
     const order = await Order.create({
-      restaurantId, sessionId, tableId,
+      restaurantId,
+      sessionId,
+      tableId,
       customerId: req.customer?._id || null,
       items: orderItems,
-      subtotal, gstPercent, gstAmount, totalAmount,
+      subtotal,
+      gstPercent,
+      gstAmount,
+      totalAmount,
       status: "Pending",
     });
-
     await Session.findByIdAndUpdate(sessionId, { $inc: { totalAmount } });
+
+    // populate before emitting, so the admin's real-time listener receives
+    // the exact same shape as a normal getOrders() response — ready to
+    // display immediately, matching every other order in the list
+    await order.populate("tableId", "name capacity");
+    await order.populate("customerId", "username phone");
+
+    // a socket failure should never prevent an order from being placed —
+    // this is a nice-to-have notification, not a critical path
+    try {
+      getIO().to(`restaurant-${restaurantId}`).emit("newOrder", order);
+    } catch (emitErr) {
+      console.error("Socket emit failed:", emitErr.message);
+    }
 
     res.status(201).json({ success: true, order });
   } catch (error) {
@@ -186,7 +232,12 @@ const getReviewableItems = async (req, res) => {
       order.items.forEach((item) => {
         const id = item.menuItemId.toString();
         if (!itemMap[id]) {
-          itemMap[id] = { menuItemId: item.menuItemId, name: item.name, price: item.price, isVeg: item.isVeg };
+          itemMap[id] = {
+            menuItemId: item.menuItemId,
+            name: item.name,
+            price: item.price,
+            isVeg: item.isVeg,
+          };
         }
       });
     });
@@ -233,7 +284,6 @@ const getReviewableItems = async (req, res) => {
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
-
 
 // new
 // POST /api/public/reviews
@@ -305,8 +355,6 @@ const getReviewableItems = async (req, res) => {
 //   }
 // };
 
-
-
 // const getItemReviews = async (req, res) => {
 //   try {
 //     const reviews = await Review.find({ menuItemId: req.params.menuItemId }).sort({ createdAt: -1 });
@@ -319,14 +367,15 @@ const getReviewableItems = async (req, res) => {
 //   }
 // };
 
-
 // new submit review
 const submitReview = async (req, res) => {
   try {
     const { restaurantId, menuItemId, sessionId, rating, text } = req.body;
 
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Rating must be between 1 and 5" });
     }
 
     const servedOrder = await Order.findOne({
@@ -343,7 +392,8 @@ const submitReview = async (req, res) => {
       });
     }
 
-    const customerName = req.customer.username?.trim() || `Guest ${req.customer.phone.slice(-4)}`;
+    const customerName =
+      req.customer.username?.trim() || `Guest ${req.customer.phone.slice(-4)}`;
 
     // ALWAYS create a new review — multiple reviews per customer allowed
     const review = await Review.create({
@@ -360,7 +410,6 @@ const submitReview = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // new
 // GET /api/public/reviews/:menuItemId
@@ -380,7 +429,6 @@ const getItemReviews = async (req, res) => {
   }
 };
 
-
 // new for customer history
 // GET /api/public/orders/customer-history
 // Returns ALL orders ever placed by this logged-in customer at this restaurant
@@ -388,7 +436,12 @@ const getItemReviews = async (req, res) => {
 const getCustomerOrderHistory = async (req, res) => {
   try {
     if (!req.customer?._id) {
-      return res.status(401).json({ success: false, message: "Login required to view order history" });
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Login required to view order history",
+        });
     }
 
     const orders = await Order.find({
@@ -404,4 +457,13 @@ const getCustomerOrderHistory = async (req, res) => {
   }
 };
 
-module.exports = { getMenu, createSession, placeOrder, getSessionOrders, getReviewableItems, submitReview, getItemReviews, getCustomerOrderHistory };
+module.exports = {
+  getMenu,
+  createSession,
+  placeOrder,
+  getSessionOrders,
+  getReviewableItems,
+  submitReview,
+  getItemReviews,
+  getCustomerOrderHistory,
+};

@@ -103,10 +103,10 @@ return (
               <input
                 type="text"
                 name="username"
-                placeholder="Ankit"
+                placeholder="Ankit Saini"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-0 focus:ring-blue-500/20 outline-none transition"
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ return (
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-0 focus:ring-blue-500/20 outline-none transition"
               />
             </div>
             <div>
@@ -141,7 +141,7 @@ return (
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-0 focus:ring-blue-500/20 outline-none transition"
               />
             </div>
             {/* <div>

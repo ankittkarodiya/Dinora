@@ -24,8 +24,32 @@ const isCustomerRoute = (url) => CUSTOMER_ROUTE_PATTERNS.some((pattern) => url.i
 
 
 // ── Request interceptor — attaches the correct token per route type ──
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     if (isCustomerRoute(config.url)) {
+//       const customerToken = sessionStorage.getItem("customerToken");
+//       if (customerToken) {
+//         config.headers.Authorization = `Bearer ${customerToken}`;
+//       }
+//     } else {
+//       const adminToken = localStorage.getItem("token");
+//       if (adminToken) {
+//         config.headers.Authorization = `Bearer ${adminToken}`;
+//       }
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 axiosInstance.interceptors.request.use(
   (config) => {
+    // ← THE FIX: if the caller already explicitly set an Authorization
+    // header (like Verification.jsx does, with a token from the URL),
+    // never override it — only fill it in automatically when it's missing.
+    if (config.headers.Authorization) {
+      return config;
+    }
+
     if (isCustomerRoute(config.url)) {
       const customerToken = sessionStorage.getItem("customerToken");
       if (customerToken) {

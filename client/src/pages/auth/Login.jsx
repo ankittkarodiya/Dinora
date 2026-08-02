@@ -103,7 +103,7 @@ const handleSubmit = async (e) => {
               placeholder="Enter email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
             />
           </div>
 
