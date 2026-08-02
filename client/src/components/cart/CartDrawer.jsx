@@ -733,9 +733,7 @@ export default function CartDrawer({
       className="w-full py-4 rounded-2xl font-bold text-base text-white bg-linear-to-r from-[#FC8019] to-[#ff9a3d] shadow-lg shadow-orange-500/25 active:scale-[0.99] transition-transform duration-150"
     >
       Done
-    </button>
-
-    
+    </button> 
   </div>
 )}
 
@@ -745,6 +743,37 @@ export default function CartDrawer({
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import { useState } from "react";
 // import { useDispatch, useSelector } from "react-redux";
