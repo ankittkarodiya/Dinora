@@ -61,7 +61,8 @@ export default function CustomerLogin() {
               onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setPhoneError(""); }}
               placeholder="Phone number"
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
+              // className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
+              className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none text-lg  px-4 py-4 tracking-widest"
               autoFocus
             />
           </div>
