@@ -90,6 +90,26 @@ export function OrdersProvider({ children }) {
     };
   }, []);
 
+
+//   for pwa app refetch orders automatically
+    // ── Catch up on anything missed while backgrounded ──────────────────
+// Android often pauses a minimized PWA's JavaScript entirely rather than
+// killing it outright — any socket events that arrive during that paused
+// window are simply never processed, since nothing is running to receive
+// them. This automatically re-syncs with the server the moment the app
+// becomes visible again, so a manual "Refresh" click is never required.
+useEffect(() => {
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      refetchOrders();
+    }
+  };
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+}, []);
+
+
+
   // ── The real-time connection ────────────────────────────────────────
   // Joins this restaurant's private room once we know its ID, and listens
   // for newOrder events for as long as this provider is mounted — which,

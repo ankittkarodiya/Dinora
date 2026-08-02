@@ -97,17 +97,34 @@ export const unlockAudio = () => {
 //   }
 // };
 
-export const playSound = (soundId) => {
+// export const playSound = (soundId) => {
+//   try {
+//     const preset = SOUND_PRESETS.find((s) => s.id === soundId) || SOUND_PRESETS[0];
+//     const ctx = getContext();
+//     console.log("🔊 playSound called. Context state:", ctx.state, "| sound:", soundId);
+//     if (ctx.state === "suspended") {
+//       ctx.resume().catch(() => {});
+//     }
+//     preset.play(ctx);
+//   } catch (err) {
+//     console.log("🔊 playSound threw an error:", err);
+//   }
+// };
+
+export const playSound = async (soundId) => {
   try {
     const preset = SOUND_PRESETS.find((s) => s.id === soundId) || SOUND_PRESETS[0];
     const ctx = getContext();
-    console.log("🔊 playSound called. Context state:", ctx.state, "| sound:", soundId);
+    // ← THE FIX: wait for resume() to genuinely finish before scheduling
+    // any tones. Firing resume() and immediately playing regardless was
+    // scheduling sound against a context that wasn't actually running yet
+    // — which is exactly what caused the noticeable delay.
     if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
+      await ctx.resume();
     }
     preset.play(ctx);
-  } catch (err) {
-    console.log("🔊 playSound threw an error:", err);
+  } catch {
+    // Web Audio API unsupported or blocked — fails silently
   }
 };
 
