@@ -19,6 +19,7 @@ import {
   requestCashPaymentApi,
 } from "../../api/publicApi";
 import toast from "react-hot-toast";
+import { CircleCheck, Receipt, ShoppingBag } from "lucide-react";
 
 export default function CartDrawer({
   isOpen,
@@ -322,7 +323,7 @@ export default function CartDrawer({
                   className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
                 />
               </div>
-              
+
               <button
                 type="submit"
                 disabled={identifying}
@@ -623,13 +624,19 @@ export default function CartDrawer({
           </>
         )}
 
-        {screen === "cash-success" && (
+        {/* {screen === "cash-success" && (
           <div className="px-5 py-10 text-center">
             <div className="pt-3 pb-8 flex justify-center">
               <div className="w-10 h-1 bg-white/20 rounded-full" />
             </div>
             <div className="text-5xl mb-4">🙏</div>
-            <div className="text-white font-bold text-xl mb-2">
+            <div className="flex justify-center mb-4">
+              <ShoppingBag className="w-5 h-5 text-blue-600" />
+              <Receipt className="w-5 h-5 text-blue-600" />
+              <CircleCheck className="w-5 h-5 text-green-600" />
+            </div>
+
+            <div className="text-white font-bold text-xl mb-2 text-center">
               Order Placed!
             </div>
             <div className="text-gray-400 text-sm mb-6">
@@ -637,7 +644,9 @@ export default function CartDrawer({
             </div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6 text-left">
               <div className="text-amber-300 font-bold text-sm mb-1">
-                {/* 💵 Cash Payment */}₹ Cash Payment
+                💵 Cash Payment
+                ₹ Cash Payment
+                Cash Payment
               </div>
               <div className="text-gray-300 text-sm">
                 Please pay{" "}
@@ -657,7 +666,81 @@ export default function CartDrawer({
               Done
             </button>
           </div>
-        )}
+        )} */}
+
+
+        {screen === "cash-success" && (
+  <div className="px-5 py-8 text-center">
+    {/* Handle bar */}
+    <div className="pt-2 pb-6 flex justify-center">
+      <div className="w-12 h-1 bg-white/15 rounded-full" />
+    </div>
+
+    {/* Success Icon */}
+    <div className="flex justify-center mb-5">
+      <div className="relative">
+        <div className="w-24 h-24 rounded-full bg-green-500/15 border border-green-400/25 flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.25)] backdrop-blur-sm">
+          <CircleCheck className="w-12 h-12 text-green-400" />
+        </div>
+
+        {/* Small floating dot */}
+        <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 border-2 border-[#111827] flex items-center justify-center">
+          <div className="w-2 h-2 rounded-full bg-white" />
+        </div>
+      </div>
+    </div>
+
+    {/* Title */}
+    <h2 className="text-white font-extrabold text-2xl tracking-tight mb-2">
+      Order Placed!
+    </h2>
+
+    {/* Subtitle */}
+    <p className="text-gray-400 text-sm mb-6 leading-relaxed max-w-xs mx-auto">
+      Your order has been sent to the kitchen. We’ll notify you when it starts preparing.
+    </p>
+
+    {/* Cash payment card */}
+    <div className="bg-linear-to-br from-amber-500/12 to-orange-500/8 border border-amber-400/20 rounded-3xl p-5 mb-6 text-left backdrop-blur-sm shadow-lg">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-amber-300 font-semibold text-sm uppercase tracking-wide">
+          Cash Payment
+        </span>
+        <div className="px-2 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-200 text-xs font-medium">
+          Pending
+        </div>
+      </div>
+
+      <div className="text-gray-300 text-sm leading-relaxed">
+        Please pay the amount below to the staff at your table or at the counter.
+      </div>
+
+      <div className="mt-4 rounded-2xl bg-black/20 border border-white/5 p-4">
+        <div className="text-xs text-gray-400 mb-1">Amount to pay</div>
+        <div className="text-3xl font-extrabold text-white tracking-tight">
+          ₹{confirmedTotal.toFixed(2)}
+        </div>
+      </div>
+
+      <div className="text-gray-500 text-xs mt-4 leading-relaxed">
+        Your bill will be closed once the staff confirms that payment has been received.
+      </div>
+    </div>
+
+    {/* Done button */}
+    <button
+      onClick={handleClose}
+      className="w-full py-4 rounded-2xl font-bold text-base text-white bg-linear-to-r from-[#FC8019] to-[#ff9a3d] shadow-lg shadow-orange-500/25 active:scale-[0.99] transition-transform duration-150"
+    >
+      Done
+    </button>
+
+    
+  </div>
+)}
+
+
+        
       </div>
     </>
   );
