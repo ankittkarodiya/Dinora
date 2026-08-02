@@ -94,44 +94,89 @@ export function OrdersProvider({ children }) {
   // Joins this restaurant's private room once we know its ID, and listens
   // for newOrder events for as long as this provider is mounted — which,
   // since it lives in the layout, means for the entire admin session.
-  useEffect(() => {
-    if (!restaurant?._id) return;
+//   useEffect(() => {
+//     if (!restaurant?._id) return;
 
-    const socket = getSocket();
-    socket.emit("join-restaurant", restaurant._id);
+//     const socket = getSocket();
+//     socket.emit("join-restaurant", restaurant._id);
 
-    const handleNewOrder = (order) => {
-      setOrders((prev) => {
-        // safety net — never add the same order twice, in case of a
-        // reconnect or duplicate emit
-        if (prev.some((o) => o._id === order._id)) return prev;
-        return [order, ...prev];
-      });
+//     const handleNewOrder = (order) => {
+//       setOrders((prev) => {
+//         // safety net — never add the same order twice, in case of a
+//         // reconnect or duplicate emit
+//         if (prev.some((o) => o._id === order._id)) return prev;
+//         return [order, ...prev];
+//       });
 
-    //   if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
-    //     playSound(getSelectedSound());
-    //   }
-    // new to replace the above
-    if (canUseNotificationSound(restaurantIsProRef.current) && isNotificationSoundEnabled()) {
-        playSound(getSelectedSound());
+//     //   if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
+//     //     playSound(getSelectedSound());
+//     //   }
+//     // new to replace the above
+//     if (canUseNotificationSound(restaurantIsProRef.current) && isNotificationSoundEnabled()) {
+//         playSound(getSelectedSound());
+//     }
+
+//       toast.custom(
+//         () => (
+//           <div className="bg-amber-400 text-slate-900 font-bold text-sm px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce">
+//             ⓘ New order!
+//           </div>
+//         ),
+//         { duration: 2500, position: "top-center" },
+//       );
+//     };
+
+//     socket.on("newOrder", handleNewOrder);
+
+//     return () => {
+//       socket.off("newOrder", handleNewOrder);
+//     };
+//   }, [restaurant?._id]);
+
+// new use effect
+useEffect(() => {
+  if (!restaurant?._id) return;
+
+  const socket = getSocket();
+
+  // ← THE FIX: Socket.io does NOT automatically restore room membership
+  // after a disconnect/reconnect (network switch, mobile OS backgrounding,
+  // any brief connection drop). A fresh reconnection gets a brand-new,
+  // empty room membership every time. Without rejoining on every single
+  // "connect" event — not just the first one — the socket looks perfectly
+  // connected but silently stops receiving any events after the first
+  // reconnection, exactly matching "works sometimes, not every time."
+  const joinRoom = () => socket.emit("join-restaurant", restaurant._id);
+  joinRoom(); // join immediately if already connected right now
+  socket.on("connect", joinRoom); // and rejoin every time a (re)connection happens
+
+  const handleNewOrder = (order) => {
+    setOrders((prev) => {
+      if (prev.some((o) => o._id === order._id)) return prev;
+      return [order, ...prev];
+    });
+
+    if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
+      playSound(getSelectedSound());
     }
 
-      toast.custom(
-        () => (
-          <div className="bg-amber-400 text-slate-900 font-bold text-sm px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce">
-            ⓘ New order!
-          </div>
-        ),
-        { duration: 2500, position: "top-center" },
-      );
-    };
+    toast.custom(
+      () => (
+        <div className="bg-amber-400 text-slate-900 font-bold text-sm px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 animate-bounce">
+          ⓘ New order!
+        </div>
+      ),
+      { duration: 2500, position: "top-center" },
+    );
+  };
 
-    socket.on("newOrder", handleNewOrder);
+  socket.on("newOrder", handleNewOrder);
 
-    return () => {
-      socket.off("newOrder", handleNewOrder);
-    };
-  }, [restaurant?._id]);
+  return () => {
+    socket.off("connect", joinRoom);
+    socket.off("newOrder", handleNewOrder);
+  };
+}, [restaurant?._id]);
 
   // ── Used by action handlers (accept/print/status/cancel/confirm) ──
   // Patches one specific order in place once the backend confirms a change.
