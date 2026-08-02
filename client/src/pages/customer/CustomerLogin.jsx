@@ -57,7 +57,7 @@ export default function CustomerLogin() {
             <span className="px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10">+91</span>
             <input
               type="tel"
-              
+
               inputMode="numeric"
               pattern="[0-9]*"
               autoComplete="tel-national"
@@ -66,8 +66,7 @@ export default function CustomerLogin() {
               onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setPhoneError(""); }}
               placeholder="Phone number"
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              // className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
-              className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none text-lg  px-4 py-4 tracking-widest"
+              className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
               autoFocus
             />
           </div>
