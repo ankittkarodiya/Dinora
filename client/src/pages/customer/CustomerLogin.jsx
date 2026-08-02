@@ -53,8 +53,10 @@ export default function CustomerLogin() {
         </p>
 
         <div className="space-y-3 mt-7">
-          <div className="flex items-center bg-[#1C1C1E] rounded-2xl overflow-hidden border border-white/5 focus-within:border-[#FC8019]/40">
-            {/* <span className="px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10">+91</span> */}
+
+          
+          {/* <div className="flex items-center bg-[#1C1C1E] rounded-2xl overflow-hidden border border-white/5 focus-within:border-[#FC8019]/40">
+            <span className="px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10">+91</span>
             <span className="shrink-0 w-16 text-center px-3 py-4 text-gray-400 text-sm font-semibold border-r border-white/10">
               +91
             </span>
@@ -72,7 +74,26 @@ export default function CustomerLogin() {
               className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
               autoFocus
             />
-          </div>
+          </div> */}
+          <div className="flex items-center bg-[#1C1C1E] rounded-2xl overflow-hidden border border-white/5 focus-within:border-[#FC8019]/40">
+  <div className="flex-none min-w-[64px] px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10 text-center">
+    +91
+  </div>
+
+  <input
+    type="tel"
+    inputMode="numeric"
+    value={phone}
+    onChange={(e) => {
+      setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+      setPhoneError("");
+    }}
+    placeholder="Phone number"
+    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+    className="min-w-0 flex-1 bg-transparent text-white placeholder-gray-600 outline-none px-4 py-4 text-lg tracking-widest"
+    autoFocus
+  />
+</div>
 
           {phoneError && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center justify-between">
