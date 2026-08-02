@@ -76,7 +76,7 @@ export default function CustomerLogin() {
             />
           </div> */}
           <div className="flex items-center bg-[#1C1C1E] rounded-2xl overflow-hidden border border-white/5 focus-within:border-[#FC8019]/40">
-  <div className="flex-none min-w-[64px] px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10 text-center">
+  <div className="flex-none min-w-16 px-4 py-4 text-gray-400 text-sm font-semibold border-r border-white/10 text-center">
     +91
   </div>
 
