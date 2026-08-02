@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getMyRestaurantApi,
   createRestaurantApi,
@@ -70,6 +71,7 @@ const PLANS = [
 
 export default function RestaurantSetup() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // ← new: used to seed the shared ["restaurant"] cache after setup succeeds
   const [step, setStep] = useState("details");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -215,7 +217,8 @@ export default function RestaurantSetup() {
     if (isRenewal) return; // ← safety guard — trial restart should never happen on renewal
     setSubmitting(true);
     try {
-      await createRestaurantApi({ ...form, plan: "trial" });
+      const data = await createRestaurantApi({ ...form, plan: "trial" });
+      queryClient.setQueryData(["restaurant"], data.restaurant); // ← seeds the cache Tables.jsx/Settings.jsx share, so their first visit is instant
       sessionStorage.removeItem("restaurantSetupForm"); // ← draft no longer needed once setup is done
       toast.success("10-day free trial started!");
       navigate("/restaurant/dashboard");
@@ -261,11 +264,13 @@ export default function RestaurantSetup() {
             // renewed. Instead, just update their details in case they
             // edited anything, then verify the payment against the
             // existing restaurant.
+            let restaurantData;
             if (isRenewal) {
-              await updateRestaurantApi(form);
+              restaurantData = await updateRestaurantApi(form);
             } else {
-              await createRestaurantApi({ ...form, plan: selectedPlan });
+              restaurantData = await createRestaurantApi({ ...form, plan: selectedPlan });
             }
+            queryClient.setQueryData(["restaurant"], restaurantData.restaurant); // ← same seeding here, covers both renewal and new-signup paths
 
             await verifySubscriptionApi({
               razorpay_order_id: response.razorpay_order_id,
@@ -675,35 +680,12 @@ export default function RestaurantSetup() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 // import {
 //   getMyRestaurantApi,
 //   createRestaurantApi,
+//   updateRestaurantApi,
 // } from "../../api/restaurantApi";
 // import {
 //   createSubscriptionOrderApi,
@@ -739,7 +721,7 @@ export default function RestaurantSetup() {
 //       "Table management",
 //       "Order history with date-range filtering",
 //       "Cash and online payments (your own Razorpay)",
-//       "Up to 10 tables",
+//       "Up to 15 tables",
 //     ],
 //   },
 //   {
@@ -777,6 +759,12 @@ export default function RestaurantSetup() {
 
 //   const [billingCycle, setBillingCycle] = useState("monthly"); // "monthly" | "yearly"
 
+//   // ← NEW: true when a restaurant already exists but its subscription has
+//   // expired — in this mode we pre-fill their real data, skip straight to
+//   // plan selection, and never call createRestaurantApi again (it already
+//   // exists), so nothing about their restaurant is ever lost or recreated.
+//   const [isRenewal, setIsRenewal] = useState(false);
+
 //   // const [form, setForm] = useState({
 //   //   name: "",
 //   //   slug: "",
@@ -809,7 +797,28 @@ export default function RestaurantSetup() {
 //     const check = async () => {
 //       try {
 //         const data = await getMyRestaurantApi();
-//         if (data.restaurant) navigate("/restaurant/dashboard");
+//         if (data.restaurant) {
+//           // ← THE FIX: only skip past setup entirely if the subscription
+//           // is genuinely active. If it exists but is expired, this is a
+//           // renewal — stay on this page, pre-fill their real data, and
+//           // let them choose a plan to reactivate, instead of bouncing
+//           // back to a dashboard that will just reject them again.
+//           if (data.restaurant.subscriptionStatus === "active") {
+//             navigate("/restaurant/dashboard");
+//             return;
+//           }
+//           setIsRenewal(true);
+//           setForm({
+//             name: data.restaurant.name || "",
+//             slug: data.restaurant.slug || "",
+//             description: data.restaurant.description || "",
+//             phone: data.restaurant.phone || "",
+//             address: data.restaurant.address || "",
+//             gstNumber: data.restaurant.gstNumber || "",
+//             gstPercent: String(data.restaurant.gstPercent || "5"),
+//           });
+//           setStep("plan"); // skip straight to plan selection — their info is already known
+//         }
 //       } catch {
 //         // no restaurant yet — this is the expected state on this page
 //       } finally {
@@ -880,10 +889,12 @@ export default function RestaurantSetup() {
 //     setStep("plan");
 //   };
 
-//   // ← The ONLY place createRestaurantApi is ever called, and it always
-//   // includes a real, chosen plan. A restaurant document can never exist
-//   // in the database without a deliberate plan attached to it.
+//   // ← The ONLY place createRestaurantApi is ever called for a brand-new
+//   // signup, and it always includes a real, chosen plan. A restaurant
+//   // document can never exist in the database without a deliberate plan
+//   // attached to it. Not reachable during renewal (button is hidden then).
 //   const handleStartTrial = async () => {
+//     if (isRenewal) return; // ← safety guard — trial restart should never happen on renewal
 //     setSubmitting(true);
 //     try {
 //       await createRestaurantApi({ ...form, plan: "trial" });
@@ -925,7 +936,19 @@ export default function RestaurantSetup() {
 //         order_id: data.order.id,
 //         handler: async (response) => {
 //           try {
-//             await createRestaurantApi({ ...form, plan: selectedPlan });
+//             // ← THE FIX: only create a restaurant on a genuinely new signup.
+//             // On renewal, the restaurant already exists — creating it again
+//             // would fail ("You already have a restaurant") and would skip
+//             // verifySubscriptionApi entirely, leaving them paid but not
+//             // renewed. Instead, just update their details in case they
+//             // edited anything, then verify the payment against the
+//             // existing restaurant.
+//             if (isRenewal) {
+//               await updateRestaurantApi(form);
+//             } else {
+//               await createRestaurantApi({ ...form, plan: selectedPlan });
+//             }
+
 //             await verifySubscriptionApi({
 //               razorpay_order_id: response.razorpay_order_id,
 //               razorpay_payment_id: response.razorpay_payment_id,
@@ -938,7 +961,9 @@ export default function RestaurantSetup() {
 
 //             // toast.success("Subscription activated! Welcome to Dinora 🎉");
 //             toast.success(
-//               "You're all set! Your Dinora subscription is now active.",
+//               isRenewal
+//                 ? "Subscription renewed! Welcome back to Dinora"
+//                 : "You're all set! Your Dinora subscription is now active.",
 //             );
 //             navigate("/restaurant/dashboard");
 //           } catch (err) {
@@ -989,34 +1014,39 @@ export default function RestaurantSetup() {
 //         <div className="text-center mb-8">
 //           <h1 className="text-4xl font-bold text-white">Dinora</h1>
 //           <p className="text-slate-300 mt-2">
-//             {step === "details" ? "Setup your restaurant" : "Choose your plan"}
+//             {isRenewal
+//               ? "Your subscription has expired — choose a plan to continue"
+//               : step === "details" ? "Setup your restaurant" : "Choose your plan"}
 //           </p>
 //         </div>
 
-//         <div className="flex items-center gap-2 mb-8 justify-center">
-//           {["details", "plan"].map((s, i) => (
-//             <div key={s} className="flex items-center gap-2">
-//               <div
-//                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2
-//                 ${
-//                   step === s
-//                     ? "border-blue-500 bg-blue-500/20 text-blue-400"
-//                     : step === "plan" && s === "details"
-//                       ? "border-green-500 bg-green-500/20 text-green-400"
-//                       : "border-white/20 bg-white/5 text-slate-500"
-//                 }`}
-//               >
-//                 {step === "plan" && s === "details" ? "✓" : i + 1}
+//         {/* ← progress indicator hidden during renewal — there's only one real step (choose plan) */}
+//         {!isRenewal && (
+//           <div className="flex items-center gap-2 mb-8 justify-center">
+//             {["details", "plan"].map((s, i) => (
+//               <div key={s} className="flex items-center gap-2">
+//                 <div
+//                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2
+//                   ${
+//                     step === s
+//                       ? "border-blue-500 bg-blue-500/20 text-blue-400"
+//                       : step === "plan" && s === "details"
+//                         ? "border-green-500 bg-green-500/20 text-green-400"
+//                         : "border-white/20 bg-white/5 text-slate-500"
+//                   }`}
+//                 >
+//                   {step === "plan" && s === "details" ? "✓" : i + 1}
+//                 </div>
+//                 <span
+//                   className={`text-xs font-semibold capitalize ${step === s ? "text-white" : "text-slate-500"}`}
+//                 >
+//                   {s === "details" ? "Restaurant Info" : "Choose Plan"}
+//                 </span>
+//                 {i === 0 && <div className="w-8 h-px bg-white/20" />}
 //               </div>
-//               <span
-//                 className={`text-xs font-semibold capitalize ${step === s ? "text-white" : "text-slate-500"}`}
-//               >
-//                 {s === "details" ? "Restaurant Info" : "Choose Plan"}
-//               </span>
-//               {i === 0 && <div className="w-8 h-px bg-white/20" />}
-//             </div>
-//           ))}
-//         </div>
+//             ))}
+//           </div>
+//         )}
 
 //         {step === "details" && (
 //           <div className="rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl p-8 shadow-2xl">
@@ -1059,13 +1089,14 @@ export default function RestaurantSetup() {
 //                     }
 //                     placeholder="spice-garden"
 //                     // required
-//                     className="flex-1 px-3 py-3 text-white placeholder-slate-400 outline-none bg-transparent"
+//                     disabled={isRenewal} // ← slug can't change, and shouldn't during renewal anyway
+//                     className="flex-1 px-3 py-3 text-white placeholder-slate-400 outline-none bg-transparent disabled:opacity-60"
 //                   />
 //                 </div>
 //               </div>
 //               <div>
 //                 <label className="block text-white mb-2 font-medium">
-//                   Description
+//                   Description (optional)
 //                 </label>
 //                 <textarea
 //                   value={form.description}
@@ -1140,7 +1171,9 @@ export default function RestaurantSetup() {
 
 //         {step === "plan" && (
 //           <div className="space-y-4">
-//             {/* ← NEW — lets them go back and fix details before paying */}
+//             {/* ← "Back to details" lets them edit their info even during renewal —
+//                 intentionally NOT hidden for isRenewal, since they might want to
+//                 update phone/address/GST while reactivating */}
 //             <button
 //               onClick={() => setStep("details")}
 //               className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-semibold transition-colors mb-2"
@@ -1159,28 +1192,32 @@ export default function RestaurantSetup() {
 //                   d="M15 19l-7-7 7-7"
 //                 />
 //               </svg>
-//               Back to details
+//               {isRenewal ? "Edit restaurant details" : "Back to details"}
 //             </button>
 
-//             {/* Trial option */}
-//             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-//               <span className="text-slate-300 text-sm">Start with a </span>
-//               <span className="text-white font-bold">10-day free trial</span>
-//               <span className="text-slate-300 text-sm">
-//                 {" "}
-//                 to explore the platform
-//               </span>
-//               <button
-//                 onClick={handleStartTrial}
-//                 disabled={submitting}
-//                 className="block mx-auto mt-3 px-6 py-2 border border-white/20 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50"
-//               >
-//                 {submitting ? "Starting..." : "Start Free Trial →"}
-//               </button>
-//             </div>
+//             {/* Trial option — hidden entirely during renewal, since a renewal
+//                 means they've already had real usage, not a first trial */}
+//             {!isRenewal && (
+//               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+//                 <span className="text-slate-300 text-sm">Start with a </span>
+//                 <span className="text-white font-bold">10-day free trial</span>
+//                 <span className="text-slate-300 text-sm">
+//                   {" "}
+//                   {/* to explore the platform */}
+//                   — up to 10 tables, explore the platform
+//                 </span>
+//                 <button
+//                   onClick={handleStartTrial}
+//                   disabled={submitting}
+//                   className="block mx-auto mt-3 px-6 py-2 border border-white/20 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50"
+//                 >
+//                   {submitting ? "Starting..." : "Start Free Trial →"}
+//                 </button>
+//               </div>
+//             )}
 
 //             <div className="text-center text-slate-400 text-sm">
-//               — or choose a plan now —
+//               {isRenewal ? "Choose a plan to reactivate your account" : "— or choose a plan now —"}
 //             </div>
 
 //             {/* Billing cycle toggle */}

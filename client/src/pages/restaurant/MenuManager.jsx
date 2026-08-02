@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getMenuItemsApi,
   createMenuItemApi,
@@ -26,9 +27,45 @@ const BLANK = {
 
 export default function MenuManager() {
   const fileInputRef = useRef(null);
+  const queryClient = useQueryClient();
 
-  const [menuItems, setMenuItems] = useState([]);
-  const [categories, setCategories] = useState([]);
+  // ← THE CHANGE: two useQuery calls replace menuItems/categories useState,
+  // hasFetchedRef, its useEffect, and fetchData. The categories query uses
+  // the SAME key ["categories"] that Categories.jsx uses — so both pages
+  // share one cache. Edit a category there, and it's already up to date
+  // here too, with zero extra fetch.
+  const {
+    data: menuItemsData,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["menuItems"],
+    queryFn: async () => {
+      const res = await getMenuItemsApi();
+      return res.items || [];
+    },
+  });
+  const menuItems = menuItemsData || [];
+
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await getCategoriesApi();
+      return res.categories || [];
+    },
+  });
+  const categories = categoriesData || [];
+
+  const loading = itemsLoading || categoriesLoading;
+  if ((itemsError || categoriesError) && !loading) {
+    // matches the original single "Failed to load menu" toast on failure
+    toast.error("Failed to load menu");
+  }
+
   const [form, setForm] = useState(BLANK);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -36,7 +73,6 @@ export default function MenuManager() {
   const [editing, setEditing] = useState(null);
   const [filterCat, setFilterCat] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false); // true only while the photo is going to Cloudinary
   const [saving, setSaving] = useState(false); // true while the item itself is being saved
 
@@ -44,34 +80,8 @@ export default function MenuManager() {
   const [openingPicker, setOpeningPicker] = useState(false);
 
   // delete alert
-  // const [openingPicker, setOpeningPicker] = useState(false);
   const [deleteModal, setDeleteModal] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
-  // useEffect(() => { fetchData(); }, []);
-
-  const hasFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const [itemsData, catsData] = await Promise.all([
-        getMenuItemsApi(),
-        getCategoriesApi(),
-      ]);
-      setMenuItems(itemsData.items || []);
-      setCategories(catsData.categories || []);
-    } catch {
-      toast.error("Failed to load menu");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -162,11 +172,13 @@ export default function MenuManager() {
     try {
       if (editing) {
         const data = await updateMenuItemApi(editing, payload);
-        setMenuItems((p) => p.map((m) => (m._id === editing ? data.item : m)));
+        queryClient.setQueryData(["menuItems"], (old) =>
+          (old || []).map((m) => (m._id === editing ? data.item : m))
+        );
         toast.success("Item updated");
       } else {
         const data = await createMenuItemApi(payload);
-        setMenuItems((p) => [...p, data.item]);
+        queryClient.setQueryData(["menuItems"], (old) => [...(old || []), data.item]);
         toast.success("Item added");
       }
       handleCancel();
@@ -206,16 +218,6 @@ export default function MenuManager() {
     setShowForm(false);
   };
 
-  // const handleDelete = async (id) => {
-  //   try {
-  //     await deleteMenuItemApi(id);
-  //     setMenuItems((p) => p.filter((m) => m._id !== id));
-  //     toast.success("Item deleted");
-  //   } catch {
-  //     toast.error("Failed to delete");
-  //   }
-  // };
-
   // new handle deletes
   const handleDeleteClick = (item) => {
     setDeleteModal(item);
@@ -226,7 +228,9 @@ export default function MenuManager() {
     setDeleting(true);
     try {
       await deleteMenuItemApi(deleteModal._id);
-      setMenuItems((p) => p.filter((m) => m._id !== deleteModal._id));
+      queryClient.setQueryData(["menuItems"], (old) =>
+        (old || []).filter((m) => m._id !== deleteModal._id)
+      );
       toast.success("Item deleted");
       setDeleteModal(null);
     } catch {
@@ -239,7 +243,9 @@ export default function MenuManager() {
   const handleToggle = async (id) => {
     try {
       const data = await toggleAvailabilityApi(id);
-      setMenuItems((p) => p.map((m) => (m._id === id ? data.item : m)));
+      queryClient.setQueryData(["menuItems"], (old) =>
+        (old || []).map((m) => (m._id === id ? data.item : m))
+      );
     } catch {
       toast.error("Failed to toggle availability");
     }
@@ -343,25 +349,6 @@ export default function MenuManager() {
           </h3>
 
           <div className="flex items-center gap-4">
-            {/* <div
-              onClick={() => fileInputRef.current?.click()}
-              className="relative w-32 h-32 rounded-xl border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all cursor-pointer flex items-center justify-center overflow-hidden shrink-0"
-            >
-              {imagePreview ? (
-                <>
-                  <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-semibold">Change</span>
-                  </div>
-                </>
-              ) : (
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21,15 16,10 5,21" />
-                </svg>
-              )}
-            </div> */}
             <div
               onClick={handleUploadBoxClick}
               className="relative w-32 h-32 rounded-xl border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-blue-500/50 transition-all cursor-pointer flex items-center justify-center overflow-hidden shrink-0"
@@ -624,7 +611,6 @@ export default function MenuManager() {
               <div className="w-16 h-16 rounded-xl overflow-hidden bg-white/10 shrink-0">
                 {item.image ? (
                   <img
-                    // src={item.image}
                     src={optimizeImage(item.image, 100)}
                     alt={item.name}
                     className="w-full h-full object-cover"
@@ -690,12 +676,6 @@ export default function MenuManager() {
                   Edit
                 </button>
 
-                {/* <button
-                  onClick={() => handleDelete(item._id)}
-                  className="px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold"
-                >
-                  Del
-                </button> */}
                 <button onClick={() => handleDeleteClick(item)} className="px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold">Del</button>
 
               </div>
@@ -706,6 +686,14 @@ export default function MenuManager() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -759,7 +747,8 @@ export default function MenuManager() {
 //   isAvailable: true,
 //   isBestseller: false,
 //   description: "",
-//   portionSize: "", // ← new: "", "half", or "full"
+//   hasHalfFull: false, // ← new: local UI toggle, not sent to the backend directly
+//   halfPrice: "", // ← new: only meaningful when hasHalfFull is true
 // };
 
 // export default function MenuManager() {
@@ -813,6 +802,20 @@ export default function MenuManager() {
 
 //   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
+//   // ← new: toggling Half & Full pricing on pre-fills Half Price with roughly
+//   // half the current Full Price, purely as a starting point — it stays a
+//   // normal editable field, never auto-recalculated after this
+//   const toggleHalfFull = () => {
+//     setForm((p) => {
+//       const turningOn = !p.hasHalfFull;
+//       if (turningOn && !p.halfPrice && p.price) {
+//         const suggested = Math.round(Number(p.price) / 2);
+//         return { ...p, hasHalfFull: true, halfPrice: String(suggested) };
+//       }
+//       return { ...p, hasHalfFull: turningOn };
+//     });
+//   };
+
 //   // replace your existing upload box's onClick with this
 //   const handleUploadBoxClick = () => {
 //     if (openingPicker) return; // ← prevents rapid double-clicks from doing anything weird
@@ -849,6 +852,10 @@ export default function MenuManager() {
 //       toast.error("Name, category, and price are required");
 //       return;
 //     }
+//     if (form.hasHalfFull && !form.halfPrice) {
+//       toast.error("Enter a half price, or turn off Half & Full pricing");
+//       return;
+//     }
 
 //     const payload = {
 //       name: form.name,
@@ -858,7 +865,7 @@ export default function MenuManager() {
 //       isVeg: form.isVeg,
 //       isAvailable: form.isAvailable,
 //       isBestseller: form.isBestseller,
-//       portionSize: form.portionSize, // ← new
+//       halfPrice: form.hasHalfFull ? form.halfPrice : null, // ← new
 //     };
 
 //     if (imageFile) {
@@ -907,7 +914,8 @@ export default function MenuManager() {
 //       isVeg: item.isVeg,
 //       isAvailable: item.isAvailable,
 //       isBestseller: item.isBestseller,
-//       portionSize: item.portionSize || "", // ← new
+//       hasHalfFull: !!item.halfPrice, // ← new
+//       halfPrice: item.halfPrice ? String(item.halfPrice) : "", // ← new
 //     });
 //     setImagePreview(item.image || null);
 //     setImageFile(null);
@@ -1088,7 +1096,6 @@ export default function MenuManager() {
 //               {imagePreview ? (
 //                 <>
 //                   <img
-//                     // src={imagePreview}
 //                     src={optimizeImage(imagePreview, 300)}
 //                     alt="Preview"
 //                     className="absolute inset-0 w-full h-full object-cover"
@@ -1176,7 +1183,7 @@ export default function MenuManager() {
 //             </div>
 //             <div>
 //               <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
-//                 Price (₹) *
+//                 {form.hasHalfFull ? "Full Price (₹) *" : "Price (₹) *"}
 //               </label>
 //               <input
 //                 type="number"
@@ -1186,6 +1193,38 @@ export default function MenuManager() {
 //                 className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
 //               />
 //             </div>
+//           </div>
+
+//           {/* ← new: Half & Full pricing toggle, plus the conditional Half Price field */}
+//           <div>
+//             <label className="flex items-center gap-2 cursor-pointer mb-3">
+//               <div
+//                 onClick={toggleHalfFull}
+//                 className={`w-12 h-6 rounded-full relative transition-colors cursor-pointer ${form.hasHalfFull ? "bg-blue-500" : "bg-slate-600"}`}
+//               >
+//                 <div
+//                   className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${form.hasHalfFull ? "translate-x-7" : "translate-x-1"}`}
+//                 />
+//               </div>
+//               <span className="text-slate-300 text-sm font-semibold">
+//                 This item has Half &amp; Full plate pricing
+//               </span>
+//             </label>
+
+//             {form.hasHalfFull && (
+//               <div>
+//                 <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
+//                   Half Price (₹) *
+//                 </label>
+//                 <input
+//                   type="number"
+//                   value={form.halfPrice}
+//                   onChange={(e) => set("halfPrice", e.target.value)}
+//                   placeholder="e.g. 200"
+//                   className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
+//                 />
+//               </div>
+//             )}
 //           </div>
 
 //           <div>
@@ -1206,36 +1245,9 @@ export default function MenuManager() {
 //             </select>
 //           </div>
 
-//           {/* new for portion size */}
-//           {/* <div>
-//   <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
-//     Portion Size <span className="text-slate-500 normal-case font-normal">(optional)</span>
-//   </label>
-//   <select
-//     value={form.portionSize}
-//     onChange={(e) => set("portionSize", e.target.value)}
-//     className="w-full rounded-xl border border-white/20 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
-//   >
-//     <option value="">Not applicable</option>
-//     <option value="half">Half Plate</option>
-//     <option value="full">Full Plate</option>
-//   </select>
-// </div> */}
-//           <div>
-//   <label className="flex items-center gap-2 cursor-pointer mb-2">
-//     <div
-//       onClick={() => set("hasHalfFull", !form.hasHalfFull)}
-//       className={`w-12 h-6 rounded-full relative transition-colors cursor-pointer ${form.hasHalfFull ? "bg-blue-500" : "bg-slate-600"}`}
-//     >
-//       <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${form.hasHalfFull ? "translate-x-7" : "translate-x-1"}`} />
-//     </div>
-//     <span className="text-slate-300 text-sm font-semibold">This item has Half &amp; Full plate pricing</span>
-//   </label>
-// </div>
-
 //           <div>
 //             <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
-//               Description <span className="text-slate-500 normal-case font-normal">(optional)</span>
+//               Description
 //             </label>
 //             <textarea
 //               value={form.description}
@@ -1376,18 +1388,14 @@ export default function MenuManager() {
 //                       Bestseller
 //                     </span>
 //                   )}
-
-//                   {/* new for portion size */}
-//                   {item.portionSize && (
-//   <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-500/20 text-blue-400">
-//     {item.portionSize === "half" ? "Half Plate" : "Full Plate"}
-//   </span>
-// )}
-
-
 //                 </div>
 //                 <div className="text-slate-400 text-xs mt-0.5">
-//                   {catName(item)} · ₹{item.price}
+//                   {catName(item)} ·{" "}
+//                   {item.halfPrice ? (
+//                     <>₹{item.halfPrice} Half / ₹{item.price} Full</>
+//                   ) : (
+//                     <>₹{item.price}</>
+//                   )}
 //                 </div>
 //                 {item.description && (
 //                   <div className="text-slate-500 text-xs mt-0.5 truncate">
