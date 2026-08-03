@@ -243,9 +243,10 @@ const loginUser = async(req, res) => {
     user.currentSessionToken = sessionToken;
     await user.save();
 
-    // if (!user.isActive) {
-    //   return res.status(403).json({ success: false, message: "Account is deactivated" });
-    // }
+    // new for isActive filed in user schema
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: "Account is deactivated" });
+    }
 
     // add verification and session later
     // check if user is verified
@@ -293,11 +294,10 @@ const loginUser = async(req, res) => {
 // logoutUser
 const logoutUser = async(req, res) => {
   try {
-    const userId = req.userId;
-
+    // const userId = req.userId;
 
     // new
-    // const userId = req.user._id;
+    const userId = req.user._id;
 
     // add session
     await User.findByIdAndUpdate(userId, {isLoggedIn: false});
