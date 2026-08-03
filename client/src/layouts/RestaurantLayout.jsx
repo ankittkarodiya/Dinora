@@ -142,6 +142,9 @@ function LayoutContent({ children }) {
   }
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+
+  setTimeout(() => navigate("/login"), 300);
+
   navigate("/login");
 };
 
