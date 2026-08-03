@@ -347,6 +347,8 @@ export default function CartDrawer({
         className="fixed bottom-0 left-1/2 w-full max-w-120 z-90 bg-[#1C1C1E] rounded-t-3xl flex flex-col max-h-[85vh] transition-all duration-300"
         style={{
           transform: `translateX(-50%) translateY(${isOpen ? "0" : "100%"})`,
+          // new
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {screen === "cart" && (

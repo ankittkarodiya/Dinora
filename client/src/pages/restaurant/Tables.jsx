@@ -1,18 +1,20 @@
 import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query"; // ← fixed: useQueryClient added here
-import { getTablesApi, createTableApi, deleteTableApi } from "../../api/tableApi";
+import {
+  getTablesApi,
+  createTableApi,
+  deleteTableApi,
+} from "../../api/tableApi";
 import { getMyRestaurantApi } from "../../api/restaurantApi";
 import toast from "react-hot-toast";
+import { QrCode } from "lucide-react";
 
 export default function Tables() {
   // ── Fetch tables ──────────────────────────────────────────────────
   // Cached under ["tables"]. Revisiting this page within 30s (React
   // Query's default staleTime, set once in main.jsx) shows this data
   // INSTANTLY from cache — no loading spinner, no refetch.
-  const {
-    data: tablesData,
-    isLoading: tablesLoading,
-  } = useQuery({
+  const { data: tablesData, isLoading: tablesLoading } = useQuery({
     queryKey: ["tables"],
     queryFn: async () => {
       const res = await getTablesApi();
@@ -27,10 +29,7 @@ export default function Tables() {
   // places read from one single cached copy instead of each fetching
   // their own separately. Updating the profile in Settings will
   // automatically be reflected here too, with no extra fetch.
-  const {
-    data: restaurant,
-    isLoading: restaurantLoading,
-  } = useQuery({
+  const { data: restaurant, isLoading: restaurantLoading } = useQuery({
     queryKey: ["restaurant"],
     queryFn: async () => {
       const res = await getMyRestaurantApi();
@@ -60,17 +59,25 @@ export default function Tables() {
     if (adding) return; // guard against double-clicks while a request is already in flight
     setAdding(true);
     try {
-      const data = await createTableApi({ name: form.name, capacity: Number(form.capacity) });
+      const data = await createTableApi({
+        name: form.name,
+        capacity: Number(form.capacity),
+      });
       // ← patches the cached ["tables"] list directly — every component
       // reading this query (just this page, for now) sees the new table
       // immediately, without needing a fresh fetch from the server
-      queryClient.setQueryData(["tables"], (old) => [...(old || []), data.table]);
+      queryClient.setQueryData(["tables"], (old) => [
+        ...(old || []),
+        data.table,
+      ]);
       setForm({ name: "", capacity: "" });
       toast.success("Table added");
     } catch (error) {
       // special-cased error: hitting the plan's table limit gets its own message
       if (error.response?.data?.code === "TABLE_LIMIT_REACHED") {
-        toast.error(error.response.data.message + " Go to Settings to upgrade.");
+        toast.error(
+          error.response.data.message + " Go to Settings to upgrade.",
+        );
       } else {
         toast.error(error.response?.data?.message || "Failed to add table");
       }
@@ -90,7 +97,9 @@ export default function Tables() {
     try {
       await deleteTableApi(deleteModal._id);
       // ← removes the deleted table from the cached list directly
-      queryClient.setQueryData(["tables"], (old) => (old || []).filter((t) => t._id !== deleteModal._id));
+      queryClient.setQueryData(["tables"], (old) =>
+        (old || []).filter((t) => t._id !== deleteModal._id),
+      );
       toast.success("Table deleted");
       setDeleteModal(null);
     } catch (error) {
@@ -104,7 +113,7 @@ export default function Tables() {
   // builds the actual scannable QR image URL for a given table, via a free third-party QR generation API
   const qrUrl = (tableId) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`
+      `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`,
     )}&bgcolor=0f172a&color=ffffff&margin=10`;
 
   // the actual customer-facing menu URL that QR code points to
@@ -179,25 +188,29 @@ export default function Tables() {
   };
 
   // ── Loading state — shown while either tables or restaurant is still fetching ─
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="text-4xl mb-4 animate-pulse">🪑</div>
-        <div className="text-slate-400 text-sm">Loading tables...</div>
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          {/* <div className="text-4xl mb-4 animate-pulse">🪑</div> */}
+          <div className="text-slate-400 text-sm">Loading tables...</div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   // ── Missing-profile guard — can't manage tables without a restaurant profile first ─
-  if (!restaurant) return (
-    <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
-      <div className="text-4xl mb-3">⚠️</div>
-      <div className="text-white font-bold text-lg mb-2">Restaurant Profile Missing</div>
-      <div className="text-slate-300 text-sm">
-        You need to create your restaurant profile first before adding tables.
+  if (!restaurant)
+    return (
+      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+        <div className="text-4xl mb-3">⚠️</div>
+        <div className="text-white font-bold text-lg mb-2">
+          Restaurant Profile Missing
+        </div>
+        <div className="text-slate-300 text-sm">
+          You need to create your restaurant profile first before adding tables.
+        </div>
       </div>
-    </div>
-  );
+    );
 
   // ── Main page content ────────────────────────────────────────────────
   return (
@@ -223,7 +236,11 @@ export default function Tables() {
               <div className="text-4xl mb-3">⚠️</div>
               <h3 className="text-white font-bold text-lg">Delete Table?</h3>
               <p className="text-slate-400 text-xs mt-1">
-                Are you sure you want to delete <span className="text-white font-semibold">"{deleteModal.name}"</span>? This will also invalidate its QR code.
+                Are you sure you want to delete{" "}
+                <span className="text-white font-semibold">
+                  "{deleteModal.name}"
+                </span>
+                ? This will also invalidate its QR code.
               </p>
             </div>
             <div className="flex gap-3">
@@ -250,7 +267,8 @@ export default function Tables() {
       <div>
         <h2 className="text-white font-bold text-2xl">Tables & QR Codes</h2>
         <p className="text-slate-400 text-sm mt-1">
-          Add tables and generate QR codes for customers to scan · {tables.length} tables
+          Add tables and generate QR codes for customers to scan ·{" "}
+          {tables.length} tables
         </p>
       </div>
 
@@ -278,7 +296,9 @@ export default function Tables() {
             <input
               type="number"
               value={form.capacity}
-              onChange={(e) => setForm((p) => ({ ...p, capacity: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, capacity: e.target.value }))
+              }
               placeholder="4"
               disabled={adding}
               className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500 disabled:opacity-50"
@@ -298,7 +318,7 @@ export default function Tables() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {tables.length === 0 ? (
           <div className="col-span-3 rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-slate-400">
-            <div className="text-4xl mb-3">🪑</div>
+            {/* <div className="text-4xl mb-3">🪑</div> */}
             <div className="font-semibold">No tables yet</div>
             <div className="text-sm mt-1">Add your first table above</div>
           </div>
@@ -310,19 +330,32 @@ export default function Tables() {
             >
               <div className="text-4xl mb-3">🪑</div>
               <div className="text-white font-bold text-lg">{table.name}</div>
+
               <div className="text-slate-400 text-sm mt-1 mb-4">
                 Capacity: {table.capacity} people
               </div>
+
               <div className="text-slate-500 text-xs mb-4 break-all bg-white/5 rounded-lg px-3 py-2">
                 /menu/{restaurant?.slug}/{table._id}
               </div>
+
+
               <div className="flex gap-2">
-                <button
+
+                {/* <button
                   onClick={() => setQrTable(table)}
                   className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
                 >
                   📱 View QR
+                </button> */}
+                <button
+                  onClick={() => setQrTable(table)}
+                  className="flex flex-1 items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all hover:-translate-y-0.5"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>View QR</span>
                 </button>
+
                 <button
                   onClick={() => handleDeleteClick(table)}
                   className="py-2.5 px-3 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-all"
@@ -345,7 +378,9 @@ export default function Tables() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-sm rounded-3xl border border-white/10 bg-slate-800/90 backdrop-blur-xl p-8 text-center"
           >
-            <h3 className="text-white font-bold text-xl mb-1">{qrTable.name}</h3>
+            <h3 className="text-white font-bold text-xl mb-1">
+              {qrTable.name}
+            </h3>
             <p className="text-slate-400 text-sm mb-6">
               Capacity: {qrTable.capacity} people · Scan to open menu
             </p>
@@ -379,18 +414,35 @@ export default function Tables() {
               }}
               className="w-full mb-4 py-2.5 border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 rounded-xl font-semibold text-sm transition-all"
             >
-              📋 Copy Link
+              {/* 📋 Copy Link */}
+              🔗 Copy Link
             </button>
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 text-blue-300 text-xs text-left mb-6">
-              💡 Print this QR and place it on {qrTable.name}. Customers scan to open the menu directly — no app needed.
+              💡 Print this QR and place it on {qrTable.name}. Customers scan to
+              open the menu directly — no app needed.
             </div>
             <div className="flex gap-3">
               <button
                 onClick={handlePrintQr}
-                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
+                // className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
+                className="flex flex-1 items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm hover:-translate-y-0.5 transition-all"
               >
-                🖨️ Print QR
+                {/* 🖨️ Print QR */}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4 shrink-0"
+                >
+                  <path d="M6 9V3h12v6M6 18h12v4H6zM4 9h16a2 2 0 012 2v6h-4M2 17v-6a2 2 0 012-2" />
+                </svg>
+
+                <span className="whitespace-nowrap">Print QR</span>
               </button>
+
               <button
                 onClick={() => setQrTable(null)}
                 className="flex-1 py-3 border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 rounded-xl font-bold text-sm transition-all"
@@ -404,30 +456,6 @@ export default function Tables() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { useState, useEffect, useRef } from "react";
 // import { getTablesApi, createTableApi, deleteTableApi } from "../../api/tableApi";
@@ -553,7 +581,7 @@ export default function Tables() {
 //           <div class="table-name">${qrTable.name}</div>
 //           <div class="subtitle">Scan to open menu</div>
 //           <img src="${qrUrl(qrTable._id)}" alt="QR Code" />
-          
+
 //           <p class="link">${menuUrl(qrTable._id)}</p>
 //           <div class="footer">Powered by Dinora · dinora.in</div>
 //         </body>

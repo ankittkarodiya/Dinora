@@ -11,7 +11,8 @@ import {
   HandCoins,
   Coins,
   TrendingUp, Hourglass, UtensilsCrossed, 
-  Star} from "lucide-react";
+  Star,
+  ClipboardList} from "lucide-react";
 
 const STATUS_STYLE = {
   Pending: "bg-amber-500/20 text-amber-300 border-amber-500/30",
@@ -179,7 +180,7 @@ export default function Dashboard() {
         />
         <StatCard
           // icon="🍽️"
-          icon={<UtensilsCrossed className="w-6 h-6 text-pink-400" />}
+          icon={<UtensilsCrossed className="w-6 h-6 text-blue-300" />}
           label="Menu Items"
           value={menuItems.length}
           sub={`${categories.length} categories`}
@@ -264,7 +265,11 @@ export default function Dashboard() {
 
           {recentOrders.length === 0 ? (
             <div className="text-center py-10 text-slate-400">
-              <div className="text-4xl mb-3">📋</div>
+              {/* <div className="text-4xl mb-3">📋</div> */}
+              <div className="flex justify-center mb-3">
+                {/* <ClipboardList className="w-10 h-10 text-orange-400" /> */}
+                <ClipboardList className="w-10 h-10 text-gray-400" />
+              </div>
               <div className="font-semibold text-sm">No orders yet</div>
               <div className="text-xs mt-1">
                 Share your QR codes so customers can order

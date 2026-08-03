@@ -370,7 +370,7 @@ export default function Orders() {
           />
 
 
-          
+
         </div>
         <button
           onClick={() => setDateMode("all")}
@@ -403,9 +403,9 @@ export default function Orders() {
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center text-slate-400">
           {/* <div className="text-4xl mb-3">📋</div> */}
-          <div className="flex justify-center mb-3">
+          {/* <div className="flex justify-center mb-3">
             <ClipboardList className="w-10 h-10 text-orange-400" />
-          </div>
+          </div> */}
 
           <div className="font-semibold">No orders found</div>
         </div>
@@ -624,6 +624,21 @@ export default function Orders() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import { useState, useEffect, useRef, useMemo } from "react";
 // import {
