@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@layer base {
+  .recharts-wrapper *:focus,
+  .recharts-wrapper *:focus-visible {
+    outline: none !important;
+  }
+}

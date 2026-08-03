@@ -147,7 +147,9 @@ export default function Analytics() {
             ))}
           </select>
           <button onClick={() => refetch()}
-            className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 text-sm font-semibold">
+            // className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 text-sm font-semibold"
+            className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-slate-300 text-sm font-semibold transition-all"
+            >
             🔄 Refresh
           </button>
         </div>
