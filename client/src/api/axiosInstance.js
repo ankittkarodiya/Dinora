@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import { navigateTo } from "./navigation"; // ← new, at the top of the file
+import { navigateTo } from "../utils/navigation"; // ← new, at the top of the file
 
 
 
@@ -153,7 +153,7 @@ axiosInstance.interceptors.response.use(
       // setTimeout(() => {
       //   window.location.href = "/login";
       // }, 4000);
-      
+
       // new
       // ← redirect happens immediately — the toast keeps living on its own,
       // since this is a client-side navigation, not a full page reload
