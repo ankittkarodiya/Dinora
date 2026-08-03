@@ -102,6 +102,25 @@ axiosInstance.interceptors.response.use(
         duration: 4000,
       });
 
+
+
+      // for account deactivation
+      if (error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
+      if (sessionInvalidatedHandled) {
+        return Promise.reject(error);
+      }
+      sessionInvalidatedHandled = true;
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      toast.dismiss();
+      toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.", {
+        duration: 4000,
+      });
+
+
+
       // silence every other toast anywhere in the app until the redirect
       // completes — other components' own catch blocks are just downstream
       // side effects of this same invalidated session and would otherwise
