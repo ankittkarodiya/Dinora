@@ -134,7 +134,7 @@ axiosInstance.interceptors.response.use(
 
       toast.dismiss();
       toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.", {
-        duration: 8000,
+        duration: 4000,
       });
 
       toast.error = () => {};
@@ -143,7 +143,7 @@ axiosInstance.interceptors.response.use(
 
       setTimeout(() => {
         window.location.href = "/login";
-      }, 600);
+      }, 4000);
 
       return Promise.reject(error);
     }
