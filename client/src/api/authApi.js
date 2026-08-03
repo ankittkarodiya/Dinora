@@ -36,3 +36,10 @@ export const getMeApi = async () => {
   const response = await axiosInstance.get("/auth/me");
   return response.data;
 };
+
+
+// new for actually making isLoggedin true and false in db
+export const logoutApi = async () => {
+  const response = await axiosInstance.post("/auth/logout");
+  return response.data;
+};

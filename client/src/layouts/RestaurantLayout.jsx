@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+
+import { logoutApi } from "../api/authApi";
+
 import { getMyRestaurantApi } from "../api/restaurantApi";
 import { getTablesApi } from "../api/tableApi";
 import { OrdersProvider, useOrders } from "../context/OrdersContext";
@@ -121,11 +124,22 @@ function LayoutContent({ children }) {
     fetchRestaurant();
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   localStorage.removeItem("user");
+  //   navigate("/login");
+  // };
+  const handleLogout = async () => {
+  try {
+    await logoutApi(); // ← actually tells the backend to flip isLoggedIn to false
+  } catch {
+    // even if this fails (expired token, network issue), we still want to
+    // clear local state and log the user out on this device regardless
+  }
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  navigate("/login");
+};
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 flex">
