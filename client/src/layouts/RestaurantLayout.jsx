@@ -81,6 +81,9 @@ function LayoutContent({ children }) {
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false); // ← new
+
   const [restaurant, setRestaurant] = useState(null); // this local fetch still handles the preview-table-link logic below
   const [previewTableId, setPreviewTableId] = useState(null);
 
@@ -197,7 +200,10 @@ function LayoutContent({ children }) {
             </div>
           )}
           <button
-            onClick={handleLogout}
+            // onClick={handleLogout}
+            // new
+            onClick={() => setShowLogoutConfirm(true)}
+
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-400/10 transition-all"
           >
             <span>[←</span>
@@ -224,6 +230,43 @@ function LayoutContent({ children }) {
           {children}
         </main>
       </div>
+
+
+          {showLogoutConfirm && (
+  <div
+    onClick={() => setShowLogoutConfirm(false)}
+    className="fixed inset-0 bg-black/80 z-100 flex items-center justify-center p-4"
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="w-full max-w-md rounded-3xl border border-red-500/20 bg-slate-800/95 p-6"
+    >
+      <div className="text-center mb-5">
+        <div className="text-4xl mb-3">⚠️</div>
+        <h3 className="text-white font-bold text-lg">Log Out?</h3>
+        <p className="text-slate-400 text-xs mt-1">
+          Are you sure you want to log out of your account?
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <button
+          onClick={() => setShowLogoutConfirm(false)}
+          className="flex-1 py-3 border border-white/20 bg-white/10 text-slate-300 rounded-xl font-bold text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleLogout}
+          className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm"
+        >
+          Yes, Log Out
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 }
