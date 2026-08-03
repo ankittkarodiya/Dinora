@@ -142,9 +142,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("user");
 
       toast.dismiss();
-      toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.", {
-        duration: 4000,
-      });
+      toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.");
 
       // toast.error = () => {};
       // toast.success = () => {};
@@ -159,6 +157,14 @@ axiosInstance.interceptors.response.use(
       // since this is a client-side navigation, not a full page reload
       navigateTo("/login");
 
+      // ← THE FIX: since we no longer reload the page (which used to reset
+  // this flag automatically), reset it manually shortly after navigating,
+  // so a FUTURE session-invalidation event (after logging back in) isn't
+  // silently ignored forever by a flag that's stuck true from this tab's
+  // entire lifetime
+  setTimeout(() => {
+    sessionInvalidatedHandled = false;
+  }, 1000);
 
       return Promise.reject(error);
     }
