@@ -22,6 +22,19 @@ const protect = async (req, res, next) => {
 
 
 
+    // ← new: deactivation now takes effect on every real app request,
+    // not just the one logout route — kicks out an already-open session
+    // the very next time it does anything, not only on a fresh login attempt
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is deactivated",
+        code: "ACCOUNT_DEACTIVATED",
+      });
+    }
+
+
+
 
     if (decoded.sessionToken && decoded.sessionToken !== user.currentSessionToken) {
   return res.status(401).json({
