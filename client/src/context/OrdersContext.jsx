@@ -176,8 +176,12 @@ useEffect(() => {
       return [order, ...prev];
     });
 
-    if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
-      playSound(getSelectedSound());
+    // if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
+    //   playSound(getSelectedSound());
+    // }
+    // new
+    if (canUseNotificationSound(restaurantIsProRef.current) && isNotificationSoundEnabled()) {
+        playSound(getSelectedSound());
     }
 
     toast.custom(
