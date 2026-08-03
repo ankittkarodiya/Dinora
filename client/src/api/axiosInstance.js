@@ -121,7 +121,7 @@ axiosInstance.interceptors.response.use(
 
 
 
-    // for account deactivation
+    // new for account deactivation
     // SESSION_INVALIDATED where its condition could never be true
     if (error.response?.data?.code === "ACCOUNT_DEACTIVATED") {
       if (sessionInvalidatedHandled) {
