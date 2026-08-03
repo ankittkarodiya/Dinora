@@ -18,6 +18,8 @@ import {
   TabletSmartphone,
 } from "lucide-react";
 
+import toast from "react-hot-toast";
+
 const navItems = [
   {
     to: "/restaurant/dashboard",
@@ -132,6 +134,8 @@ function LayoutContent({ children }) {
   const handleLogout = async () => {
   try {
     await logoutApi(); // ← actually tells the backend to flip isLoggedIn to false
+    toast.success("Logged out successfully");
+
   } catch {
     // even if this fails (expired token, network issue), we still want to
     // clear local state and log the user out on this device regardless
