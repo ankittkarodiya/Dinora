@@ -4,9 +4,20 @@ import { useLocation } from "react-router-dom";
 import { loadUser } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
 
+import { setNavigate } from "./utils/navigation"; // ← new
+
+
 export default function App() {
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const navigate = useNavigate(); // ← new
+
+  useEffect(() => {
+    setNavigate(navigate); // ← new: registers it once, so axiosInstance can use it later
+  }, [navigate]);
+
+  
 
   // ← THE FIX: only check for an admin session on genuinely admin-facing
   // routes. Rather than excluding customer/public routes one at a time

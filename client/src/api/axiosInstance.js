@@ -1,6 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
+import { navigateTo } from "./navigation"; // ← new, at the top of the file
+
 
 
 
@@ -76,7 +78,9 @@ axiosInstance.interceptors.response.use(
     // subscription expiry — redirect to renew, unrelated to session/token logic
     if (error.response?.data?.code === "SUBSCRIPTION_EXPIRED") {
       if (window.location.pathname !== "/restaurant/setup") {
-        window.location.href = "/restaurant/setup?renew=true";
+        // window.location.href = "/restaurant/setup?renew=true";
+        // new
+        navigateTo("/restaurant/setup?renew=true");
       }
       return Promise.reject(error);
     }
@@ -112,9 +116,14 @@ axiosInstance.interceptors.response.use(
 
       // small delay so the toast actually has time to render and be seen
       // before the page navigates away
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 600);
+      // setTimeout(() => {
+      //   window.location.href = "/login";
+      // }, 600);
+
+      // new
+      // ← redirect happens immediately — the toast keeps living on its own,
+      // since this is a client-side navigation, not a full page reload
+      navigateTo("/login");
 
       return Promise.reject(error);
     }
@@ -141,9 +150,15 @@ axiosInstance.interceptors.response.use(
       toast.success = () => {};
       toast.dismiss = () => {};
 
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 4000);
+      // setTimeout(() => {
+      //   window.location.href = "/login";
+      // }, 4000);
+      
+      // new
+      // ← redirect happens immediately — the toast keeps living on its own,
+      // since this is a client-side navigation, not a full page reload
+      navigateTo("/login");
+
 
       return Promise.reject(error);
     }
@@ -174,7 +189,9 @@ axiosInstance.interceptors.response.use(
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           if (!window.location.pathname.includes("/login")) {
-            window.location.href = "/login";
+            // window.location.href = "/login";
+            // new
+            navigateTo("/login");
           }
           return Promise.reject(retryError);
         }
@@ -184,7 +201,9 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+        // window.location.href = "/login";
+        // new
+        navigateTo("/login");
       }
     }
     return Promise.reject(error);
