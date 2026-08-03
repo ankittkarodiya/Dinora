@@ -25,6 +25,18 @@ const isAuthenticated = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+
+    // ← new: an account deactivated mid-session gets kicked out on its very
+    // next request, not just blocked from logging in again later
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is deactivated",
+        code: "ACCOUNT_DEACTIVATED",
+      });
+    }
+
+
     // ← added: was missing entirely, so single-device login was never enforced
     if (sessionToken && sessionToken !== user.currentSessionToken) {
       return res.status(401).json({
