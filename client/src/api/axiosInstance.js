@@ -142,9 +142,10 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("user");
 
       toast.dismiss();
-      toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.", {
-        duration: 4000,
-      });
+      toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.");
+      // toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.", {
+      //   duration: 4000,
+      // });
 
       // toast.error = () => {};
       // toast.success = () => {};
