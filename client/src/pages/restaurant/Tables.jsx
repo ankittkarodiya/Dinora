@@ -299,7 +299,7 @@ export default function Tables() {
               onChange={(e) =>
                 setForm((p) => ({ ...p, capacity: e.target.value }))
               }
-              placeholder="4"
+              placeholder="e.g. 4"
               disabled={adding}
               className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500 disabled:opacity-50"
             />
