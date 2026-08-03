@@ -102,9 +102,12 @@ axiosInstance.interceptors.response.use(
 
       // clear anything currently showing, then show ONLY this one message
       toast.dismiss();
-      toast.error("You were logged out because your account was signed in on another device.", {
-        duration: 4000,
-      });
+      toast.error("You were logged out because your account was signed in on another device.");
+      // toast.dismiss();
+      // toast.error("You were logged out because your account was signed in on another device.", {
+      //   duration: 4000,
+      // });
+
 
       // silence every other toast anywhere in the app until the redirect
       // completes — other components' own catch blocks are just downstream
@@ -124,6 +127,10 @@ axiosInstance.interceptors.response.use(
       // ← redirect happens immediately — the toast keeps living on its own,
       // since this is a client-side navigation, not a full page reload
       navigateTo("/login");
+
+      setTimeout(() => {
+        sessionInvalidatedHandled = false;
+      }, 1000);
 
       return Promise.reject(error);
     }
@@ -158,13 +165,13 @@ axiosInstance.interceptors.response.use(
       navigateTo("/login");
 
       // ← THE FIX: since we no longer reload the page (which used to reset
-  // this flag automatically), reset it manually shortly after navigating,
-  // so a FUTURE session-invalidation event (after logging back in) isn't
-  // silently ignored forever by a flag that's stuck true from this tab's
-  // entire lifetime
-  setTimeout(() => {
-    sessionInvalidatedHandled = false;
-  }, 1000);
+      // this flag automatically), reset it manually shortly after navigating,
+      // so a FUTURE session-invalidation event (after logging back in) isn't
+      // silently ignored forever by a flag that's stuck true from this tab's
+      // entire lifetime
+      setTimeout(() => {
+        sessionInvalidatedHandled = false;
+      }, 1000);
 
       return Promise.reject(error);
     }
