@@ -110,9 +110,9 @@ axiosInstance.interceptors.response.use(
       // completes — other components' own catch blocks are just downstream
       // side effects of this same invalidated session and would otherwise
       // stack on top of the real message, making it unreadable
-      toast.error = () => {};
-      toast.success = () => {};
-      toast.dismiss = () => {};
+      // toast.error = () => {};
+      // toast.success = () => {};
+      // toast.dismiss = () => {};
 
       // small delay so the toast actually has time to render and be seen
       // before the page navigates away
@@ -146,9 +146,9 @@ axiosInstance.interceptors.response.use(
         duration: 4000,
       });
 
-      toast.error = () => {};
-      toast.success = () => {};
-      toast.dismiss = () => {};
+      // toast.error = () => {};
+      // toast.success = () => {};
+      // toast.dismiss = () => {};
 
       // setTimeout(() => {
       //   window.location.href = "/login";
