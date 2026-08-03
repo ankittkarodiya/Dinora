@@ -24,8 +24,8 @@ export const setSelectedSound = (soundId) => {
 // Single source of truth for whether notification sound requires Pro.
 // Flip this ONE value to change it everywhere the feature is gated —
 // nothing else in the codebase needs to be touched, found, or re-added.
-// export const NOTIFICATION_SOUND_REQUIRES_PRO = false; // ← set back to true to restore Pro-only
-export const NOTIFICATION_SOUND_REQUIRES_PRO = true;
+export const NOTIFICATION_SOUND_REQUIRES_PRO = false; // ← set back to true to restore Pro-only
+// export const NOTIFICATION_SOUND_REQUIRES_PRO = true;
 
 // Call this instead of checking restaurantIsPro directly, anywhere the
 // notification sound feature needs to check access — keeps every gate
