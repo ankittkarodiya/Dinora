@@ -105,6 +105,10 @@ useEffect(() => {
 
       unlockAudio(); // ← re-attempt resuming audio every time the tab comes back, since iOS Safari often re-suspends it after even a brief lock/backgrounding — a single unlock on first load isn't reliable enough there
 
+      if (soundMayBeSuspended) {
+        toast("Tap anywhere to re-enable order sound alerts", { icon: "🔊", duration: 3000 });
+      }
+
 
     }
   };
