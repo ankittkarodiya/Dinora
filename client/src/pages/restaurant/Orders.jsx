@@ -455,11 +455,18 @@ export default function Orders() {
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all capitalize ${statusFilter === f ? "bg-blue-600 text-white" : "bg-white/10 text-slate-300 border border-white/10 hover:bg-white/20"}`}
           >
             {f === "all" ? "All Status" : `${STATUS_ICON[f]} ${f}`}
-            {f !== "all" && orders.filter((o) => o.status === f).length > 0 && (
+
+            {/* {f !== "all" && orders.filter((o) => o.status === f).length > 0 && (
               <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded-full">
                 {orders.filter((o) => o.status === f).length}
               </span>
+            )} */}
+            {f !== "all" && orders.filter((o) => o.status === f && isOrderInDateFilter(o)).length > 0 && (
+              <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded-full">
+                {orders.filter((o) => o.status === f && isOrderInDateFilter(o)).length}
+              </span>
             )}
+
           </button>
         ))}
       </div>
@@ -467,9 +474,9 @@ export default function Orders() {
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center text-slate-400">
           {/* <div className="text-4xl mb-3">📋</div> */}
-          <div className="flex justify-center mb-3">
+          {/* <div className="flex justify-center mb-3">
             <ClipboardList className="w-10 h-10 text-orange-400" />
-          </div>
+          </div> */}
 
           <div className="font-semibold">No orders found</div>
         </div>
