@@ -7,6 +7,8 @@ import { getTablesApi } from "../../api/tableApi";
 import { getReviewsApi } from "../../api/reviewApi";
 import { useSubscription } from "../../hooks/useSubscription";
 
+import { useOrders } from "../../context/OrdersContext";
+
 import {
   HandCoins,
   Coins,
@@ -104,34 +106,101 @@ export default function Dashboard() {
   // already does via OrdersContext. Same Promise.allSettled behavior as
   // before is preserved inside queryFn — one failed call still never
   // blocks the other four from showing their data.
-  const { data, isLoading: queryLoading } = useQuery({
-    queryKey: ["dashboard", isPro],
-    queryFn: async () => {
-      const calls = [
-        getOrdersApi(),
-        getMenuItemsApi(),
-        getCategoriesApi(),
-        getTablesApi(),
-        isPro ? getReviewsApi() : Promise.resolve({ reviews: [] }),
-      ];
-      const [o, m, c, t, r] = await Promise.allSettled(calls);
-      return {
-        orders: o.status === "fulfilled" ? o.value.orders || [] : [],
-        menuItems: m.status === "fulfilled" ? m.value.items || [] : [],
-        categories: c.status === "fulfilled" ? c.value.categories || [] : [],
-        tables: t.status === "fulfilled" ? t.value.tables || [] : [],
-        reviews: r.status === "fulfilled" ? r.value.reviews || [] : [],
-      };
-    },
-    enabled: !subLoading, // same guard as before — wait for subscription info first
-  });
 
-  const orders = data?.orders || [];
-  const menuItems = data?.menuItems || [];
-  const categories = data?.categories || [];
-  const tables = data?.tables || [];
-  const reviews = data?.reviews || [];
-  const loading = queryLoading;
+
+
+
+
+  // const { data, isLoading: queryLoading } = useQuery({
+  //   queryKey: ["dashboard", isPro],
+  //   queryFn: async () => {
+  //     const calls = [
+  //       getOrdersApi(),
+  //       getMenuItemsApi(),
+  //       getCategoriesApi(),
+  //       getTablesApi(),
+  //       isPro ? getReviewsApi() : Promise.resolve({ reviews: [] }),
+  //     ];
+  //     const [o, m, c, t, r] = await Promise.allSettled(calls);
+  //     return {
+  //       orders: o.status === "fulfilled" ? o.value.orders || [] : [],
+  //       menuItems: m.status === "fulfilled" ? m.value.items || [] : [],
+  //       categories: c.status === "fulfilled" ? c.value.categories || [] : [],
+  //       tables: t.status === "fulfilled" ? t.value.tables || [] : [],
+  //       reviews: r.status === "fulfilled" ? r.value.reviews || [] : [],
+  //     };
+  //   },
+  //   enabled: !subLoading, // same guard as before — wait for subscription info first
+  // });
+
+  // const orders = data?.orders || [];
+  // const menuItems = data?.menuItems || [];
+  // const categories = data?.categories || [];
+  // const tables = data?.tables || [];
+  // const reviews = data?.reviews || [];
+  // const loading = queryLoading;
+
+  // new
+  // ← THE FIX: orders now come from OrdersContext — the same live,
+// socket-driven data source Orders.jsx and the sidebar badge already use.
+// Status changes now reflect here instantly, no refresh needed.
+const { orders, loading: ordersLoading } = useOrders();
+
+// the remaining four still fetch independently, but each uses the SAME
+// cache key as its own dedicated page (Categories.jsx, Tables.jsx,
+// MenuManager.jsx, Reviews.jsx) — visiting Dashboard after any of those
+// pages is instant, sharing one cached copy instead of fetching separately
+const { data: menuItemsData, isLoading: menuItemsLoading } = useQuery({
+  queryKey: ["menuItems"],
+  queryFn: async () => {
+    const res = await getMenuItemsApi();
+    return res.items || [];
+  },
+});
+const menuItems = menuItemsData || [];
+
+const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+  queryKey: ["categories"],
+  queryFn: async () => {
+    const res = await getCategoriesApi();
+    return res.categories || [];
+  },
+});
+const categories = categoriesData || [];
+
+const { data: tablesData, isLoading: tablesLoading } = useQuery({
+  queryKey: ["tables"],
+  queryFn: async () => {
+    const res = await getTablesApi();
+    return res.tables || [];
+  },
+});
+const tables = tablesData || [];
+
+const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
+  queryKey: ["reviews", isPro],
+  queryFn: async () => {
+    const res = await getReviewsApi();
+    return {
+      reviews: res.reviews || [],
+      groupedByItem: res.groupedByItem || [],
+      totalReviews: res.totalReviews || 0,
+      overallAvg: res.overallAvg || null,
+    };
+  },
+  enabled: isPro && !subLoading,
+});
+const reviews = reviewsData?.reviews || [];
+
+const loading =
+  ordersLoading ||
+  menuItemsLoading ||
+  categoriesLoading ||
+  tablesLoading ||
+  (isPro && reviewsLoading);
+
+
+
 
   // const totalRevenue = orders
   //   .filter((o) => o.status === "Completed" && o.paymentStatus === "paid")

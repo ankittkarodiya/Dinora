@@ -263,14 +263,25 @@ export default function Orders() {
         </button>
       </div>
 
-      {pendingCount > 0 && (
+      {/* {pendingCount > 0 && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
             <span className="text-amber-300 font-semibold text-sm">
               {pendingCount} new order{pendingCount > 1 ? "s" : ""} waiting
             </span>
+          </div> 
+
+          {/* new 
+          <div className="flex items-center gap-2.5">
+            <div className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+             {pendingCount}
+            </div>
+            <span className="text-amber-300 font-semibold text-sm">
+              new order{pendingCount > 1 ? "s" : ""} waiting
+            </span>
           </div>
+          
           <button
             onClick={() => setStatusFilter("Pending")}
             className="text-amber-400 text-xs font-bold"
@@ -278,14 +289,47 @@ export default function Orders() {
             View →
           </button>
         </div>
-      )}
+      )} */}
 
-      {cashPendingOrders.length > 0 && (
+      {/* new */}
+      {pendingCount > 0 && (
+  <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 flex items-center justify-between">
+    <div className="flex items-center gap-2.5">
+      <div className="w-5 h-5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 flex items-center justify-center text-[11px] font-bold shrink-0">
+        {pendingCount}
+      </div>
+      <span className="text-slate-400 font-medium text-sm">
+        new order{pendingCount > 1 ? "s" : ""} waiting
+      </span>
+    </div>
+    <button
+      onClick={() => setStatusFilter("Pending")}
+      className="text-amber-400/80 text-xs font-semibold"
+    >
+      View →
+    </button>
+  </div>
+)}
+
+
+
+      {/* {cashPendingOrders.length > 0 && (
         <div className="rounded-2xl border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center justify-between">
           <span className="text-green-300 font-semibold text-sm">
-            💵 {cashPendingOrders.length} cash payment
+            {cashPendingOrders.length} cash payment
             {cashPendingOrders.length > 1 ? "s" : ""} waiting confirmation
-          </span>
+          </span> 
+
+          {/* new 
+            <div className="flex items-center gap-2.5">
+              <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+               {cashPendingOrders.length}
+              </div>
+              <span className="text-green-300 font-semibold text-sm">
+               cash payment{cashPendingOrders.length > 1 ? "s" : ""} waiting confirmation
+              </span>
+            </div>
+
           <button
             onClick={() => setStatusFilter("Served")}
             className="text-green-400 text-xs font-bold"
@@ -293,7 +337,27 @@ export default function Orders() {
             View →
           </button>
         </div>
-      )}
+      )} */}
+
+      {/* new */}
+      {cashPendingOrders.length > 0 && (
+  <div className="rounded-2xl border border-green-500/20 bg-green-500/5 px-4 py-3 flex items-center justify-between">
+    <div className="flex items-center gap-2.5">
+      <div className="w-5 h-5 rounded-full bg-green-500/15 border border-green-400/30 text-green-300 flex items-center justify-center text-[11px] font-bold shrink-0">
+        {cashPendingOrders.length}
+      </div>
+      <span className="text-slate-400 font-medium text-sm">
+        cash payment{cashPendingOrders.length > 1 ? "s" : ""} waiting confirmation
+      </span>
+    </div>
+    <button
+      onClick={() => setStatusFilter("Served")}
+      className="text-green-400/80 text-xs font-semibold"
+    >
+      View →
+    </button>
+  </div>
+)}
 
       {/* Date filter — two buttons only */}
       <div className="flex items-center gap-2">
@@ -403,9 +467,9 @@ export default function Orders() {
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-12 text-center text-slate-400">
           {/* <div className="text-4xl mb-3">📋</div> */}
-          {/* <div className="flex justify-center mb-3">
+          <div className="flex justify-center mb-3">
             <ClipboardList className="w-10 h-10 text-orange-400" />
-          </div> */}
+          </div>
 
           <div className="font-semibold">No orders found</div>
         </div>
@@ -611,7 +675,7 @@ export default function Orders() {
                       >
                         {isThisOrderProcessing
                           ? "Confirming..."
-                          : "₹ Confirm Cash Received"}
+                          : "Confirm Cash Received"}
                       </button>
                     )}
                   </div>
@@ -624,7 +688,6 @@ export default function Orders() {
     </div>
   );
 }
-
 
 
 
