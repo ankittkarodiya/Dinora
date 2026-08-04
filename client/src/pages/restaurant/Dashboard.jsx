@@ -237,63 +237,65 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
-        <h3 className="text-white font-bold text-base mb-5">
-          Order Status Overview
-        </h3>
-        ← ONLY CHANGE #2: same neutral-card-plus-small-dot treatment,
-            replacing the per-status tinted background/border/text
-        
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { label: "Preparing", count: preparingOrders, dot: "bg-blue-400" },
-            { label: "Ready", count: orders.filter((o) => o.status === "Ready").length, dot: "bg-purple-400" },
-            { label: "Served", count: orders.filter((o) => o.status === "Served").length, dot: "bg-cyan-400" },
-            { label: "Completed", count: todaysCompletedOrders, dot: "bg-emerald-400", sub: true },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="rounded-xl border border-white/10 bg-white/5 p-4 text-center"
-            >
-              <div className="text-white text-3xl font-bold">{s.count}</div>
-              <div className="flex items-center justify-center gap-1.5 mt-1.5">
-                <span className={`w-1.5 h-1.5 animate-pulse rounded-full ${s.dot}`} />
-                <span className="text-slate-300 text-xs font-medium">{s.label}</span>
-              </div>
-              {s.sub && (
-                <span className="block text-slate-400 text-[10px] font-normal mt-1">
-                  Today's completed orders
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div> */}
 
-      {/* new */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-  {[
-    { label: "Preparing", count: preparingOrders, bg: "from-sky-500/20 via-sky-500/5 to-transparent border-sky-400/25", dot: "bg-sky-400" },
-    { label: "Ready", count: orders.filter((o) => o.status === "Ready").length, bg: "from-violet-500/20 via-violet-500/5 to-transparent border-violet-400/25", dot: "bg-violet-400" },
-    { label: "Served", count: orders.filter((o) => o.status === "Served").length, bg: "from-cyan-500/20 via-cyan-500/5 to-transparent border-cyan-400/25", dot: "bg-cyan-400" },
-    { label: "Completed", count: todaysCompletedOrders, bg: "from-emerald-500/20 via-emerald-500/5 to-transparent border-emerald-400/25", dot: "bg-emerald-400", sub: true },
-  ].map((s) => (
-    <div
-      key={s.label}
-      className={`rounded-xl border bg-linear-to-br ${s.bg} p-4 text-center`}
-    >
-      <div className="text-white text-3xl font-bold">{s.count}</div>
-      <div className="flex items-center justify-center gap-1.5 mt-1.5">
-        <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-        <span className="text-slate-300 text-xs font-medium">{s.label}</span>
+{/* <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
+  <h3 className="text-white font-bold text-base mb-5">
+    Order Status Overview
+  </h3>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    {[
+      { label: "Preparing", count: preparingOrders, bg: "from-sky-500/20 via-sky-500/5 to-transparent border-sky-400/25", dot: "bg-sky-400" },
+      { label: "Ready", count: orders.filter((o) => o.status === "Ready").length, bg: "from-fuchsia-500/20 via-pink-500/5 to-transparent border-fuchsia-400/25", dot: "bg-fuchsia-400" },
+      { label: "Served", count: orders.filter((o) => o.status === "Served").length, bg: "from-cyan-500/20 via-cyan-500/5 to-transparent border-cyan-400/25", dot: "bg-cyan-400" },
+      { label: "Completed", count: todaysCompletedOrders, bg: "from-lime-500/20 via-lime-500/5 to-transparent border-lime-400/25", dot: "bg-lime-400", sub: true },
+    ].map((s) => (
+      <div
+        key={s.label}
+        className={`rounded-xl border bg-linear-to-br ${s.bg} p-4 text-center`}
+      >
+        <div className="text-white text-3xl font-bold">{s.count}</div>
+        <div className="flex items-center justify-center gap-1.5 mt-1.5">
+          <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+          <span className="text-slate-300 text-xs font-medium">{s.label}</span>
+        </div>
+        {s.sub && (
+          <span className="block text-slate-500 text-[10px] font-normal mt-1">
+            Today's completed orders
+          </span>
+        )}
       </div>
-      {s.sub && (
-        <span className="block text-slate-500 text-[10px] font-normal mt-1">
-          Today's completed orders
-        </span>
-      )}
-    </div>
-  ))}
+    ))}
+  </div>
+</div> */}
+
+<div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
+  <h3 className="text-white font-bold text-base mb-5">
+    Order Status Overview
+  </h3>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    {[
+      { label: "Preparing", count: preparingOrders },
+      { label: "Ready", count: orders.filter((o) => o.status === "Ready").length },
+      { label: "Served", count: orders.filter((o) => o.status === "Served").length },
+      { label: "Completed", count: todaysCompletedOrders, sub: true },
+    ].map((s) => (
+      <div
+        key={s.label}
+        className="rounded-xl border border-[#EFEABB]/20 bg-white/5 p-4 text-center"
+      >
+        <div className="text-[#EFEABB] text-3xl font-bold">{s.count}</div>
+        <div className="flex items-center justify-center gap-1.5 mt-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#EFEABB]" />
+          <span className="text-slate-300 text-xs font-medium">{s.label}</span>
+        </div>
+        {s.sub && (
+          <span className="block text-slate-400 text-[10px] font-normal mt-1">
+            Today's completed orders
+          </span>
+        )}
+      </div>
+    ))}
+  </div>
 </div>
 
 
