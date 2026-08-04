@@ -22,23 +22,67 @@ const PERIOD_OPTIONS = [
 
 const PIE_COLORS = ["#3B82F6", "#10B981", "#F59E0B"];
 
-function StatCard({ label, value, sub, color = "blue", icon }) {
-  const colors = {
-    blue:   "from-blue-600/20 to-blue-600/5 border-blue-500/20",
-    green:  "from-green-600/20 to-green-600/5 border-green-500/20",
-    amber:  "from-amber-600/20 to-amber-600/5 border-amber-500/20",
-    purple: "from-purple-600/20 to-purple-600/5 border-purple-500/20",
-  };
+// function StatCard({ label, value, sub, color = "blue", icon }) {
+//   const colors = {
+//     blue:   "from-blue-600/20 to-blue-600/5 border-blue-500/20",
+//     green:  "from-green-600/20 to-green-600/5 border-green-500/20",
+//     amber:  "from-amber-600/20 to-amber-600/5 border-amber-500/20",
+//     purple: "from-purple-600/20 to-purple-600/5 border-purple-500/20",
+//   };
 
+//   return (
+//     <div className={`rounded-2xl border bg-linear-to-br ${colors[color]} p-5`}>
+//       <div className="text-2xl mb-2">{icon}</div>
+//       <div className="text-white font-bold text-2xl">{value}</div>
+//       <div className="text-slate-300 text-sm mt-0.5">{label}</div>
+//       {sub && <div className="text-slate-500 text-xs mt-1">{sub}</div>}
+//     </div>
+//   );
+// }
+
+// new
+// function StatCard({ label, value, sub, color = "blue", icon }) {
+//   const badgeColors = {
+//     blue:   "bg-blue-500/10 text-blue-400",
+//     green:  "bg-emerald-500/10 text-emerald-400",
+//     amber:  "bg-amber-500/10 text-amber-400",
+//     purple: "bg-purple-500/10 text-purple-400",
+//   };
+//   return (
+//     <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+//       <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${badgeColors[color]}`}>
+//         {icon}
+//       </div>
+//       <div className="text-white font-bold text-2xl">{value}</div>
+//       <div className="text-slate-300 text-sm mt-0.5">{label}</div>
+//       {sub && <div className="text-slate-500 text-xs mt-1">{sub}</div>}
+//     </div>
+//   );
+// }
+
+// new new
+function StatCard({ label, value, sub, color = "blue", icon }) {
+  const themes = {
+    blue:   { bg: "from-indigo-500/20 via-indigo-500/5 to-transparent border-indigo-400/25", badge: "bg-indigo-500 text-white" },
+    green:  { bg: "from-emerald-500/20 via-teal-500/5 to-transparent border-emerald-400/25", badge: "bg-emerald-500 text-white" },
+    amber:  { bg: "from-amber-500/20 via-orange-500/5 to-transparent border-amber-400/25", badge: "bg-amber-500 text-white" },
+    purple: { bg: "from-violet-500/20 via-purple-500/5 to-transparent border-violet-400/25", badge: "bg-violet-500 text-white" },
+  };
+  const theme = themes[color];
   return (
-    <div className={`rounded-2xl border bg-linear-to-br ${colors[color]} p-5`}>
-      <div className="text-2xl mb-2">{icon}</div>
+    <div className={`rounded-2xl border bg-linear-to-br ${theme.bg} p-5`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 shadow-lg ${theme.badge}`}>
+        {icon}
+      </div>
       <div className="text-white font-bold text-2xl">{value}</div>
       <div className="text-slate-300 text-sm mt-0.5">{label}</div>
       {sub && <div className="text-slate-500 text-xs mt-1">{sub}</div>}
     </div>
   );
 }
+
+
+
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -185,14 +229,17 @@ export default function Analytics() {
           {/* Stat cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard
-              icon={<TrendingUp className="w-6 h-6 text-emerald-400" />}
+              // icon={<TrendingUp className="w-6 h-6 text-emerald-400" 
+              icon={<TrendingUp className="w-6 h-6 text-white" 
+              />}
               label="Revenue"
               value={`₹${Number(data.totalRevenue).toLocaleString()}`}
               sub="Paid orders only"
               color="green"
             />
             <StatCard
-              icon={<ClipboardList className="w-6 h-6 text-blue-400" />}
+              // icon={<ClipboardList className="w-6 h-6 text-blue-400" />}
+              icon={<ClipboardList className="w-6 h-6 text-white" />}
               label="Orders"
               value={data.totalOrders}
               sub="Excl. cancelled"
@@ -200,7 +247,8 @@ export default function Analytics() {
             />
             <StatCard
               // icon={<ChartColumnIncreasing className="w-6 h-6 text-amber-400" />}
-              icon={<Calculator className="w-6 h-6 text-amber-400" />}
+              // icon={<Calculator className="w-6 h-6 text-amber-400" />}
+              icon={<Calculator className="w-6 h-6 text-white" />}
               label="Avg Order"
               value={`₹${data.avgOrderValue}`}
               color="amber"
@@ -214,7 +262,8 @@ export default function Analytics() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-6 h-6 shrink-0 text-purple-400"
+                  // className="w-6 h-6 shrink-0 text-purple-400"
+                  className="w-6 h-6 shrink-0 text-white"
                 >
                   <rect x="2" y="5" width="20" height="14" rx="2" />
                   <path d="M2 10h20" />
