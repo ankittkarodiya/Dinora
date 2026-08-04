@@ -268,7 +268,11 @@ export default function Dashboard() {
   </div>
 </div> */}
 
-<div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
+
+
+
+
+{/* <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
   <h3 className="text-white font-bold text-base mb-5">
     Order Status Overview
   </h3>
@@ -296,7 +300,39 @@ export default function Dashboard() {
       </div>
     ))}
   </div>
+</div> */}
+
+
+<div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
+  <h3 className="text-white font-bold text-base mb-5">
+    Order Status Overview
+  </h3>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    {[
+      { label: "Preparing", count: preparingOrders },
+      { label: "Ready", count: orders.filter((o) => o.status === "Ready").length },
+      { label: "Served", count: orders.filter((o) => o.status === "Served").length },
+      { label: "Completed", count: todaysCompletedOrders, sub: true },
+    ].map((s) => (
+      <div
+        key={s.label}
+        className="rounded-xl border border-white/10 bg-linear-to-br from-slate-800 via-slate-800/60 to-blue-950/40 p-4 text-center"
+      >
+        <div className="text-white text-3xl font-bold">{s.count}</div>
+        <div className="flex items-center justify-center gap-1.5 mt-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-white text-xs font-medium">{s.label}</span>
+        </div>
+        {s.sub && (
+          <span className="block text-slate-400 text-[10px] font-normal mt-1">
+            Today's completed orders
+          </span>
+        )}
+      </div>
+    ))}
+  </div>
 </div>
+
 
 
 
