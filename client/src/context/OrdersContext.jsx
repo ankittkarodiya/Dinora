@@ -32,6 +32,8 @@ export function OrdersProvider({ children }) {
 
   const hasFetchedRef = useRef(false);
 
+  const notifiedOrderIdsRef = useRef(new Set()); // ← tracks which orders have already triggered sound/toast, preventing duplicates regardless of cause
+
   // ── Initial load — existing orders + restaurant info, once ────────
   useEffect(() => {
     if (hasFetchedRef.current) return;
@@ -105,9 +107,9 @@ useEffect(() => {
 
       unlockAudio(); // ← re-attempt resuming audio every time the tab comes back, since iOS Safari often re-suspends it after even a brief lock/backgrounding — a single unlock on first load isn't reliable enough there
 
-      if (soundMayBeSuspended) {
-        toast("Tap anywhere to re-enable order sound alerts", { icon: "🔊", duration: 3000 });
-      }
+    //   if (soundMayBeSuspended) {
+    //     toast("Tap anywhere to re-enable order sound alerts", { icon: "🔊", duration: 3000 });
+    //   }
 
 
     }
@@ -184,6 +186,15 @@ useEffect(() => {
       return [order, ...prev];
     });
 
+
+    // ← guards against duplicate sound/toast if this event somehow arrives
+  // more than once for the same order (e.g. a brief double-connection
+  // during a mobile background/foreground transition) — regardless of
+  // the exact cause, this guarantees sound only ever plays ONCE per order
+  if (!notifiedOrderIdsRef.current.has(order._id)) {
+    notifiedOrderIdsRef.current.add(order._id);
+
+
     // if (restaurantIsProRef.current && isNotificationSoundEnabled()) {
     //   playSound(getSelectedSound());
     // }
@@ -201,6 +212,7 @@ useEffect(() => {
       { duration: 2500, position: "top-center" },
     );
   };
+};
 
   socket.on("newOrder", handleNewOrder);
 
