@@ -47,6 +47,9 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 
 const uploadRoutes = require("./routes/uploadRoutes");
 
+// for web-push notifications
+const pushRoutes = require("./routes/pushRoutes");
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/restaurant", restaurantRoutes);
@@ -60,6 +63,7 @@ app.use("/api/customer", customerAuthRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/push", pushRoutes);
 
 
 

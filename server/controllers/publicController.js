@@ -123,6 +123,8 @@ const placeOrder = async (req, res) => {
         .json({ success: false, message: "Restaurant not found" });
     }
 
+    const table = await Table.findById(tableId);
+
     // fetch real, current prices from the DB — never trust client-sent prices
     const menuItemIds = items.map((i) => i.menuItemId);
     const dbItems = await MenuItem.find({
@@ -188,11 +190,82 @@ const placeOrder = async (req, res) => {
       console.error("Socket emit failed:", emitErr.message);
     }
 
+
+
+    // new for web-push notifications
+    // ← new: also send a real OS-level push notification, alongside the
+    // socket emit. This is what actually reaches a device even if its
+    // browser tab/PWA has been suspended or killed in the background —
+    // something the socket alone can never do.
+    // try {
+    //   const webpush = require("../config/webPush");
+    //   const PushSubscription = require("../models/PushSubscription");
+    //   const subscriptions = await PushSubscription.find({ restaurantId });
+
+    //   const payload = JSON.stringify({
+    //     // title: "New Order!",
+    //     // body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · Table ${tableId}`,
+    //     title: "Dinora — New Order!",
+    //     body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table.name}`,
+    //   });
+
+    //   await Promise.allSettled(
+    //     subscriptions.map((sub) =>
+    //       webpush
+    //         .sendNotification(
+    //           { endpoint: sub.endpoint, keys: sub.keys },
+    //           payload,
+    //         )
+    //         .catch(async (err) => {
+    //           // a 410 Gone means this subscription is no longer valid
+    //           // (browser data cleared, uninstalled, etc.) — clean it up
+    //           if (err.statusCode === 410) {
+    //             await PushSubscription.deleteOne({ endpoint: sub.endpoint });
+    //           }
+    //         }),
+    //     ),
+    //   );
+    // } catch (pushErr) {
+    //   console.error("Push notification failed:", pushErr.message);
+    // }
+
+    try {
+  const webpush = require("../config/webPush");
+  const PushSubscription = require("../models/PushSubscription");
+  const subscriptions = await PushSubscription.find({ restaurantId });
+
+  const payload = JSON.stringify({
+    title: "Dinora — New Order!",
+    body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
+  });
+
+  await Promise.allSettled(
+    subscriptions.map((sub) =>
+      webpush
+        .sendNotification(
+          { endpoint: sub.endpoint, keys: sub.keys },
+          payload,
+        )
+        .catch(async (err) => {
+          if (err.statusCode === 410) {
+            await PushSubscription.deleteOne({ endpoint: sub.endpoint });
+          }
+        }),
+    ),
+  );
+} catch (pushErr) {
+  console.error("Push notification failed:", pushErr.message);
+}
+
+
+
     res.status(201).json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 
 // ── GET /api/public/orders/session/:sessionId ─────────────────────
 // if customer logged in — show only their orders in this session
@@ -436,12 +509,10 @@ const getItemReviews = async (req, res) => {
 const getCustomerOrderHistory = async (req, res) => {
   try {
     if (!req.customer?._id) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: "Login required to view order history",
-        });
+      return res.status(401).json({
+        success: false,
+        message: "Login required to view order history",
+      });
     }
 
     const orders = await Order.find({

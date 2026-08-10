@@ -24,6 +24,11 @@ import {
 } from "../../utils/notificationPrefs";
 import { SOUND_PRESETS, playSound } from "../../utils/notificationSounds";
 
+import { registerServiceWorker, subscribeToPush, unsubscribeFromPush } from "../../utils/pushNotifications";
+import { subscribePushApi, unsubscribePushApi } from "../../api/pushApi";
+
+
+
 const PLANS = [
   {
     id: "basic",
@@ -173,6 +178,63 @@ export default function Settings() {
     setSoundEnabledState(next);
     setNotificationSoundEnabled(next);
   };
+
+
+
+
+
+  // new for web-push notifications
+  const [pushEnabled, setPushEnabled] = useState(false);
+const [pushLoading, setPushLoading] = useState(false);
+
+useEffect(() => {
+  (async () => {
+    if (!("serviceWorker" in navigator)) return;
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) return;
+      const sub = await registration.pushManager.getSubscription();
+      setPushEnabled(!!sub);
+    } catch {
+      // not supported, or no registration yet — stays false
+    }
+  })();
+}, []);
+
+const handleEnablePush = async () => {
+  setPushLoading(true);
+  try {
+    await registerServiceWorker();
+    const subscription = await subscribeToPush();
+    await subscribePushApi(subscription);
+    setPushEnabled(true);
+    toast.success("Push notifications enabled on this device");
+  } catch (err) {
+    toast.error(err.message || "Could not enable push notifications");
+  } finally {
+    setPushLoading(false);
+  }
+};
+
+const handleDisablePush = async () => {
+  setPushLoading(true);
+  try {
+    const subscription = await unsubscribeFromPush();
+    if (subscription) {
+      await unsubscribePushApi(subscription.endpoint);
+    }
+    setPushEnabled(false);
+    toast.success("Push notifications disabled on this device");
+  } catch {
+    toast.error("Could not disable push notifications");
+  } finally {
+    setPushLoading(false);
+  }
+}; 
+
+
+
+
 
   // derived value — recalculates on every render, no extra state needed
   // to disable the save profile btn when nothing changed in form
@@ -745,106 +807,6 @@ export default function Settings() {
             </form>
           </div>
 
-          {/* Notifications */}
-          {/* <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <h3 className="text-white font-bold text-sm">Notifications</h3>
-              {!restaurantIsPro && (
-                <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
-                  PRO
-                </span>
-              )}
-            </div>
-            <label className={`flex items-center gap-3 ${restaurantIsPro ? "cursor-pointer" : "cursor-not-allowed"}`}>
-              <div
-                onClick={toggleSound}
-                className={`w-12 h-6 rounded-full relative transition-colors ${
-                  soundEnabled && restaurantIsPro ? "bg-blue-500" : "bg-slate-600"
-                } ${restaurantIsPro ? "cursor-pointer" : "cursor-not-allowed"}`}
-              >
-                <div
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    soundEnabled && restaurantIsPro ? "translate-x-7" : "translate-x-1"
-                  }`}
-                />
-              </div>
-              <span className={`text-sm font-semibold ${restaurantIsPro ? "text-slate-300" : "text-slate-500"}`}>
-                Play sound for new orders
-                {!restaurantIsPro && (
-                  <span className="block text-slate-500 text-xs font-normal mt-0.5">
-                    Upgrade to Pro to enable
-                  </span>
-                )}
-              </span>
-            </label>
-          </div> */}
-
-          {/* Notifications */}
-          {/* <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <h3 className="text-white font-bold text-sm">Notifications</h3>
-              {!restaurantIsPro && (
-                <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
-                  PRO
-                </span>
-              )}
-            </div>
-
-            <label
-              className={`flex items-center gap-3 mb-4 ${restaurantIsPro ? "cursor-pointer" : "cursor-not-allowed"}`}
-            >
-              <div
-                onClick={toggleSound}
-                className={`w-12 h-6 rounded-full relative transition-colors ${
-                  soundEnabled && restaurantIsPro
-                    ? "bg-blue-500"
-                    : "bg-slate-600"
-                } ${restaurantIsPro ? "cursor-pointer" : "cursor-not-allowed"}`}
-              >
-                <div
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                    soundEnabled && restaurantIsPro
-                      ? "translate-x-7"
-                      : "translate-x-1"
-                  }`}
-                />
-              </div>
-              <span
-                className={`text-sm font-semibold ${restaurantIsPro ? "text-slate-300" : "text-slate-500"}`}
-              >
-                Play sound for new orders
-                {!restaurantIsPro && (
-                  <span className="block text-slate-500 text-xs font-normal mt-0.5">
-                    Upgrade to Pro to enable
-                  </span>
-                )}
-              </span>
-            </label>
-
-            {restaurantIsPro && soundEnabled && (
-              <div className="space-y-2 pt-3 border-t border-white/10">
-                <div className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-2">
-                  Notification Sound
-                </div>
-                {SOUND_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    onClick={() => handleSoundChange(preset.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm font-semibold transition-colors ${
-                      selectedSound === preset.id
-                        ? "border-blue-500 bg-blue-500/10 text-white"
-                        : "border-white/10 bg-white/5 text-slate-400"
-                    }`}
-                  >
-                    <span>{preset.label}</span>
-                    {selectedSound === preset.id && (
-                      <span className="text-blue-400 text-xs">✓ Selected</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div> */}
 
           {/* new Notifications */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -912,6 +874,32 @@ export default function Settings() {
               </div>
             )}
           </div>
+
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+  <h3 className="text-white font-bold text-sm mb-2">Push Notifications</h3>
+  <p className="text-slate-400 text-xs leading-relaxed mb-4">
+    Get notified of new orders even when this app is closed or the phone screen is off — more reliable than the in-app sound alone, especially on Android and iPhone.
+  </p>
+  <button
+    onClick={pushEnabled ? handleDisablePush : handleEnablePush}
+    disabled={pushLoading}
+    className={`w-full py-2.5 rounded-xl font-bold text-xs disabled:opacity-50 ${
+      pushEnabled
+        ? "border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300"
+        : "bg-blue-600 hover:bg-blue-700 text-white"
+    }`}
+  >
+    {pushLoading
+      ? "Please wait..."
+      : pushEnabled
+        ? "Disable on This Device"
+        : "Enable on This Device"}
+  </button>
+</div>
+
+
+
         </div>
       </div>
     </div>
