@@ -11,13 +11,21 @@ self.addEventListener("push", (event) => {
   }
 
   const title = data.title || "New Order";
-  const options = {
-    body: data.body || "",
-    // icon: "/icons/icon-192 (1).png",
-    icon: "/icons/icon-192new.png",
-    badge: "/icons/icon-192new.png",
-    vibrate: [200, 100, 200],
-  };
+
+//   const options = {
+//     body: data.body || "",
+//     // icon: "/icons/icon-192 (1).png",
+//     icon: "/icons/icon-192new.png",
+//     badge: "/icons/icon-192new.png",
+//     vibrate: [200, 100, 200],
+//   };
+
+const options = {
+  body: data.body || "",
+  icon: "https://www.dinora.in/icons/icon-192new.png",
+  badge: "https://www.dinora.in/icons/icon-192new.png",
+  vibrate: [200, 100, 200],
+};
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
