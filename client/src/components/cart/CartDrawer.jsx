@@ -195,7 +195,7 @@ export default function CartDrawer({
             dispatch(clearCart());
             handleClose();
             onOrderPlaced();
-            toast.success("Payment successful! Order placed 🥳");
+            toast.success("Payment successful! Order placed");
           } catch {
             toast.error("Payment verification failed. Contact staff.");
           }
@@ -671,38 +671,44 @@ export default function CartDrawer({
         )} */}
 
 
-        {screen === "cash-success" && (
+        {/* {screen === "cash-success" && (
   <div className="px-5 py-8 text-center">
-    {/* Handle bar */}
+    {/* Handle bar 
+
     <div className="pt-2 pb-6 flex justify-center">
       <div className="w-12 h-1 bg-white/15 rounded-full" />
     </div>
 
-    {/* Success Icon */}
+    Success Icon
+
     <div className="flex justify-center mb-5">
       <div className="relative">
         <div className="w-24 h-24 rounded-full bg-green-500/15 border border-green-400/25 flex items-center justify-center shadow-[0_0_40px_rgba(34,197,94,0.25)] backdrop-blur-sm">
           <CircleCheck className="w-12 h-12 text-green-400" />
         </div>
 
-        {/* Small floating dot */}
+        Small floating dot
+
         <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-green-500 border-2 border-[#111827] flex items-center justify-center">
           <div className="w-2 h-2 rounded-full bg-white" />
         </div>
       </div>
     </div>
 
-    {/* Title */}
+    Title
+
     <h2 className="text-white font-extrabold text-2xl tracking-tight mb-2">
       Order Placed!
     </h2>
 
-    {/* Subtitle */}
+    Subtitle
+
     <p className="text-gray-400 text-sm mb-6 leading-relaxed max-w-xs mx-auto">
       Your order has been sent to the kitchen. We’ll notify you when it starts preparing.
     </p>
 
-    {/* Cash payment card */}
+    Cash payment card
+
     <div className="bg-linear-to-br from-amber-500/12 to-orange-500/8 border border-amber-400/20 rounded-3xl p-5 mb-6 text-left backdrop-blur-sm shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <span className="text-amber-300 font-semibold text-sm uppercase tracking-wide">
@@ -729,13 +735,54 @@ export default function CartDrawer({
       </div>
     </div>
 
-    {/* Done button */}
+    Done button
     <button
       onClick={handleClose}
       className="w-full py-4 rounded-2xl font-bold text-base text-white bg-linear-to-r from-[#FC8019] to-[#ff9a3d] shadow-lg shadow-orange-500/25 active:scale-[0.99] transition-transform duration-150"
     >
       Done
     </button> 
+  </div>
+)} */}
+
+          {screen === "cash-success" && (
+  <div className="px-5 py-10 text-center">
+    {/* Handle bar */}
+    <div className="pt-3 pb-8 flex justify-center">
+      <div className="w-10 h-1 bg-white/20 rounded-full" />
+    </div>
+
+    {/* Success icon — plain outlined circle, no glow/shadow/gradient */}
+    <div className="w-14 h-14 rounded-full border-2 border-[#FC8019] flex items-center justify-center mx-auto mb-5">
+      <CircleCheck className="w-7 h-7 text-[#FC8019]" strokeWidth={2.5} />
+    </div>
+
+    {/* Title */}
+    <div className="text-white font-bold text-xl mb-1.5">
+      Order Placed
+    </div>
+    <p className="text-gray-500 text-sm mb-8">
+      Your food is being prepared
+    </p>
+
+    {/* Cash payment info — plain text with a thin divider, no card/gradient/badge */}
+    <div className="border-t border-white/10 pt-5 mb-8 text-left">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-gray-500 text-xs uppercase tracking-wide">Amount Due</span>
+        <span className="text-white font-bold text-lg">₹{confirmedTotal.toFixed(2)}</span>
+      </div>
+      <p className="text-gray-500 text-xs leading-relaxed">
+        Please pay in cash to the staff at your table. Your bill closes once payment is confirmed.
+      </p>
+    </div>
+
+    {/* Done button — solid, no gradient/shadow */}
+    <button
+      onClick={handleClose}
+      className="w-full py-4 rounded-2xl font-bold text-base text-white bg-[#FC8019] active:scale-[0.99] transition-transform duration-150"
+    >
+      Done
+    </button>
   </div>
 )}
 
@@ -745,6 +792,16 @@ export default function CartDrawer({
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
