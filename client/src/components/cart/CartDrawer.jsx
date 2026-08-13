@@ -773,7 +773,7 @@ export default function CartDrawer({
     <div className="text-white font-bold text-2xl mb-1.5">
       Order Placed
     </div>
-    <p className="text-gray-400 text-sm mb-8">
+    <p className="text-gray-500 text-sm mb-8">
       Waiting for the restaurant to accept your order
     </p>
 
@@ -781,15 +781,15 @@ export default function CartDrawer({
     <div className="bg-white/3 rounded-2xl p-5 text-left">
       {tableName && (
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-dashed border-white/10">
-          <span className="text-gray-400 text-xs uppercase tracking-wide font-mono">Table</span>
+          <span className="text-gray-500 text-xs uppercase tracking-wide font-mono">Table</span>
           <span className="text-gray-300 font-semibold text-sm">{tableName}</span>
         </div>
       )}
       <div className="flex items-center justify-between">
-        <span className="text-gray-400 text-xs uppercase tracking-wide font-mono">Amount Due</span>
+        <span className="text-gray-500 text-xs uppercase tracking-wide font-mono">Amount Due</span>
         <span className="text-white font-bold text-2xl">₹{confirmedTotal.toFixed(2)}</span>
       </div>
-      <p className="text-gray-400 text-xs leading-relaxed mt-4 pt-4 border-t border-dashed border-white/10">
+      <p className="text-gray-500 text-xs leading-relaxed mt-4 pt-4 border-t border-dashed border-white/10">
         Please pay in cash to the staff at your table or at the counter. Your bill closes once payment is confirmed.
       </p>
     </div>
