@@ -235,8 +235,11 @@ const placeOrder = async (req, res) => {
   const subscriptions = await PushSubscription.find({ restaurantId });
 
   const payload = JSON.stringify({
-    title: "Dinora — New Order!",
+    // title: "Dinora — New Order!",
+    title: "New Order!",
     body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
+    // new
+    image: "https://www.dinora.in/icons/notification-banner.jpg",
   });
 
   await Promise.allSettled(

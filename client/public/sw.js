@@ -24,6 +24,9 @@ const options = {
   body: data.body || "",
   icon: "https://www.dinora.in/icons/icon-192new.png",
   badge: "https://www.dinora.in/icons/icon-192new.png",
+  // new
+  image: data.image,
+  
   vibrate: [200, 100, 200],
 };
 
