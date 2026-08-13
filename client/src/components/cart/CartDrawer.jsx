@@ -745,41 +745,59 @@ export default function CartDrawer({
   </div>
 )} */}
 
-          {screen === "cash-success" && (
+
+
+
+  {/* final new cash-success screen */}
+  {screen === "cash-success" && (
   <div className="px-5 py-10 text-center">
     {/* Handle bar */}
     <div className="pt-3 pb-8 flex justify-center">
       <div className="w-10 h-1 bg-white/20 rounded-full" />
     </div>
 
-    {/* Success icon — plain outlined circle, no glow/shadow/gradient */}
-    <div className="w-14 h-14 rounded-full border-2 border-[#FC8019] flex items-center justify-center mx-auto mb-5">
-      <CircleCheck className="w-7 h-7 text-[#FC8019]" strokeWidth={2.5} />
+    {/* Rotated "stamp" mark — same visual language as your kitchen ticket
+        status stamps, now accurately reflecting Pending, not a false Confirmed */}
+    <div className="flex justify-center mb-6">
+      <div
+        className="inline-block border-2 border-[#FC8019] rounded-lg px-4 py-1.5"
+        style={{ transform: "rotate(-4deg)" }}
+      >
+        <span className="text-[#FC8019] font-mono font-bold text-xs tracking-[0.2em]">
+          ORDER RECEIVED
+        </span>
+      </div>
     </div>
 
     {/* Title */}
-    <div className="text-white font-bold text-xl mb-1.5">
+    <div className="text-white font-bold text-2xl mb-1.5">
       Order Placed
     </div>
-    <p className="text-gray-500 text-sm mb-8">
-      Your food is being prepared
+    <p className="text-gray-400 text-sm mb-8">
+      Waiting for the restaurant to accept your order
     </p>
 
-    {/* Cash payment info — plain text with a thin divider, no card/gradient/badge */}
-    <div className="border-t border-white/10 pt-5 mb-8 text-left">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-gray-500 text-xs uppercase tracking-wide">Amount Due</span>
-        <span className="text-white font-bold text-lg">₹{confirmedTotal.toFixed(2)}</span>
+    {/* Receipt-style summary card */}
+    <div className="bg-white/3 rounded-2xl p-5 text-left">
+      {tableName && (
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-dashed border-white/10">
+          <span className="text-gray-400 text-xs uppercase tracking-wide font-mono">Table</span>
+          <span className="text-gray-300 font-semibold text-sm">{tableName}</span>
+        </div>
+      )}
+      <div className="flex items-center justify-between">
+        <span className="text-gray-400 text-xs uppercase tracking-wide font-mono">Amount Due</span>
+        <span className="text-white font-bold text-2xl">₹{confirmedTotal.toFixed(2)}</span>
       </div>
-      <p className="text-gray-500 text-xs leading-relaxed">
-        Please pay in cash to the staff at your table. Your bill closes once payment is confirmed.
+      <p className="text-gray-400 text-xs leading-relaxed mt-4 pt-4 border-t border-dashed border-white/10">
+        Please pay in cash to the staff at your table or at the counter. Your bill closes once payment is confirmed.
       </p>
     </div>
 
-    {/* Done button — solid, no gradient/shadow */}
+    {/* Done button */}
     <button
       onClick={handleClose}
-      className="w-full py-4 rounded-2xl font-bold text-base text-white bg-[#FC8019] active:scale-[0.99] transition-transform duration-150"
+      className="w-full py-4 mt-8 rounded-2xl font-bold text-base text-white bg-[#FC8019] active:scale-[0.99] transition-transform duration-150"
     >
       Done
     </button>
