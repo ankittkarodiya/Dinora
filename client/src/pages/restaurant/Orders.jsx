@@ -185,7 +185,10 @@ export default function Orders() {
     (o) =>
       o.paymentMethod === "cash" &&
       o.paymentStatus !== "paid" &&
-      o.status === "Served",
+      // o.status === "Served",
+      // new
+      o.status === "Served" &&
+      isOrderInDateFilter(o),
   );
 
   if (loading) {
