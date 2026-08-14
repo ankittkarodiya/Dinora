@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentCustomer } from "../../features/customerAuth/customerAuthSlice";
 import { submitReviewApi } from "../../api/publicApi";
 import toast from "react-hot-toast";
+import { HandHeart } from "lucide-react";
 
 const LABELS = ["", "Poor", "Fair", "Good", "Very Good", "Excellent 🤩"];
 
@@ -65,7 +66,12 @@ export default function ReviewModal({ item, sessionId, restaurantId, onClose, on
 
         {done ? (
           <div className="text-center py-6">
-            <div className="text-5xl mb-3">🙏</div>
+            
+            {/* <div className="text-5xl mb-3">🙏</div> */}
+            <div className="mb-3 flex justify-center">
+              <HandHeart size={48} strokeWidth={1.8} className="text-white" />
+            </div>
+
             <div className="text-white font-bold text-xl">Thank you!</div>
             <div className="text-gray-400 text-sm mt-1 mb-5">Your review has been submitted</div>
             <button onClick={onClose} className="w-full py-4 bg-[#FC8019] text-white rounded-2xl font-bold">

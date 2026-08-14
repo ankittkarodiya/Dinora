@@ -173,7 +173,8 @@ export default function OrderTracker({ sessionId, isOpen, onClose }) {
                       <div
                         className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${statusInfo.border} ${statusInfo.bg} ${statusInfo.color}`}
                       >
-                        <span>{statusInfo.icon}</span>
+                        {/* i commented the icon because i dont want the icon */}
+                        {/* <span>{statusInfo.icon}</span> */}
                         <span>{statusInfo.label}</span>
                       </div>
                     </div>
