@@ -9,7 +9,7 @@ import {
 import KitchenSlip from "../../components/admin/KitchenSlip";
 import toast from "react-hot-toast";
 import { useOrders } from "../../context/OrdersContext";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, RefreshCw } from "lucide-react";
 
 // ← Local-date helper, replacing every UTC-based toISOString().split("T")[0]
 // call in this file. toISOString() reports the date in UTC — for any
@@ -260,12 +260,27 @@ export default function Orders() {
             {periodRevenue.toLocaleString()}
           </p>
         </div>
-        <button
+        {/* <button
           onClick={refetchOrders}
           className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 active:translate-y-0.5 active:shadow-inner transition-all duration-100 ease-out text-slate-300 text-sm font-semibold cursor-pointer"
         >
           🔄 Refresh
-        </button>
+        </button> */}
+        
+        {/* new */}
+        <button
+  onClick={refetchOrders}
+  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl
+             border border-white/20 bg-white/10
+             hover:bg-white/20
+             active:bg-white/30 active:scale-95
+             transition-all duration-150 ease-out
+             text-slate-300 text-sm font-semibold cursor-pointer"
+>
+  <RefreshCw size={15} strokeWidth={2.5} />
+  Refresh
+</button>
+
       </div>
 
       {/* {pendingCount > 0 && (

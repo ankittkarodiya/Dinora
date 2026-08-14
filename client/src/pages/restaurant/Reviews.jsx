@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getReviewsApi } from "../../api/reviewApi";
-import { Loader2, Star } from "lucide-react"; // ← new icon import
+import { Loader2, RefreshCw, Star } from "lucide-react"; // ← new icon import
 import toast from "react-hot-toast";
 
 import { useSubscription } from "../../hooks/useSubscription";
@@ -114,13 +114,29 @@ export default function Reviews() {
             {overallAvg && ` · ${overallAvg} avg`}
           </p>
         </div>
-        <button
+        {/* <button
           onClick={() => refetch()}
           // className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 text-sm font-semibold transition-all"
           className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-slate-300 text-sm font-semibold transition-all"
         >
           🔄 Refresh
-        </button>
+        </button> */}
+
+          {/* new */}
+        <button
+  onClick={() => refetch()}
+  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl
+             border border-white/20 bg-white/10
+             hover:bg-white/20
+             active:bg-white/30 active:scale-95
+             text-slate-300 text-sm font-semibold
+             transition-all duration-150 ease-out cursor-pointer"
+>
+  <RefreshCw size={15} strokeWidth={2.5} />
+  Refresh
+</button>
+
+
       </div>
 
       {totalReviews === 0 ? (

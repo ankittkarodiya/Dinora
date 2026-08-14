@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getSessionOrdersApi } from "../../api/publicApi";
 import VegIcon from "../common/VegIcon";
+import { RefreshCw } from "lucide-react";
 
 const STATUS_STEPS = ["Pending", "Preparing", "Ready", "Served"];
 
@@ -126,12 +127,27 @@ export default function OrderTracker({ sessionId, isOpen, onClose }) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button
+              {/* <button
                 onClick={fetchOrders}
                 className="text-blue-400 text-xs font-semibold hover:text-blue-300"
               >
                 🔄 Refresh
-              </button>
+              </button> */}
+
+                <button
+                  onClick={fetchOrders}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                bg-blue-500/10 border border-blue-400/20
+                text-blue-400 text-xs font-semibold
+                hover:bg-blue-500/20 hover:border-blue-400/40
+                  active:scale-95 transition-all duration-150"
+                >
+                  <RefreshCw size={14} strokeWidth={2.5} />
+                    Refresh
+                </button>
+
+
+
               <button
                 onClick={onClose}
                 className="w-8 h-8 rounded-lg bg-white/10 text-slate-400 hover:bg-white/20 text-sm"

@@ -6,7 +6,7 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, ClipboardList, ChartColumnIncreasing, Calculator, Loader2, ChartColumn } from "lucide-react"; // ← new icon imports
+import { TrendingUp, ClipboardList, ChartColumnIncreasing, Calculator, Loader2, ChartColumn, RefreshCw } from "lucide-react"; // ← new icon imports
 
 import { useSubscription } from "../../hooks/useSubscription";
 import UpgradeToProCard from "../../components/restaurant/UpgradeToProCard";
@@ -190,12 +190,29 @@ export default function Analytics() {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
-          <button onClick={() => refetch()}
+          {/* <button onClick={() => refetch()}
             // className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-slate-300 text-sm font-semibold"
             className="px-4 py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-slate-300 text-sm font-semibold transition-all"
             >
             🔄 Refresh
-          </button>
+          </button> */}
+
+            {/* new */}
+            <button
+  onClick={() => refetch()}
+  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl
+             border border-white/20 bg-white/10
+             hover:bg-white/20
+             active:bg-white/30 active:scale-95
+             transition-all duration-150 ease-out
+             text-slate-300 text-sm font-semibold cursor-pointer"
+>
+  <RefreshCw size={15} strokeWidth={2.5} />
+  Refresh
+</button>
+
+
+
         </div>
       </div>
 
