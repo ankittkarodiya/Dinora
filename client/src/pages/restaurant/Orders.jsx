@@ -180,7 +180,9 @@ export default function Orders() {
     .filter((o) => o.status === "Completed" && o.paymentStatus === "paid")
     .reduce((s, o) => s + o.totalAmount, 0);
 
-  const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  // const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  // new
+  const pendingCount = orders.filter((o) => o.status === "Pending" && isOrderInDateFilter(o)).length;
   const cashPendingOrders = orders.filter(
     (o) =>
       o.paymentMethod === "cash" &&
