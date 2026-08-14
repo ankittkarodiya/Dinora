@@ -180,17 +180,17 @@ export default function Orders() {
     .filter((o) => o.status === "Completed" && o.paymentStatus === "paid")
     .reduce((s, o) => s + o.totalAmount, 0);
 
-  // const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  const pendingCount = orders.filter((o) => o.status === "Pending").length;
   // new
-  const pendingCount = orders.filter((o) => o.status === "Pending" && isOrderInDateFilter(o)).length;
+  // const pendingCount = orders.filter((o) => o.status === "Pending" && isOrderInDateFilter(o)).length;
   const cashPendingOrders = orders.filter(
     (o) =>
       o.paymentMethod === "cash" &&
       o.paymentStatus !== "paid" &&
-      // o.status === "Served",
+      o.status === "Served",
       // new
-      o.status === "Served" &&
-      isOrderInDateFilter(o),
+      // o.status === "Served" &&
+      // isOrderInDateFilter(o),
   );
 
   if (loading) {
@@ -308,7 +308,12 @@ export default function Orders() {
       </span>
     </div>
     <button
-      onClick={() => setStatusFilter("Pending")}
+      onClick={() => {
+        setStatusFilter("Pending");
+        // new
+        setDateMode("all"); // ← switches to All Time so the banner's count and the visible list always match
+
+      }}
       className="text-amber-400/80 text-xs font-semibold"
     >
       View →
@@ -356,7 +361,11 @@ export default function Orders() {
       </span>
     </div>
     <button
-      onClick={() => setStatusFilter("Served")}
+      onClick={() => {
+        setStatusFilter("Served");
+        // new
+        setDateMode("all"); // ← same fix here
+      }}
       className="text-green-400/80 text-xs font-semibold"
     >
       View →
