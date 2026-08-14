@@ -487,7 +487,7 @@ export default function MenuManager() {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
               Category *
             </label>
@@ -503,7 +503,40 @@ export default function MenuManager() {
                 </option>
               ))}
             </select>
+          </div> */}
+
+          {/* new */}
+          <div className="relative">
+            <select
+              value={form.categoryId}
+              onChange={(e) => set("categoryId", e.target.value)}
+              className="w-full appearance-none rounded-xl border border-white/20 bg-slate-800 px-4 py-3 pr-12 text-white outline-none focus:ring-0"
+              // removed focus:border-blue-500 from the ClassName
+            >
+              <option value="">Select a category</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                 {c.name}
+                </option>
+              ))}
+            </select>
+
+            <svg
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </div>
+
+
 
           <div>
             <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
