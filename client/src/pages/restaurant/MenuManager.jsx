@@ -494,7 +494,7 @@ export default function MenuManager() {
             <select
               value={form.categoryId}
               onChange={(e) => set("categoryId", e.target.value)}
-              className="w-full rounded-xl border border-white/20 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
+              className="w-full rounded-xl border border-white/20 bg-slate-800 px-4 py-3 pr-10 text-white outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
             >
               <option value="">Select a category</option>
               {categories.map((c) => (
@@ -507,7 +507,7 @@ export default function MenuManager() {
 
           <div>
             <label className="block text-slate-300 text-xs font-bold uppercase tracking-wide mb-2">
-              Description
+              Description <span className="text-sm font-normal normal-case text-slate-500">(optional)</span>
             </label>
             <textarea
               value={form.description}
