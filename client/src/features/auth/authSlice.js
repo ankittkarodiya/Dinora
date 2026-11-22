@@ -24,9 +24,20 @@ export const loadUser = createAsyncThunk(
       if (!token) return thunkAPI.rejectWithValue("No token");
       const data = await getMeApi();
       return data.user;
-    } catch (error) {
-      localStorage.removeItem("token");
-      return thunkAPI.rejectWithValue("Session expired");
+    } 
+    // catch (error) {
+    //   localStorage.removeItem("token");
+    //   return thunkAPI.rejectWithValue("Session expired");
+    // }
+
+    // new
+    catch (error) {
+      // Only a real 401 means the session is dead
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        return thunkAPI.rejectWithValue("Session expired");
+      }
+      return thunkAPI.rejectWithValue("Could not verify session");
     }
   }
 );

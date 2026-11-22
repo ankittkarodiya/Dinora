@@ -60,8 +60,24 @@ const protect = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch (error) {
-    return res.status(401).json({ success: false, message: "Token invalid or expired" });
+  } 
+  // catch (error) {
+  //   return res.status(401).json({ success: false, message: "Token invalid or expired" });
+  // }
+  
+  // new
+  catch (error) {
+    // Only genuine token problems are a 401. Anything else (e.g. a MongoDB
+    // hiccup) is a server error and must NOT log the user out.
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
+    ) {
+      return res.status(401).json({ success: false, message: "Token invalid or expired" });
+    }
+    console.error("protect middleware error:", error);
+    return res.status(500).json({ success: false, message: "Server error, please try again" });
   }
 };
 
