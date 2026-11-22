@@ -47,15 +47,13 @@ export default function Categories() {
         toast.success("Category added");
       }
       setForm({ name: "" });
-      // commenting out this to stop scrolling
       // Scroll back to the category that was just edited
-      // if (wasEditing) {
-      //   setTimeout(() => {
-      //     const el = document.getElementById(`category-${wasEditing}`);
-      //     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      //   }, 100);
-      // }
-
+      if (wasEditing) {
+        setTimeout(() => {
+          const el = document.getElementById(`category-${wasEditing}`);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
@@ -144,13 +142,7 @@ export default function Categories() {
       </div>
 
       {/* Form — name only, no image upload */}
-      {/* <div className="rounded-2xl border border-gray-200 bg-white p-6"> */}
-
-
-      {/* new to open a form and stop scrolling */}
-      <div className={editing ? "fixed inset-0 z-100 bg-black/40 flex items-center justify-center p-4" : ""}>
-      <div className={`rounded-2xl border border-gray-200 bg-white p-6 ${editing ? "w-full max-w-md shadow-2xl" : ""}`}>
-
+      <div className="rounded-2xl border border-gray-200 bg-white p-6">
         <h3 className="text-gray-900 font-bold text-base mb-4">
           {editing ? "Edit Category" : "Add New Category"}
         </h3>
@@ -188,7 +180,6 @@ export default function Categories() {
             )}
           </div>
         </div>
-      </div>
       </div>
 
       {/* List — plain text rows (no hover — rows are NOT clickable) */}
