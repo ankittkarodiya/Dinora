@@ -8,16 +8,21 @@ import { store } from "./app/store.js";
 import App from "./App";
 import './index.css'
 
-// ← new: one shared query client for the whole app. staleTime keeps data
-// "fresh" for 30 seconds after fetching — during that window, switching
-// pages and back reuses the cached data instantly with no refetch at all.
-// After that, React Query still shows the cached data instantly, but
-// quietly refetches in the background to catch any updates.
+// One shared query client for the whole app. staleTime keeps data "fresh"
+// for 30 seconds after fetching — switching pages and back reuses the
+// cached data with no refetch at all.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30 * 1000,
-      refetchOnWindowFocus: false, // avoid a refetch every time the tab regains focus, e.g. on mobile
+      refetchOnWindowFocus: false,
+      // Don't retry real server answers (429, 401, 404...). Retrying a
+      // rate-limited request only makes the rate limiting worse.
+      retry: (failureCount, error) => {
+        const status = error?.response?.status;
+        if (status && status < 500) return false;
+        return failureCount < 2;
+      },
     },
   },
 });
@@ -34,6 +39,81 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </QueryClientProvider>
   </React.StrictMode>
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React from "react";
+// import ReactDOM from "react-dom/client";
+// import { BrowserRouter } from "react-router-dom";
+// import { Provider } from "react-redux";
+// import { Toaster } from "react-hot-toast";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { store } from "./app/store.js";
+// import App from "./App";
+// import './index.css'
+
+// // ← new: one shared query client for the whole app. staleTime keeps data
+// // "fresh" for 30 seconds after fetching — during that window, switching
+// // pages and back reuses the cached data instantly with no refetch at all.
+// // After that, React Query still shows the cached data instantly, but
+// // quietly refetches in the background to catch any updates.
+// const queryClient = new QueryClient({
+//   defaultOptions: {
+//     queries: {
+//       staleTime: 30 * 1000,
+//       refetchOnWindowFocus: false, // avoid a refetch every time the tab regains focus, e.g. on mobile
+//     },
+//   },
+// });
+
+// ReactDOM.createRoot(document.getElementById("root")).render(
+//   <React.StrictMode>
+//     <QueryClientProvider client={queryClient}>
+//       <Provider store={store}>
+//         <BrowserRouter>
+//           <App />
+//           <Toaster position="top-right" toastOptions={{ style: { background: "#1E293B", color: "#E2E8F0" } }} />
+//         </BrowserRouter>
+//       </Provider>
+//     </QueryClientProvider>
+//   </React.StrictMode>
+// );
 
 
 

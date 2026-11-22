@@ -1,6 +1,10 @@
 // Generic retry wrapper — useful for calls made right after page load,
 // e.g. when a laptop just woke from sleep and the very first network
 // request can fail even though everything is actually fine a moment later.
+//
+// Only retries when the server never answered (network error) or answered
+// with a 5xx. A real 4xx reply (429 rate-limit, 401, 404...) is a final
+// answer — retrying it just piles more requests onto an already-full limiter.
 export async function fetchWithRetry(fn, { retries = 2, delayMs = 800 } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -8,6 +12,8 @@ export async function fetchWithRetry(fn, { retries = 2, delayMs = 800 } = {}) {
       return await fn();
     } catch (err) {
       lastError = err;
+      const status = err.response?.status;
+      if (status && status < 500) throw err;
       if (attempt < retries) {
         await new Promise((r) => setTimeout(r, delayMs));
       }
@@ -15,3 +21,60 @@ export async function fetchWithRetry(fn, { retries = 2, delayMs = 800 } = {}) {
   }
   throw lastError;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// old
+// // Generic retry wrapper — useful for calls made right after page load,
+// // e.g. when a laptop just woke from sleep and the very first network
+// // request can fail even though everything is actually fine a moment later.
+// export async function fetchWithRetry(fn, { retries = 2, delayMs = 800 } = {}) {
+//   let lastError;
+//   for (let attempt = 0; attempt <= retries; attempt++) {
+//     try {
+//       return await fn();
+//     } catch (err) {
+//       lastError = err;
+//       if (attempt < retries) {
+//         await new Promise((r) => setTimeout(r, delayMs));
+//       }
+//     }
+//   }
+//   throw lastError;
+// }

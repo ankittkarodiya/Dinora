@@ -1,4 +1,8 @@
 // after kiosk
+
+// 
+import { useQuery } from "@tanstack/react-query";
+
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
@@ -55,38 +59,67 @@ function LayoutContent({ children }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [restaurant, setRestaurant] = useState(null);
-  const [previewTableId, setPreviewTableId] = useState(null);
+
+  // commenting them (both) out
+  // const [restaurant, setRestaurant] = useState(null);
+  // const [previewTableId, setPreviewTableId] = useState(null);
 
   const { orders } = useOrders();
   const pendingCount = orders.filter((o) => o.status === "Pending").length;
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
+  // useEffect(() => {
+  //   const fetchRestaurant = async () => {
+  //     try {
+  //       const [restaurantData, tablesData] = await Promise.all([
+  //         getMyRestaurantApi(),
+  //         getTablesApi(),
+  //       ]);
+  //       setRestaurant(restaurantData.restaurant);
+  //       if (tablesData.tables?.length > 0) {
+  //         setPreviewTableId(tablesData.tables[0]._id);
+  //       } else {
+  //         setPreviewTableId(null);
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       if (err.response?.status === 404 || err.response?.status === 401) {
+  //         localStorage.removeItem("token");
+  //         localStorage.removeItem("user");
+  //         navigate("/login");
+  //       }
+  //     }
+  //   };
+  //   fetchRestaurant();
+  // }, [location.pathname]);
+  
+  // new
+    // Shared cache keys with Dashboard/Tables/Settings — so navigating
+  // between admin pages reuses the cached data instead of refetching.
+  const { data: restaurant = null, error: restaurantError } = useQuery({
+    queryKey: ["restaurant"],
+    queryFn: async () => (await getMyRestaurantApi()).restaurant,
+    retry: false,
+  });
+
+  const { data: tablesList } = useQuery({
+    queryKey: ["tables"],
+    queryFn: async () => (await getTablesApi()).tables || [],
+  });
+
+  const previewTableId = tablesList?.length > 0 ? tablesList[0]._id : null;
+
+  // Same 404/401 -> back to login behaviour as before
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      try {
-        const [restaurantData, tablesData] = await Promise.all([
-          getMyRestaurantApi(),
-          getTablesApi(),
-        ]);
-        setRestaurant(restaurantData.restaurant);
-        if (tablesData.tables?.length > 0) {
-          setPreviewTableId(tablesData.tables[0]._id);
-        } else {
-          setPreviewTableId(null);
-        }
-      } catch (err) {
-        console.error(err);
-        if (err.response?.status === 404 || err.response?.status === 401) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          navigate("/login");
-        }
-      }
-    };
-    fetchRestaurant();
-  }, [location.pathname]);
+    const status = restaurantError?.response?.status;
+    if (status === 404 || status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
+  }, [restaurantError, navigate]);
+
 
   const handleLogout = async () => {
     try {
