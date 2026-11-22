@@ -1,5 +1,5 @@
 // after kiosk
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategoriesApi, createCategoryApi, updateCategoryApi, deleteCategoryApi } from "../../api/categoryApi";
 import toast from "react-hot-toast";
@@ -21,6 +21,9 @@ export default function Categories() {
     },
   });
   const categories = data || [];
+
+  // new
+  const formRef = useRef(null);
 
   const [form, setForm] = useState({ name: "" });
   const [editing, setEditing] = useState(null);
@@ -51,7 +54,9 @@ export default function Categories() {
       if (wasEditing) {
         setTimeout(() => {
           const el = document.getElementById(`category-${wasEditing}`);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+          // if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (el) el.scrollIntoView({ behavior: "auto", block: "center" });
+
         }, 100);
       }
     } catch (error) {
@@ -61,9 +66,17 @@ export default function Categories() {
     }
   };
 
-  const handleEdit = (cat) => {
+  // const handleEdit = (cat) => {
+  //   setEditing(cat._id);
+  //   setForm({ name: cat.name });
+  // };
+
+  // new
+    const handleEdit = (cat) => {
     setEditing(cat._id);
     setForm({ name: cat.name });
+    // jump straight to the form instantly (no smooth scroll)
+    formRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
   };
 
   const handleDeleteClick = (cat) => {
@@ -87,10 +100,28 @@ export default function Categories() {
     }
   };
 
-  const handleCancel = () => {
+  // const handleCancel = () => {
+  //   setEditing(null);
+  //   setForm({ name: "" });
+  // };
+
+  // new to jump to the category again
+    const handleCancel = () => {
+    const wasEditing = editing; // remember which category we were editing
     setEditing(null);
     setForm({ name: "" });
+    // jump straight back to that category (no smooth scroll)
+    if (wasEditing) {
+      setTimeout(() => {
+        const el = document.getElementById(`category-${wasEditing}`);
+        if (el) el.scrollIntoView({ behavior: "auto", block: "center" });
+      }, 50);
+    }
   };
+
+
+
+  
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -142,7 +173,9 @@ export default function Categories() {
       </div>
 
       {/* Form — name only, no image upload */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      {/* <div className="rounded-2xl border border-gray-200 bg-white p-6"> */}
+      <div ref={formRef} className="scroll-mt-20 rounded-2xl border border-gray-200 bg-white p-6">
+
         <h3 className="text-gray-900 font-bold text-base mb-4">
           {editing ? "Edit Category" : "Add New Category"}
         </h3>
