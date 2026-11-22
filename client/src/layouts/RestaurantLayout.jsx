@@ -299,14 +299,22 @@ function LayoutContent({ children }) {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 py-3 rounded-xl font-semibold text-sm transition-colors"
+                // className="flex-1 py-3 rounded-xl font-semibold text-sm transition-colors"
+
+                // new for clickable looking button
+                className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-150 cursor-pointer hover:brightness-95 active:brightness-90 active:scale-[0.98] disabled:opacity-50"
+
                 style={{ backgroundColor: "#f7f7f7", border: "1px solid #e4e4e4", color: "#555" }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-colors"
+                // className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-colors"
+
+                // new for clickable looking button
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 active:scale-[0.98] text-white rounded-xl font-semibold text-sm transition-all duration-150 cursor-pointer disabled:opacity-50"
+
               >
                 Yes, Log Out
               </button>
