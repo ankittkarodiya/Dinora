@@ -359,7 +359,8 @@ export default function MenuManager() {
 
       {showForm && (
         // <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
-
+        
+        // {/* new to open a form and stop scrolling */}
         <div className={editing ? "fixed inset-0 z-100 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" : ""}>
         <div className={`rounded-2xl border border-gray-200 bg-white p-6 space-y-5 ${editing ? "w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" : ""}`}>
 
