@@ -1,3 +1,4 @@
+// this is just a old dead file now it is not used anywhere the payment modal is completely impleted in cartDrawer.jsx
 import { useState, useEffect } from "react";
 import { getSessionOrdersApi, createPaymentOrderApi, verifyPaymentApi, requestCashPaymentApi } from "../../api/publicApi";
 import toast from "react-hot-toast";

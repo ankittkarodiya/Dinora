@@ -14,7 +14,7 @@ export default function CustomerAuthModal({ restaurantId, onClose, onSuccess }) 
     setSubmitting(true);
     try {
       const customer = await dispatch(loginCustomer({ phone, restaurantId })).unwrap();
-      toast.success(`Welcome back, ${customer.username}!`);
+      toast.success(`Welcome back, ${customer.username.charAt(0).toUpperCase() + customer.username.slice(1).toLowerCase()}!`);
       onSuccess?.();
       onClose();
     } catch (error) {

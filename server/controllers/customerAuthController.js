@@ -25,7 +25,7 @@ const checkPhone = async (req, res) => {
     const customer = await Customer.findOne({ phone: normalizedPhone, restaurantId });
     res.json({ success: true, exists: !!customer, phone: normalizedPhone });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -69,7 +69,7 @@ const registerHandler = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -108,7 +108,7 @@ const loginHandler = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -118,7 +118,7 @@ const logoutHandler = async (req, res) => {
     await Customer.findByIdAndUpdate(req.customer._id, { isOnline: false });
     res.json({ success: true, message: "Logged out" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -137,7 +137,7 @@ const getCustomerMe = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -191,10 +191,8 @@ const identifyCustomer = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
 module.exports = { checkPhone, registerHandler, loginHandler, logoutHandler, getCustomerMe, identifyCustomer };
-
-// module.exports = { checkPhone, registerHandler, loginHandler, logoutHandler, getCustomerMe };

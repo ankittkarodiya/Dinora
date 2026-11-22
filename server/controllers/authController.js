@@ -11,76 +11,6 @@ const generateToken = (id, role) => {
   });
 };
 
-// registration
-// const registerUser = async(req, res) => {
-//   try {
-//     const {username, email, password, role} = req.body;
-
-//     if(!username || !email || !password){
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required"
-//       })
-//     }
-
-//     const existingUser = await User.findOne({ username });
-//     const existingEmail = await User.findOne({ email });
-
-//     if(existingUser && existingEmail){
-//       return res.status(400).json({
-//         success: false,
-//         message: "username & email already exists"
-//       })
-//     }
-//     if(existingUser){
-//       return res.status(400).json({
-//         success: false,
-//         message: "username already exists"
-//       })
-//     }
-//     if(existingEmail){
-//       return res.status(400).json({
-//         success: false,
-//         message: "email already exists"
-//       })
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const newUser = new User({
-//       username,
-//       email,
-//       password: hashedPassword,
-//       role
-//     })
-//     await newUser.save();
-
-//     const token = jwt.sign({
-//       id: newUser._id},
-//       process.env.JWT_SECRET,
-//       // {expiresIn:"10m"});
-//       {expiresIn: process.env.JWT_TOKEN_EXPIRES_IN
-//     });
-
-//     verifyMail(token, email);
-//     newUser.token = token;
-//     await newUser.save();
-
-//     // status will be 201 whenever something is created
-//     return res.status(201).json({
-//       success: true,
-//       message: "User registered successfully",
-//       data: newUser
-//     })
-
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message
-//     });
-//   }
-// }
-
 const registerUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
@@ -128,13 +58,15 @@ const registerUser = async (req, res) => {
     newUser.token = token;
     await newUser.save();
 
+    const userResponse = newUser.toObject();
+    delete userResponse.password;
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: newUser,
+      data: userResponse,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -150,13 +82,9 @@ const verification = async(req, res) => {
     }
 
     const token = authHeader.split(" ")[1];
-    // console.log("TOKEN:", token);
-
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // console.log("SECRET:", process.env.JWT_SECRET);
-
     } catch (error) {
       if(error.name === 'TokenExpiredError'){
         return res.status(400).json({
@@ -172,7 +100,6 @@ const verification = async(req, res) => {
     }
 
     const user = await User.findById(decoded.id);
-    // console.log("🔍 Full decoded token payload:", decoded);
 
     if(!user){
       return res.status(404).json({
@@ -200,7 +127,7 @@ const verification = async(req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
     })
   }
 }
@@ -208,10 +135,8 @@ const verification = async(req, res) => {
 // loginUser
 const loginUser = async(req, res) => {
   try {
-    // const {username, email, password, role} = req.body;
-    const {email, password, role} = req.body;
+    const {email, password} = req.body;
 
-    // if(!email || !username || !password){
     if(!email || !password){
       return res.status(400).json({
         success: false,
@@ -219,8 +144,7 @@ const loginUser = async(req, res) => {
       })
     }
 
-    // const user = await User.findOne( {username} ).select("+password");
-    const user = await User.findOne( {email} ).select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if(!user){
       return res.status(401).json({
         success: false,
@@ -236,20 +160,16 @@ const loginUser = async(req, res) => {
       })
     }
 
-    // session
-    // ← NEW: generate a fresh session marker on every login
+    // Generate a fresh session marker on every login
     // this invalidates any token issued before this moment, on any other device
     const sessionToken = crypto.randomBytes(16).toString("hex");
     user.currentSessionToken = sessionToken;
     await user.save();
 
-    // new for isActive filed in user schema
     if (!user.isActive) {
       return res.status(403).json({ success: false, message: "Account is deactivated" });
     }
 
-    // add verification and session later
-    // check if user is verified
     if(user.isVerified !== true){
       return res.status(403).json({
           success: false,
@@ -258,11 +178,9 @@ const loginUser = async(req, res) => {
     }
 
     const accessToken = jwt.sign(
-      // {userId: user._id},
-      { userId: user._id, sessionToken },   // ← embed it in the JWT payload
+      { userId: user._id, sessionToken },
       process.env.JWT_SECRET,
-      // {expiresIn: "1m"}
-      {expiresIn: "30d"} //also safe because of one device login ata a time
+      { expiresIn: "30d" }
     )
 
     const refreshToken = jwt.sign(
@@ -286,7 +204,7 @@ const loginUser = async(req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
     })
   }
 }
@@ -294,12 +212,7 @@ const loginUser = async(req, res) => {
 // logoutUser
 const logoutUser = async(req, res) => {
   try {
-    // const userId = req.userId;
-
-    // new
     const userId = req.user._id;
-
-    // add session
     await User.findByIdAndUpdate(userId, {isLoggedIn: false});
 
     return res.status(200).json({
@@ -311,7 +224,7 @@ const logoutUser = async(req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
     })
   }
 }
@@ -335,7 +248,7 @@ const forgetPassword = async (req, res) => {
         })
       }
 
-      const otp = Math.floor(1000 + Math.random()*9000).toString();
+      const otp = crypto.randomInt(100000, 1000000).toString();
       const expiry = new Date(Date.now() + 10*60*1000);
 
       user.otp = otp;
@@ -351,7 +264,7 @@ const forgetPassword = async (req, res) => {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message
+        message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
       })
     }
 }
@@ -391,13 +304,21 @@ const verifyOtp = async(req, res) => {
       })
     }
 
+    // Generate a short-lived reset token so changePassword can verify
+    // that OTP was actually completed (prevents direct calls to /change-password)
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExp = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
     user.otp = null;
     user.otpExp = null;
+    user.resetToken = resetToken;
+    user.resetTokenExp = resetTokenExp;
     await user.save();
 
     return res.status(200).json({
       success: true,
-      message: "OTP verified successfully"
+      message: "OTP verified successfully",
+      resetToken  // ← frontend must send this back with the password change request
     })
 
   } catch (error) {
@@ -409,10 +330,10 @@ const verifyOtp = async(req, res) => {
 }
 
 const changePassword = async(req, res) => {
-    const {newPassword, confirmPassword} = req.body;
+    const {newPassword, confirmPassword, resetToken} = req.body;
     const email = req.params.email;
 
-    if(!newPassword || !confirmPassword){
+    if(!newPassword || !confirmPassword || !resetToken){
       return res.status(400).json({
         success: false,
         message: "All fields are required"
@@ -432,12 +353,29 @@ const changePassword = async(req, res) => {
     if(!user){
       return res.status(404).json({
         success: false,
-        message: "USer not found"
+        message: "User not found"
+      })
+    }
+
+    // ← SECURITY: verify the reset token from OTP verification step
+    if (!user.resetToken || user.resetToken !== resetToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or missing reset token. Please verify OTP first."
+      })
+    }
+
+    if (user.resetTokenExp < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset token has expired. Please verify OTP again."
       })
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
+    user.resetToken = null;
+    user.resetTokenExp = null;
     await user.save();
 
     return res.status(200).json({
@@ -448,7 +386,7 @@ const changePassword = async(req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
     })
   }
 }
@@ -464,10 +402,9 @@ const getMe = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message
     });
   }
 };
 
-// module.exports = { registerUser, verification, loginUser, logoutUser, forgetPassword, verifyOtp, changePassword };
 module.exports = { registerUser, verification, loginUser, logoutUser, forgetPassword, verifyOtp, changePassword, getMe };

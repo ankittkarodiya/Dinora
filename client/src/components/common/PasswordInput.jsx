@@ -19,9 +19,9 @@ export default function PasswordInput({ className = "", ...props }) {
         type="button" // ← critical: prevents this from submitting any surrounding <form>
         onClick={() => setVisible((v) => !v)}
         tabIndex={-1} // don't steal tab focus away from the actual input
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-400 transition-colors"
       >
-        {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        {visible ? <Eye size={18} /> : <EyeOff size={18} />}
       </button>
     </div>
   );

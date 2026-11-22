@@ -6,10 +6,6 @@ export const loginUser = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const data = await loginApi(credentials);
-      console.log("Full API response:", data);
-      console.log("accessToken:", data.accessToken);
-      console.log("user:", data.user);
-      console.log("user.role:", data.user?.role);
       localStorage.setItem("token", data.accessToken);
       return data.user;
     } catch (error) {

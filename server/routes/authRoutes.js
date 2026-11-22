@@ -4,46 +4,15 @@ const { registerUser, verification, loginUser, getMe, logoutUser, forgetPassword
 const { protect } = require("../middlewares/authMiddleware");
 const {validateUser, userSchema} = require('../validators/userValidate');
 const isAuthenticated = require('../middlewares/isAuthenticatedMiddleware');
+const { authLimiter } = require("../middlewares/rateLimiter");
 
-// const passport = require('passport');
-const jwt = require('jsonwebtoken');
-
-router.post("/register", validateUser(userSchema), registerUser);
+router.post("/register", authLimiter, validateUser(userSchema), registerUser);
 router.post("/verify", verification);
-router.post("/login", loginUser);
+router.post("/login", authLimiter, loginUser);
 router.post("/logout", isAuthenticated, logoutUser);
-router.post('/forgot-password', forgetPassword);
-router.post('/verify-otp/:email', verifyOtp);
-router.post('/change-password/:email', changePassword);
+router.post('/forgot-password', authLimiter, forgetPassword);
+router.post('/verify-otp/:email', authLimiter, verifyOtp);
+router.post('/change-password/:email', authLimiter, changePassword);
 router.get("/me", protect, getMe);
-
-// step1 - redirect to google login
-// router.get("/google", passport.authenticate("google", {scope: ["profile", "email"]}));
-
-// router.get("/google/callback",
-//     passport.authenticate("google", {session:false}),
-//     (req, res) => {
-//         try {
-//             const token = jwt.sign({id: req.user._id, email: req.user.email}, process.env.JWT_SECRET, {expiresIn: "7d"});
-
-//             res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`)
-//         } catch (error) {
-//             console.error("Google login error:", error);
-//             res.redirect(`${process.env.CLIENT_URL}/login?error=google_failed`);
-//         }
-//     }
-// );
-
-
-
-
-
-// router.get("/me", isAuthenticated, (req, res) => {
-//     res.json({
-//         success: true,
-//         user: req.user
-//     })
-// });
-
 
 module.exports = router;

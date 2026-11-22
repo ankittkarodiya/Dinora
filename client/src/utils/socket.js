@@ -9,13 +9,25 @@ const SOCKET_URL = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "")
 let socket = null;
 
 // A single shared connection, reused everywhere it's needed — created
-// once, the first time any code calls getSocket().
+// once, the first time any code calls getSocket(). Sends the admin JWT
+// for server-side auth.
 export const getSocket = () => {
   if (!socket) {
+    const token = localStorage.getItem("token");
     socket = io(SOCKET_URL, {
       withCredentials: true,
       autoConnect: true,
+      auth: { token },
     });
   }
   return socket;
+};
+
+// Reconnect with a fresh token (called after login)
+export const reconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+  return getSocket();
 };

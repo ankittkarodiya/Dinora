@@ -99,7 +99,7 @@ const createSubscriptionOrder = async (req, res) => {
 
   } catch (error) {
     console.error("Subscription order error:", error);
-    res.status(500).json({ success: false, message: error.error?.description || error.message || "Failed to create payment order" });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : (error.error?.description || error.message || "Failed to create payment order") });
   }
 };
 
@@ -141,6 +141,16 @@ const verifySubscription = async (req, res) => {
       { new: true }
     );
 
+    // downgrading to basic — auto-reset any kiosk tables
+    if (plan === "basic") {
+      const Table = require("../models/Table");
+      await Table.updateMany(
+        { restaurantId: restaurant._id, isKiosk: true },
+        { isKiosk: false }
+      );
+    }
+
+
     await Subscription.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
       { razorpayPaymentId: razorpay_payment_id, status: "active", startsAt: new Date(), expiresAt }
@@ -149,7 +159,7 @@ const verifySubscription = async (req, res) => {
     res.json({ success: true, message: "Subscription activated!", restaurant });
   } catch (error) {
     console.error("Subscription verify error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -163,7 +173,16 @@ const getSubscriptionStatus = async (req, res) => {
 
     const isExpired = restaurant.subscriptionExpiresAt < new Date();
     if (isExpired && restaurant.subscriptionStatus === "active") {
-      await Restaurant.findByIdAndUpdate(restaurant._id, { subscriptionStatus: "expired" });
+      await Restaurant.findByIdAndUpdate(restaurant._id, {    subscriptionStatus: "expired" });
+    
+      // Pro expired — auto-reset kiosk tables (only when ACTUALLY expired)
+     if (restaurant.subscriptionPlan === "pro") {
+       const Table = require("../models/Table");
+       await Table.updateMany(
+         { restaurantId: restaurant._id, isKiosk: true },
+         { isKiosk: false }
+       );
+     }
     }
 
     res.json({
@@ -177,7 +196,7 @@ const getSubscriptionStatus = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -204,7 +223,7 @@ const addRazorpayKeys = async (req, res) => {
 
     res.json({ success: true, message: "Razorpay linked!", razorpayLinked: true });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 

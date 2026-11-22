@@ -90,7 +90,13 @@ export const cancelUnpaidOrderApi = async (orderId) => {
   const res = await axiosInstance.patch(`/public/orders/${orderId}/cancel-unpaid`);
   return res.data;
 };
+// router.patch("/orders/:id/cancel-unpaid", cancelUnpaidOrder);
 
+// Cancel an unpaid order (frees the token + reverses session total)
+// export const cancelUnpaidOrderApi = async (orderId) => {
+//   const res = await API.delete(`/public/orders/${orderId}`);
+//   return res.data;
+// };
 
 
 

@@ -8,52 +8,53 @@ const Session = require("../models/Session");
 const Order = require("../models/Order");
 const Review = require("../models/Review");
 
-// const getMenu = async (req, res) => {
-//   try {
-//     const { slug, tableId } = req.params;
-//     const restaurant = await Restaurant.findOne({ slug, isActive: true });
-//     if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
-//     const table = await Table.findOne({ _id: tableId, restaurantId: restaurant._id });
-//     if (!table) return res.status(404).json({ success: false, message: "Table not found" });
-//     const categories = await Category.find({ restaurantId: restaurant._id }).sort({ order: 1 });
-//     const menuItems = await MenuItem.find({ restaurantId: restaurant._id });
-//     res.json({
-//       success: true,
-//       restaurant: { _id: restaurant._id, name: restaurant.name, slug: restaurant.slug, description: restaurant.description, logo: restaurant.logo,
-//       gstPercent: restaurant.gstPercent, // ← this line was very likely missing
-//       subscriptionPlan: restaurant.subscriptionPlan, // ← for pro
-//       },
-//       table: { _id: table._id, name: table.name, capacity: table.capacity },
-//       categories,
-//       menuItems,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
+const Customer = require("../models/Customer");
 
-// new
 const getMenu = async (req, res) => {
   try {
     const { slug, tableId } = req.params;
     const restaurant = await Restaurant.findOne({ slug, isActive: true });
-    if (!restaurant)
-      return res
-        .status(404)
-        .json({ success: false, message: "Restaurant not found" });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: "Restaurant not found" });
+    }
 
-    // ← THE FIX: table, categories, and menu items don't depend on each other —
-    // run all three simultaneously instead of one after another
-    const [table, categories, menuItems] = await Promise.all([
+    const isPro =
+      restaurant.subscriptionPlan === "pro" &&
+      restaurant.subscriptionStatus === "active";
+
+    // all four are independent of each other, so they run in parallel
+    const [table, categories, menuItems, ratingStats] = await Promise.all([
       Table.findOne({ _id: tableId, restaurantId: restaurant._id }),
       Category.find({ restaurantId: restaurant._id }).sort({ order: 1 }),
-      MenuItem.find({ restaurantId: restaurant._id }),
+      MenuItem.find({ restaurantId: restaurant._id }).lean(),
+      // one aggregation for the whole menu (not one query per dish)
+      isPro
+        ? Review.aggregate([
+            { $match: { restaurantId: restaurant._id } },
+            {
+              $group: {
+                _id: "$menuItemId",
+                avg: { $avg: "$rating" },
+                count: { $sum: 1 },
+              },
+            },
+          ])
+        : Promise.resolve([]),
     ]);
 
-    if (!table)
-      return res
-        .status(404)
-        .json({ success: false, message: "Table not found" });
+    if (!table) {
+      return res.status(404).json({ success: false, message: "Table not found" });
+    }
+
+    const statsById = new Map(ratingStats.map((s) => [String(s._id), s]));
+    const itemsWithRatings = menuItems.map((item) => {
+      const s = statsById.get(String(item._id));
+      return {
+        ...item,
+        ratingAvg: s ? Math.round(s.avg * 10) / 10 : null,
+        ratingCount: s ? s.count : 0,
+      };
+    });
 
     res.json({
       success: true,
@@ -63,15 +64,21 @@ const getMenu = async (req, res) => {
         slug: restaurant.slug,
         description: restaurant.description,
         logo: restaurant.logo,
+        phone: restaurant.phone,
         gstPercent: restaurant.gstPercent,
         subscriptionPlan: restaurant.subscriptionPlan,
       },
-      table: { _id: table._id, name: table.name, capacity: table.capacity },
+      table: {
+        _id: table._id,
+        name: table.name,
+        capacity: table.capacity,
+        isKiosk: !!table.isKiosk && isPro,
+      },
       categories,
-      menuItems,
+      menuItems: itemsWithRatings,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -82,33 +89,13 @@ const createSession = async (req, res) => {
     const session = await Session.create({ restaurantId, tableId });
     res.status(201).json({ success: true, session });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-// const placeOrder = async (req, res) => {
-//   try {
-//     const { restaurantId, sessionId, tableId, items } = req.body;
-//     if (!items || items.length === 0) {
-//       return res.status(400).json({ success: false, message: "No items in order" });
-//     }
-//     const totalAmount = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-//     const order = await Order.create({
-//       restaurantId, sessionId, tableId,
-//       customerId: req.customer?._id || null,
-//       items, totalAmount, status: "Pending",
-//     });
-//     await Session.findByIdAndUpdate(sessionId, { $inc: { totalAmount } });
-//     res.status(201).json({ success: true, order });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// new place order
 const placeOrder = async (req, res) => {
   try {
-    const { restaurantId, sessionId, tableId, items } = req.body;
+    const { restaurantId, sessionId, tableId, items, customerName, customerPhone } = req.body;
 
     if (!items || items.length === 0) {
       return res
@@ -125,6 +112,35 @@ const placeOrder = async (req, res) => {
 
     const table = await Table.findById(tableId);
 
+    // ── resolve customer ──────────────────────────────────────────────
+    const isKiosk = table?.isKiosk === true;
+    let customerId = null;
+
+    if (!isKiosk) {
+      if (req.customer?._id) {
+        customerId = req.customer._id;
+      } else if (customerName?.trim() && customerPhone?.trim()) {
+        const cleanPhone = customerPhone.trim().replace(/\D/g, "").slice(-10);
+
+        let customer = await Customer.findOne({
+          $or: [
+            { phone: cleanPhone, restaurantId },
+            { phone: `+91${cleanPhone}`, restaurantId },
+            { phone: `91${cleanPhone}`, restaurantId },
+          ],
+        });
+
+        if (!customer) {
+          customer = await Customer.create({
+            username: customerName.trim(),
+            phone: customerPhone.trim(),
+            restaurantId,
+          });
+        }
+        customerId = customer._id;
+      }
+    }
+
     // fetch real, current prices from the DB — never trust client-sent prices
     const menuItemIds = items.map((i) => i.menuItemId);
     const dbItems = await MenuItem.find({
@@ -137,12 +153,20 @@ const placeOrder = async (req, res) => {
       const dbItem = dbItemMap.get(i.menuItemId.toString());
       if (!dbItem)
         throw new Error(`One of the items in your cart is no longer available`);
+
+      const portion = i.portion || null;
+      const price =
+        portion === "half" && dbItem.halfPrice != null
+          ? dbItem.halfPrice
+          : dbItem.price;
+
       return {
         menuItemId: dbItem._id,
         name: dbItem.name,
-        price: dbItem.price, // ← authoritative, from DB
+        price,
         qty: i.qty,
         isVeg: dbItem.isVeg,
+        portion,
       };
     });
 
@@ -151,124 +175,119 @@ const placeOrder = async (req, res) => {
     const gstAmount = Math.round(((subtotal * gstPercent) / 100) * 100) / 100;
     const totalAmount = Math.round((subtotal + gstAmount) * 100) / 100;
 
-    // const order = await Order.create({
-    //   restaurantId, sessionId, tableId,
-    //   customerId: req.customer?._id || null,
-    //   items: orderItems,
-    //   subtotal, gstPercent, gstAmount, totalAmount,
-    //   status: "Pending",
-    // });
-    // await Session.findByIdAndUpdate(sessionId, { $inc: { totalAmount } });
-    // res.status(201).json({ success: true, order });
+    // ── auto-assign the smallest free token ──
+    const usedTokens = await Order.find({
+      restaurantId,
+      tokenActive: true,
+    }).distinct("tokenNumber");
 
-    // new
+    const usedSet = new Set(usedTokens);
+    let tokenNumber = 1;
+    while (usedSet.has(tokenNumber)) tokenNumber++;
+
     const order = await Order.create({
       restaurantId,
       sessionId,
       tableId,
-      customerId: req.customer?._id || null,
+      customerId,
       items: orderItems,
       subtotal,
       gstPercent,
       gstAmount,
       totalAmount,
       status: "Pending",
+      tokenNumber,
+      tokenActive: true,
+      visibleToKitchen: !isKiosk,
     });
     await Session.findByIdAndUpdate(sessionId, { $inc: { totalAmount } });
 
-    // populate before emitting, so the admin's real-time listener receives
-    // the exact same shape as a normal getOrders() response — ready to
-    // display immediately, matching every other order in the list
+    // populate before emitting so admin's real-time listener gets
+    // the exact same shape as getOrders() — ready to display immediately
     await order.populate("tableId", "name capacity");
     await order.populate("customerId", "username phone");
 
-    // a socket failure should never prevent an order from being placed —
-    // this is a nice-to-have notification, not a critical path
-    try {
-      getIO().to(`restaurant-${restaurantId}`).emit("newOrder", order);
-    } catch (emitErr) {
-      console.error("Socket emit failed:", emitErr.message);
+    // ── notify admin (normal tables only) ─────────────────────────────
+    if (!isKiosk) {
+      try {
+        getIO().to(`restaurant-${restaurantId}`).emit("newOrder", order);
+      } catch (emitErr) {
+        console.error("Socket emit failed:", emitErr.message);
+      }
+
+      // web-push notification (normal tables only)
+      try {
+        const webpush = require("../config/webPush");
+        const PushSubscription = require("../models/PushSubscription");
+        const subscriptions = await PushSubscription.find({ restaurantId });
+
+        const payload = JSON.stringify({
+          title: "New Order!",
+          body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
+          image: "https://www.dinora.in/icons/notification-banner.jpg",
+        });
+
+        await Promise.allSettled(
+          subscriptions.map((sub) =>
+            webpush
+              .sendNotification(
+                { endpoint: sub.endpoint, keys: sub.keys },
+                payload,
+              )
+              .catch(async (err) => {
+                if (err.statusCode === 410) {
+                  await PushSubscription.deleteOne({ endpoint: sub.endpoint });
+                }
+              }),
+          ),
+        );
+      } catch (pushErr) {
+        console.error("Push notification failed:", pushErr.message);
+      }
     }
-
-
-
-    // new for web-push notifications
-    // ← new: also send a real OS-level push notification, alongside the
-    // socket emit. This is what actually reaches a device even if its
-    // browser tab/PWA has been suspended or killed in the background —
-    // something the socket alone can never do.
-    // try {
-    //   const webpush = require("../config/webPush");
-    //   const PushSubscription = require("../models/PushSubscription");
-    //   const subscriptions = await PushSubscription.find({ restaurantId });
-
-    //   const payload = JSON.stringify({
-    //     // title: "New Order!",
-    //     // body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · Table ${tableId}`,
-    //     title: "Dinora — New Order!",
-    //     body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table.name}`,
-    //   });
-
-    //   await Promise.allSettled(
-    //     subscriptions.map((sub) =>
-    //       webpush
-    //         .sendNotification(
-    //           { endpoint: sub.endpoint, keys: sub.keys },
-    //           payload,
-    //         )
-    //         .catch(async (err) => {
-    //           // a 410 Gone means this subscription is no longer valid
-    //           // (browser data cleared, uninstalled, etc.) — clean it up
-    //           if (err.statusCode === 410) {
-    //             await PushSubscription.deleteOne({ endpoint: sub.endpoint });
-    //           }
-    //         }),
-    //     ),
-    //   );
-    // } catch (pushErr) {
-    //   console.error("Push notification failed:", pushErr.message);
-    // }
-
-    try {
-  const webpush = require("../config/webPush");
-  const PushSubscription = require("../models/PushSubscription");
-  const subscriptions = await PushSubscription.find({ restaurantId });
-
-  const payload = JSON.stringify({
-    // title: "Dinora — New Order!",
-    title: "New Order!",
-    body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
-    // new
-    image: "https://www.dinora.in/icons/notification-banner.jpg",
-  });
-
-  await Promise.allSettled(
-    subscriptions.map((sub) =>
-      webpush
-        .sendNotification(
-          { endpoint: sub.endpoint, keys: sub.keys },
-          payload,
-        )
-        .catch(async (err) => {
-          if (err.statusCode === 410) {
-            await PushSubscription.deleteOne({ endpoint: sub.endpoint });
-          }
-        }),
-    ),
-  );
-} catch (pushErr) {
-  console.error("Push notification failed:", pushErr.message);
-}
-
-
 
     res.status(201).json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("PLACE ORDER ERROR:", error);
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────
+// cancelUnpaidOrder — called when the customer cancels payment on a
+// kiosk, or when a QR-table customer's unpaid order goes stale.
+// Frees the token and reverses the session total.
+//
+// Route: DELETE /api/public/orders/:id  (no auth needed — order ID is
+//        the secret; only the customer who placed it has it)
+// ─────────────────────────────────────────────────────────────────────
+const cancelUnpaidOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
 
+    // only cancel orders that are still Pending and unpaid
+    if (order.status !== "Pending" || order.paymentStatus === "paid") {
+      return res.status(400).json({ success: false, message: "This order can no longer be cancelled" });
+    }
+
+    order.status = "Cancelled";
+    order.cancellationReason = "Payment not completed";
+    await order.save(); // pre-save hook frees the token (tokenActive → false)
+
+    // reverse the session total so it doesn't inflate on retry
+    await Session.findByIdAndUpdate(order.sessionId, {
+      $inc: { totalAmount: -order.totalAmount },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("CANCEL UNPAID ORDER ERROR:", error);
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
+  }
+};
 
 // ── GET /api/public/orders/session/:sessionId ─────────────────────
 // if customer logged in — show only their orders in this session
@@ -276,17 +295,19 @@ const placeOrder = async (req, res) => {
 const getSessionOrders = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const query = { sessionId, status: { $ne: "Cancelled" } };
+    const query = { sessionId };
 
     if (req.customer?._id) {
       // logged in customer — only their orders
       query.customerId = req.customer._id;
     }
 
-    const orders = await Order.find(query).sort({ createdAt: -1 });
+    const orders = await Order.find(query)
+      .populate("tableId", "name")
+      .sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -319,131 +340,11 @@ const getReviewableItems = async (req, res) => {
     });
     res.json({ success: true, items: Object.values(itemMap) });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-// const submitReview = async (req, res) => {
-//   try {
-//     const { restaurantId, menuItemId, sessionId, rating, text } = req.body;
-//     if (!rating || rating < 1 || rating > 5) {
-//       return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
-//     }
-//     // verify item was served in this customer's order
-//     const servedOrder = await Order.findOne({
-//       sessionId,
-//       customerId: req.customer._id,
-//       status: { $in: ["Served", "Completed"] },
-//       "items.menuItemId": menuItemId,
-//     });
-//     if (!servedOrder) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "You can only review items from your served orders",
-//       });
-//     }
-//     const customerName = req.customer.username || `Customer ${req.customer.phone.slice(-4)}`;
-//     const existing = await Review.findOne({ menuItemId, customerId: req.customer._id });
-//     if (existing) {
-//       existing.rating = rating;
-//       existing.text = text;
-//       await existing.save();
-//       return res.json({ success: true, review: existing });
-//     }
-//     const review = await Review.create({
-//       restaurantId, menuItemId,
-//       customerId: req.customer._id,
-//       customerName, rating, text,
-//     });
-//     res.status(201).json({ success: true, review });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// new
 // POST /api/public/reviews
-// Customer submits a review — must be logged in via protectCustomer
-
-// const submitReview = async (req, res) => {
-//   try {
-//     const { restaurantId, menuItemId, sessionId, rating, text } = req.body;
-
-//     if (!restaurantId || !menuItemId || !sessionId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "restaurantId, menuItemId and sessionId are required",
-//       });
-//     }
-
-//     if (!rating || rating < 1 || rating > 5) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Rating must be between 1 and 5",
-//       });
-//     }
-
-//     // verify the item was served in this customer's order
-//     const servedOrder = await Order.findOne({
-//       sessionId,
-//       customerId: req.customer._id,
-//       status: { $in: ["Served", "Completed"] },
-//       "items.menuItemId": menuItemId,
-//     });
-
-//     if (!servedOrder) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "You can only review items from your served orders",
-//       });
-//     }
-
-//     const customerName =
-//       req.customer.username && req.customer.username.trim()
-//         ? req.customer.username
-//         : `Guest ${req.customer.phone.slice(-4)}`;
-
-//     // update if already reviewed
-//     const existing = await Review.findOne({
-//       menuItemId,
-//       customerId: req.customer._id,
-//     });
-
-//     if (existing) {
-//       existing.rating = rating;
-//       existing.text = text || "";
-//       await existing.save();
-//       return res.json({ success: true, review: existing, updated: true });
-//     }
-
-//     const review = await Review.create({
-//       restaurantId,
-//       menuItemId,
-//       customerId: req.customer._id,
-//       customerName,
-//       rating,
-//       text: text || "",
-//     });
-
-//     res.status(201).json({ success: true, review, updated: false });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// const getItemReviews = async (req, res) => {
-//   try {
-//     const reviews = await Review.find({ menuItemId: req.params.menuItemId }).sort({ createdAt: -1 });
-//     const avg = reviews.length
-//       ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
-//       : null;
-//     res.json({ success: true, reviews, avgRating: avg });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-// new submit review
 const submitReview = async (req, res) => {
   try {
     const { restaurantId, menuItemId, sessionId, rating, text } = req.body;
@@ -483,11 +384,10 @@ const submitReview = async (req, res) => {
 
     res.status(201).json({ success: true, review });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-// new
 // GET /api/public/reviews/:menuItemId
 const getItemReviews = async (req, res) => {
   try {
@@ -501,14 +401,12 @@ const getItemReviews = async (req, res) => {
 
     res.json({ success: true, reviews, avgRating, total: reviews.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-// new for customer history
 // GET /api/public/orders/customer-history
 // Returns ALL orders ever placed by this logged-in customer at this restaurant
-// Unlike getSessionOrders, this is NOT scoped to one session — it's the customer's full history
 const getCustomerOrderHistory = async (req, res) => {
   try {
     if (!req.customer?._id) {
@@ -518,16 +416,27 @@ const getCustomerOrderHistory = async (req, res) => {
       });
     }
 
-    const orders = await Order.find({
-      customerId: req.customer._id,
-      status: { $ne: "Cancelled" },
-    })
-      .populate("tableId", "name")
-      .sort({ createdAt: -1 }); // most recent first
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
 
-    res.json({ success: true, orders });
+    const [orders, total] = await Promise.all([
+      Order.find({ customerId: req.customer._id })
+        .populate("tableId", "name")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Order.countDocuments({ customerId: req.customer._id }),
+    ]);
+
+    res.json({
+      success: true,
+      orders,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.status(500).json({ success: false, message: isProduction ? "Something went wrong" : error.message });
   }
 };
 
@@ -535,6 +444,7 @@ module.exports = {
   getMenu,
   createSession,
   placeOrder,
+  cancelUnpaidOrder,
   getSessionOrders,
   getReviewableItems,
   submitReview,

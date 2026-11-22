@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 
 let io = null;
 
@@ -13,6 +14,19 @@ const initSocket = (httpServer, allowedOrigins) => {
       origin: allowedOrigins,
       credentials: true,
     },
+  });
+
+  // JWT auth middleware — only authenticated admins can join restaurant rooms
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication required"));
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = decoded.userId || decoded.id;
+      next();
+    } catch {
+      next(new Error("Invalid or expired token"));
+    }
   });
 
   io.on("connection", (socket) => {

@@ -16,6 +16,8 @@ const reviewSchema = new mongoose.Schema(
 // So do NOT put a unique index at all — remove any unique constraint
 reviewSchema.index({ menuItemId: 1, customerId: 1 }); // regular index for fast lookup, NOT unique
 
+reviewSchema.index({ restaurantId: 1, menuItemId: 1 }); //In your Review model, add this one line so the aggregation stays fast as reviews grow
+
 module.exports = mongoose.model("Review", reviewSchema);
 
 

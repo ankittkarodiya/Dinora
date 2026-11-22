@@ -7,33 +7,26 @@ const getRestaurantId = async (userId) => {
 };
 
 // GET /api/orders
-// const getOrders = async (req, res) => {
-//   try {
-//     const restaurantId = await getRestaurantId(req.user._id);
-//     if (!restaurantId) {
-//       return res.status(404).json({ success: false, message: "Restaurant not found" });
-//     }
-//     const orders = await Order.find({ restaurantId })
-//       .populate("tableId", "name capacity")
-//       .populate("sessionId", "status paymentMethod paymentStatus")
-//       .sort({ createdAt: -1 });
-//     res.json({ success: true, orders });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
 const getOrders = async (req, res) => {
   try {
     const restaurantId = await getRestaurantId(req.user._id);
     if (!restaurantId) return res.status(404).json({ success: false, message: "Restaurant not found" });
-    const orders = await Order.find({ restaurantId })
-      .populate("tableId", "name capacity")
-      .populate("customerId", "username phone")
-      .sort({ createdAt: -1 });
+
+    const orders = await Order.find({
+  restaurantId,
+  visibleToKitchen: { $ne: false },
+  $nor: [
+    { status: "Cancelled", cancellationReason: "Payment not completed" },
+    { status: "Cancelled", cancellationReason: "Replaced by new order" },
+  ],
+})
+  .populate("tableId", "name capacity")
+  .populate("customerId", "username phone")
+  .sort({ createdAt: -1 });
+
     res.json({ success: true, orders });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -53,11 +46,11 @@ const acceptOrder = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
-    await order.populate("customerId", "username phone"); // ← new
+    await order.populate("customerId", "username phone");
 
     res.json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -78,45 +71,51 @@ const markSlipPrinted = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
-    await order.populate("customerId", "username phone"); // ← new
+    await order.populate("customerId", "username phone");
 
     res.json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
+  }
+};
+
+// PATCH /api/orders/:id/accept-print
+// The simplified flow. "Accept" in the UI only opens the bill
+// preview (no API call). THIS runs when the staff taps "Print Bill":
+// Pending (or a legacy Accepted order) -> Preparing in a single step.
+// Closing the preview never calls this, so the order simply stays Pending.
+const acceptAndPrint = async (req, res) => {
+  try {
+    const restaurantId = await getRestaurantId(req.user._id);
+    const order = await Order.findOne({ _id: req.params.id, restaurantId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    if (!["Pending", "Accepted"].includes(order.status)) {
+      return res.status(400).json({ success: false, message: `Order is already ${order.status.toLowerCase()}` });
+    }
+    order.status = "Preparing";
+    order.acceptedAt = order.acceptedAt || new Date();
+    order.slipPrintedAt = new Date();
+    await order.save();
+    await order.populate("tableId", "name capacity");
+    await order.populate("sessionId", "status paymentMethod paymentStatus");
+    await order.populate("customerId", "username phone");
+
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
 // PATCH /api/orders/:id/status
-// const updateOrderStatus = async (req, res) => {
-//   try {
-//     const restaurantId = await getRestaurantId(req.user._id);
-//     const { status } = req.body;
-//     const validStatuses = ["Ready", "Served", "Completed"];
-//     if (!validStatuses.includes(status)) {
-//       return res.status(400).json({ success: false, message: "Invalid status" });
-//     }
-//     const order = await Order.findOneAndUpdate(
-//       { _id: req.params.id, restaurantId },
-//       { status },
-//       { new: true }
-//     )
-//       .populate("tableId", "name capacity")
-//       .populate("sessionId", "status paymentMethod paymentStatus");
-//     if (!order) {
-//       return res.status(404).json({ success: false, message: "Order not found" });
-//     }
-//     res.json({ success: true, order });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
 const updateOrderStatus = async (req, res) => {
   try {
     const restaurantId = await getRestaurantId(req.user._id);
     const { status } = req.body;
 
-    const validStatuses = ["Ready", "Served", "Completed"];
+    // "Ready" stage removed: staff go Preparing -> Served directly.
+    const validStatuses = ["Served", "Completed"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
@@ -126,9 +125,20 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
+    // only legal jumps. Legacy "Accepted"/"Ready" orders (created
+    // before the flow was simplified) can still be marked Served so nothing
+    // gets stuck.
+    const allowedFrom = {
+      Served: ["Preparing", "Accepted", "Ready"],
+      Completed: ["Served"],
+    };
+    if (!allowedFrom[status].includes(order.status)) {
+      return res.status(400).json({ success: false, message: `Cannot mark a ${order.status.toLowerCase()} order as ${status.toLowerCase()}` });
+    }
+
     order.status = status;
 
-    // ← THE FIX: if this order is being marked Served AND it was already
+    // if this order is being marked Served AND it was already
     // paid online, auto-advance straight to Completed. Cash orders stay
     // at Served until the admin manually confirms cash was received.
     if (status === "Served" && order.paymentMethod === "online" && order.paymentStatus === "paid") {
@@ -138,12 +148,11 @@ const updateOrderStatus = async (req, res) => {
     await order.save();
     await order.populate("tableId", "name capacity");
     await order.populate("sessionId", "status paymentMethod paymentStatus");
-    await order.populate("customerId", "username phone"); // ← new
-
+    await order.populate("customerId", "username phone");
 
     res.json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -167,12 +176,12 @@ const cancelOrder = async (req, res) => {
     order.cancellationReason = reason || "Cancelled by restaurant";
     await order.save();
     await order.populate("tableId", "name capacity");
-    await order.populate("customerId", "username phone"); // new
+    await order.populate("customerId", "username phone");
 
     res.json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-module.exports = { getOrders, acceptOrder, markSlipPrinted, updateOrderStatus, cancelOrder };
+module.exports = { getOrders, acceptOrder, markSlipPrinted, acceptAndPrint, updateOrderStatus, cancelOrder };

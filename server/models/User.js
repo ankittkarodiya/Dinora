@@ -80,6 +80,17 @@ const userSchema = new Schema({
   default: null,
   },
 
+  // ← SECURITY: short-lived token generated after OTP verification,
+  // required by changePassword to prove the caller actually completed OTP
+  resetToken: {
+    type: String,
+    default: null,
+  },
+  resetTokenExp: {
+    type: Date,
+    default: null,
+  },
+
 }, { timestamps: true });
 
 

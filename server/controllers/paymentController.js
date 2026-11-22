@@ -5,12 +5,13 @@ const Session = require("../models/Session");
 const Restaurant = require("../models/Restaurant");
 const { encrypt, decrypt } = require("../utils/encryption");
 
+const { getIO } = require("../config/socket");
+const Table = require("../models/Table");
+const { notifyNewOrder } = require("../utils/notifyKitchen");
+
 // ── POST /api/public/payment/preflight ────────────────────────────
 // Called BEFORE any order exists. Confirms this restaurant can accept
 // online payment right now. Never touches Order or Session.
-
-// new preflight check
-// ── POST /api/public/payment/preflight ────────────────────────────
 const preflightCheck = async (req, res) => {
   try {
     const { restaurantId } = req.body;
@@ -88,20 +89,23 @@ const createPaymentOrder = async (req, res) => {
     try {
       decryptedSecret = decrypt(restaurant.razorpayKeySecret);
       if (!decryptedSecret) throw new Error("empty");
-    // } catch {
-    //   return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "This restaurant's payment setup is invalid. Please pay by cash." });
-    // }
     } catch (decErr) {
-  console.error("createPaymentOrder decrypt failed:", decErr.message);
-  return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "This restaurant's payment setup is invalid. Please pay by cash." });
-}
-
-    // authoritative amount — sum of this session's actual unpaid orders
-    const unpaidOrders = await Order.find({ sessionId, status: { $ne: "Cancelled" }, paymentStatus: { $ne: "paid" } });
-    if (unpaidOrders.length === 0) {
-      return res.status(400).json({ success: false, code: "NOTHING_TO_PAY", message: "Nothing to pay for in this session." });
+      console.error("createPaymentOrder decrypt failed:", decErr.message);
+      return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "This restaurant's payment setup is invalid. Please pay by cash." });
     }
-    const amount = unpaidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+
+    // charge only for the specific order being paid — not all unpaid orders
+    const { orderId } = req.body;
+    const orderToPay = await Order.findOne({
+      _id: orderId,
+      sessionId,
+      status: { $ne: "Cancelled" },
+      paymentStatus: { $ne: "paid" },
+    });
+    if (!orderToPay) {
+      return res.status(400).json({ success: false, code: "NOTHING_TO_PAY", message: "Nothing to pay for." });
+    }
+    const amount = orderToPay.totalAmount;
 
     const razorpay = new Razorpay({ key_id: restaurant.razorpayKeyId, key_secret: decryptedSecret });
 
@@ -120,83 +124,16 @@ const createPaymentOrder = async (req, res) => {
     res.json({ success: true, order, keyId: restaurant.razorpayKeyId });
   } catch (error) {
     console.error("Payment order error:", error);
-    res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message || "Failed to create payment." });
+    res.status(500).json({ success: false, code: "SERVER_ERROR", message: process.env.NODE_ENV === "production" ? "Something went wrong" : (error.message || "Failed to create payment.") });
   }
 };
 
 // ── POST /api/public/payment/verify ───────────────────────────────
-// const verifyPayment = async (req, res) => {
-//   try {
-//     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, sessionId, restaurantId } = req.body;
-
-//     let keySecret = process.env.RAZORPAY_KEY_SECRET;
-//     if (restaurantId) {
-//       const restaurant = await Restaurant.findById(restaurantId).select("+razorpayKeySecret");
-//       if (restaurant?.razorpayLinked && restaurant.razorpayKeySecret) {
-//         keySecret = decrypt(restaurant.razorpayKeySecret);
-//       }
-//     }
-
-//     const body = razorpay_order_id + "|" + razorpay_payment_id;
-//     const expectedSignature = crypto.createHmac("sha256", keySecret).update(body).digest("hex");
-//     if (expectedSignature !== razorpay_signature) {
-//       return res.status(400).json({ success: false, code: "SIGNATURE_MISMATCH", message: "Payment verification failed." });
-//     }
-
-//     await Order.updateMany(
-//       { sessionId, status: { $ne: "Cancelled" }, paymentStatus: { $ne: "paid" } },
-//       { status: "Completed", paymentMethod: "online", paymentStatus: "paid" }
-//     );
-//     await Session.findByIdAndUpdate(sessionId, { status: "completed", paymentMethod: "online", paymentStatus: "paid", paidAt: new Date() });
-
-//     res.json({ success: true, message: "Payment verified and order completed" });
-//   } catch (error) {
-//     res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });
-//   }
-// };
-
-// new verify payment
-// const verifyPayment = async (req, res) => {
-//   try {
-//     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, sessionId, restaurantId } = req.body;
-
-//     // guard against a missing sessionId before it ever reaches the updateMany filter
-//     if (!sessionId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-//       return res.status(400).json({ success: false, code: "MISSING_FIELDS", message: "Missing required payment fields." });
-//     }
-
-//     let keySecret = process.env.RAZORPAY_KEY_SECRET;
-//     if (restaurantId) {
-//       const restaurant = await Restaurant.findById(restaurantId).select("+razorpayKeySecret");
-//       if (restaurant?.razorpayLinked && restaurant.razorpayKeySecret) {
-//         keySecret = decrypt(restaurant.razorpayKeySecret);
-//       }
-//     }
-
-//     const body = razorpay_order_id + "|" + razorpay_payment_id;
-//     const expectedSignature = crypto.createHmac("sha256", keySecret).update(body).digest("hex");
-//     if (expectedSignature !== razorpay_signature) {
-//       return res.status(400).json({ success: false, code: "SIGNATURE_MISMATCH", message: "Payment verification failed." });
-//     }
-
-//     await Order.updateMany(
-//       { sessionId, status: { $ne: "Cancelled" }, paymentStatus: { $ne: "paid" } },
-//       { status: "Completed", paymentMethod: "online", paymentStatus: "paid" }
-//     );
-//     await Session.findByIdAndUpdate(sessionId, { status: "completed", paymentMethod: "online", paymentStatus: "paid", paidAt: new Date() });
-
-//     res.json({ success: true, message: "Payment verified and order completed" });
-//   } catch (error) {
-//     console.error("Verify payment error:", error); // ← also add this — this function currently has NO error logging at all
-//     res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });
-//   }
-// };
-
 const verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, sessionId, restaurantId } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, sessionId, restaurantId, orderId } = req.body;
 
-    if (!sessionId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    if (!sessionId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
       return res.status(400).json({ success: false, code: "MISSING_FIELDS", message: "Missing required payment fields." });
     }
 
@@ -214,24 +151,36 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, code: "SIGNATURE_MISMATCH", message: "Payment verification failed." });
     }
 
-    // ← THE FIX — payment method + paid flag are recorded, but the order's
-    // kitchen status is left completely untouched. It still has to go
-    // through Accepted → Preparing → Ready → Served like any other order.
-    // "Completed" is now ONLY set automatically when the order reaches
-    // "Served" (handled in updateOrderStatus below), not here.
-    await Order.updateMany(
-      { sessionId, status: { $ne: "Cancelled" }, paymentStatus: { $ne: "paid" } },
-      { paymentMethod: "online", paymentStatus: "paid" } // ← status field removed entirely from this update
+    // check if this was a hidden kiosk order BEFORE flipping visibility
+    const paidOrder = await Order.findById(orderId);
+    const wasHidden = paidOrder && !paidOrder.visibleToKitchen;
+
+    // only update THIS specific order — not all orders in session
+    await Order.updateOne(
+      { _id: orderId },
+      { paymentMethod: "online", paymentStatus: "paid", visibleToKitchen: true }
     );
 
     await Session.findByIdAndUpdate(sessionId, { paymentMethod: "online", paymentStatus: "paid", paidAt: new Date() });
-    // ← Session.status is no longer force-set to "completed" here either —
-    // it should reflect the table's actual dining state, not payment state
 
     res.json({ success: true, message: "Payment verified. Your order is being processed." });
+
+    // notify admin if this was a hidden kiosk order that just became visible
+    if (wasHidden) {
+      try {
+        const notifyOrder = await Order.findById(orderId)
+          .populate("tableId", "name capacity")
+          .populate("customerId", "username phone");
+        if (notifyOrder) {
+          getIO().to(`restaurant-${notifyOrder.restaurantId}`).emit("newOrder", notifyOrder);
+        }
+      } catch (notifyErr) {
+        console.error("Kiosk order notify failed:", notifyErr.message);
+      }
+    }
   } catch (error) {
     console.error("Verify payment error:", error);
-    res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });
+    res.status(500).json({ success: false, code: "SERVER_ERROR", message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -246,15 +195,23 @@ const requestCashPayment = async (req, res) => {
     );
     res.json({ success: true, message: "Cash payment requested" });
   } catch (error) {
-    res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });
+    res.status(500).json({ success: false, code: "SERVER_ERROR", message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
 // ── PATCH /api/orders/:id/confirm-cash ─────────────────────────────
 const confirmCashPayment = async (req, res) => {
   try {
+    // ← SECURITY: verify the order belongs to this admin's restaurant
+    const restaurant = await Restaurant.findOne({ userId: req.user._id });
+    if (!restaurant) return res.status(404).json({ success: false, code: "RESTAURANT_NOT_FOUND", message: "Restaurant not found" });
+
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, code: "ORDER_NOT_FOUND", message: "Order not found" });
+
+    if (order.restaurantId.toString() !== restaurant._id.toString()) {
+      return res.status(403).json({ success: false, code: "FORBIDDEN", message: "This order does not belong to your restaurant" });
+    }
 
     order.status = "Completed";
     order.paymentStatus = "paid";
@@ -266,13 +223,12 @@ const confirmCashPayment = async (req, res) => {
     }
 
     await order.populate("tableId", "name");
-    await order.populate("customerId", "username phone"); // ← new
+    await order.populate("customerId", "username phone");
 
     res.json({ success: true, order });
   } catch (error) {
-    res.status(500).json({ success: false, code: "SERVER_ERROR", message: error.message });
+    res.status(500).json({ success: false, code: "SERVER_ERROR", message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
-
 
 module.exports = { preflightCheck, createPaymentOrder, verifyPayment, requestCashPayment, confirmCashPayment };

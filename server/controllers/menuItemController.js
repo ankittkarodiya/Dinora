@@ -26,7 +26,7 @@ const getMenuItems = async (req, res) => {
     const items = await MenuItem.find({ restaurantId }).populate("categoryId", "name").sort({ createdAt: -1 });
     res.json({ success: true, items });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -58,7 +58,7 @@ const createMenuItem = async (req, res) => {
 
     res.status(201).json({ success: true, item });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -97,7 +97,7 @@ const updateMenuItem = async (req, res) => {
     res.json({ success: true, item });
     deleteCloudinaryImage(oldImageToClean);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -111,7 +111,7 @@ const deleteMenuItem = async (req, res) => {
     res.json({ success: true, message: "Item deleted" });
     deleteCloudinaryImage(item.image);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -126,7 +126,7 @@ const toggleAvailability = async (req, res) => {
     await item.save();
     res.json({ success: true, item });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 

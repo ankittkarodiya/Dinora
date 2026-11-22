@@ -8,7 +8,7 @@ const getMyRestaurant = async (req, res) => {
     }
     res.json({ success: true, restaurant });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -34,45 +34,51 @@ const createRestaurant = async (req, res) => {
     }
 
     const finalGstPercent = gstPercent ? Number(gstPercent) : 5;
-    
+
     const restaurant = await Restaurant.create({
       userId: req.user._id,
       name, slug, description, phone, address,
       gstPercent: gstPercent ? Number(gstPercent) : 5,
-      
-      // new
-      cgstPercent: finalGstPercent / 2, // ← THE FIX: derive from the actual chosen GST%, not the schema default
+      cgstPercent: finalGstPercent / 2,
       sgstPercent: finalGstPercent / 2,
-
       gstNumber: gstNumber || "",
       subscriptionPlan: plan,
-      subscriptionBillingCycle: plan === "trial" ? "none" : "monthly", // ← THE FIX: trial has no real billing cycle; paid plans default to monthly here and get corrected to the real cycle once verifySubscription runs
-
+      subscriptionBillingCycle: plan === "trial" ? "none" : "monthly",
       // for trial, expiry is set by schema default (4 days from now)
-      // for basic/pro, subscription is not "active" until payment verifies —
-      // see verifySubscription in subscriptionController for that transition
+      // for basic/pro, subscription is not "active" until payment verifies
       subscriptionStatus: plan === "trial" ? "active" : "expired",
     });
 
     res.status(201).json({ success: true, restaurant });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
 const updateRestaurant = async (req, res) => {
   try {
-    const { name, description, phone, address, gstNumber, gstPercent } = req.body;
+    const { name, description, phone, address, gstNumber, gstPercent, tokenLimit } = req.body;
     const updateData = { name, description, phone, address, gstNumber };
     if (gstPercent !== undefined && gstPercent !== "") {
-      // updateData.gstPercent = Number(gstPercent);
-
-      // new
       const gst = Number(gstPercent);
       updateData.gstPercent = gst;
-      updateData.cgstPercent = gst / 2; // ← keep these in sync whenever gstPercent changes
+      updateData.cgstPercent = gst / 2;
       updateData.sgstPercent = gst / 2;
     }
+
+    // owner-set token limit. Whole number 1-999. Orders are still
+    // accepted past this (limit+1...); the limit only drives the owner's warning.
+    if (tokenLimit !== undefined && tokenLimit !== "") {
+      const limit = Number(tokenLimit);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 999) {
+        return res.status(400).json({
+          success: false,
+          message: "Token limit must be a whole number between 1 and 999",
+        });
+      }
+      updateData.tokenLimit = limit;
+    }
+
     const restaurant = await Restaurant.findOneAndUpdate(
       { userId: req.user._id },
       updateData,
@@ -83,11 +89,8 @@ const updateRestaurant = async (req, res) => {
     }
     res.json({ success: true, restaurant });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
-// logo removed entirely — no uploadLogo function
-
 module.exports = { getMyRestaurant, createRestaurant, updateRestaurant };
-

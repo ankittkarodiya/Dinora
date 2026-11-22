@@ -32,7 +32,7 @@ const subscribe = async (req, res) => {
 
     res.json({ success: true, message: "Subscribed to push notifications" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -46,7 +46,7 @@ const unsubscribe = async (req, res) => {
     await PushSubscription.deleteOne({ endpoint });
     res.json({ success: true, message: "Unsubscribed" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 

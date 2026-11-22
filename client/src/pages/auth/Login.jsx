@@ -1,3 +1,4 @@
+// light theme
 import { useState } from "react";
 import { loginApi } from "../../api/authApi";
 import toast from "react-hot-toast";
@@ -13,12 +14,11 @@ function Login() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    // username: "",
     email: "",
     password: "",
   });
 
-  const [submitting, setSubmitting] = useState(false); // add this state
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -36,11 +36,6 @@ const handleSubmit = async (e) => {
   try {
     const data = await loginApi(formData);
     if (data.success) {
-      // if(!getMyRestaurantApi()){
-      //   toast.success("Setup your restaurant to proceed");
-      // } else{
-      //   toast.success(data.message);
-      // }
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
       if (data.user.role === "customer") {
@@ -53,7 +48,7 @@ const handleSubmit = async (e) => {
             navigate("/restaurant/dashboard");
           }
           else navigate("/restaurant/setup");
-          
+
         } catch {
           navigate("/restaurant/setup");
         }
@@ -70,32 +65,24 @@ const handleSubmit = async (e) => {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 px-4">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl p-8 shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white">Dinora</h1>
+          <h1
+            className="text-4xl font-extrabold tracking-tight"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+          >
+            <span className="text-[#171717]">Din</span>
+            <span className="text-[#E34F36]">ora</span>
+          </h1>
 
-          <p className="text-slate-300 mt-2">Login to your account</p>
+          <p className="text-gray-600 mt-2">Login to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* <div>
-            <label className="block text-white mb-2 font-medium">
-              Name
-            </label>
-
-            <input
-              type="text"
-              name="username"
-              placeholder="Enter name"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-            />
-          </div> */}
 
           <div>
-            <label className="block text-white mb-2 font-medium">Email</label>
+            <label className="block text-gray-900 mb-2 font-medium">Email</label>
 
             <input
               type="email"
@@ -103,91 +90,49 @@ const handleSubmit = async (e) => {
               placeholder="Enter email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-0 focus:ring-blue-500"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600 focus:ring-0 transition"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="font-medium text-white">Password</label>
+              <label className="font-medium text-gray-900">Password</label>
 
               <button
                 type="button"
                 onClick={() => navigate("/forgot-password")}
-                className="text-sm text-blue-400 hover:text-blue-300 transition"
+                className="text-sm text-blue-600 hover:text-blue-700 transition"
               >
                 Forgot Password?
               </button>
             </div>
 
-            {/* <input
-              type="password"
-              name="password"
-              placeholder="Enter password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-            /> */}
             <PasswordInput
               name="password"
               value={formData.password}
-              // onChange={(e) => set("password", e.target.value)}
               onChange={handleChange}
               placeholder="Enter password"
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-slate-400 outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
             />
 
           </div>
 
-          {/* <div>
-            <label className="block text-white mb-2 font-medium">Role</label>
-
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="customer" className="text-black">
-                Customer
-              </option>
-
-              <option value="restaurant_admin" className="text-black">
-                Restaurant Admin
-              </option>
-            </select>
-          </div> */}
-
           <button
             type="submit"
-            disabled={submitting} //new to fix logout
+            disabled={submitting}
             className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition-all duration-300 hover:bg-blue-700 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {/* Login */}
             {submitting ? "Logging in..." : "Login"}
           </button>
 
-            {/* google login authentication */}
-          {/* <button>Login with Google</button> */}
-          {/* <button
-            onClick={() => {
-              (window.open("http://localhost:3000/api/auth/google"), "_self");
-            }}
-            className="w-full flex items-center justify-center gap-3          rounded-xl border border-white/20 bg-white/10 py-3 font-semibold          text-white backdrop-blur-md transition-all duration-300         hover:bg-white/20 hover:-translate-y-0.5"
-          >
-            <FcGoogle size={22} />
-            Login with Google
-          </button> */}
-
-
         </form>
 
-            <div className="mt-6 text-center text-sm text-slate-400">
+            <div className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?
 
             <Link
               to={"/register"}
-              className="ml-1 font-semibold text-blue-500 hover:text-blue-400"
+              className="ml-1 font-semibold text-blue-600 hover:text-blue-700"
             >
               Register
             </Link>

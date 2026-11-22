@@ -101,7 +101,7 @@ const getAnalytics = async (req, res) => {
       paymentSplit: { online: onlinePaid, cash: cashPaid, unpaid },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 

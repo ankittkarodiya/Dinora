@@ -15,9 +15,18 @@ const getReviews = async (req, res) => {
       return res.status(404).json({ success: false, message: "Restaurant not found" });
     }
 
-    const reviews = await Review.find({ restaurantId })
-      .populate("menuItemId", "name image")
-      .sort({ createdAt: -1 });
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const skip = (page - 1) * limit;
+
+    const [reviews, totalReviewCount] = await Promise.all([
+      Review.find({ restaurantId })
+        .populate("menuItemId", "name image")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Review.countDocuments({ restaurantId }),
+    ]);
 
     // calculate avg per item
     const itemStats = {};
@@ -51,15 +60,15 @@ const getReviews = async (req, res) => {
       success: true,
       reviews,
       groupedByItem,
-      totalReviews: reviews.length,
+      totalReviews: totalReviewCount,
       overallAvg,
+      pagination: { page, limit, total: totalReviewCount, pages: Math.ceil(totalReviewCount / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.status(500).json({ success: false, message: isProduction ? "Something went wrong" : error.message });
   }
 };
 
 module.exports = { getReviews };
-
-
 

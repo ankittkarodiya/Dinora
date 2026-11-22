@@ -13,7 +13,7 @@ const getCategories = async (req, res) => {
     const categories = await Category.find({ restaurantId }).sort({ order: 1, createdAt: 1 });
     res.json({ success: true, categories });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -26,7 +26,7 @@ const createCategory = async (req, res) => {
     const category = await Category.create({ restaurantId, name });
     res.status(201).json({ success: true, category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -42,7 +42,7 @@ const updateCategory = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: "Category not found" });
     res.json({ success: true, category });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
@@ -53,7 +53,7 @@ const deleteCategory = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: "Category not found" });
     res.json({ success: true, message: "Category deleted" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }
 };
 
