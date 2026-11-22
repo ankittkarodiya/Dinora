@@ -185,13 +185,16 @@ export default function MenuManager() {
         toast.success("Item added");
       }
       handleCancel();
+      // commenting out this to stop scrolling
+
       // Scroll back to the item that was just edited
-      if (wasEditing) {
-        setTimeout(() => {
-          const el = document.getElementById(`menu-item-${wasEditing}`);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 100);
-      }
+      // if (wasEditing) {
+      //   setTimeout(() => {
+      //     const el = document.getElementById(`menu-item-${wasEditing}`);
+      //     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      //   }, 100);
+      // }
+
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
@@ -216,7 +219,9 @@ export default function MenuManager() {
     setImageFile(null);
     setRemoveExistingImage(false);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // commenting this to stop scrolling
+    // window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancel = () => {
@@ -353,7 +358,11 @@ export default function MenuManager() {
       </div>
 
       {showForm && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
+        // <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
+
+        <div className={editing ? "fixed inset-0 z-100 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" : ""}>
+        <div className={`rounded-2xl border border-gray-200 bg-white p-6 space-y-5 ${editing ? "w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" : ""}`}>
+
           <h3 className="text-gray-900 font-bold text-base">
             {editing ? "Edit Item" : "New Menu Item"}
           </h3>
@@ -592,6 +601,7 @@ export default function MenuManager() {
             >
               Cancel
             </button>
+            </div>
           </div>
         </div>
       )}
