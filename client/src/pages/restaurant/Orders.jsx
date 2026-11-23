@@ -25,14 +25,23 @@ const getLocalDateString = (date = new Date()) => {
 };
 
 const STATUS_STYLE = {
-  Pending: "bg-amber-50 text-amber-600",
-  Accepted: "bg-violet-50 text-violet-600",
-  Preparing: "bg-blue-50 text-blue-600",
+  Pending: "bg-gray-100 text-amber-600",
+  Accepted: "bg-gray-100 text-violet-600",
+  Preparing: "bg-gray-100 text-blue-600",
   Ready: "bg-blue-50 text-blue-600", // legacy — no longer created
-  Served: "bg-green-50 text-green-600",
+  Served: "bg-gray-100 text-green-600",
   Completed: "bg-gray-100 text-gray-600",
   Cancelled: "bg-red-50 text-red-600",
 };
+// const STATUS_STYLE = {
+//   Pending: "bg-amber-50 text-amber-600",
+//   Accepted: "bg-violet-50 text-violet-600",
+//   Preparing: "bg-blue-50 text-blue-600",
+//   Ready: "bg-blue-50 text-blue-600", // legacy — no longer created
+//   Served: "bg-green-50 text-green-600",
+//   Completed: "bg-gray-100 text-gray-600",
+//   Cancelled: "bg-red-50 text-red-600",
+// };
 
 // Order flow: Pending → Accepted → Preparing → Served → Completed.
 const BASE_STATUSES = ["Pending", "Accepted", "Preparing", "Served", "Completed", "Cancelled"];
