@@ -25,23 +25,14 @@ const getLocalDateString = (date = new Date()) => {
 };
 
 const STATUS_STYLE = {
-  Pending: "bg-gray-100 text-amber-600",
-  Accepted: "bg-gray-100 text-violet-600",
-  Preparing: "bg-gray-100 text-blue-600",
+  Pending: "bg-amber-50 text-amber-600",
+  Accepted: "bg-violet-50 text-violet-600",
+  Preparing: "bg-blue-50 text-blue-600",
   Ready: "bg-blue-50 text-blue-600", // legacy — no longer created
-  Served: "bg-gray-100 text-green-600",
+  Served: "bg-green-50 text-green-600",
   Completed: "bg-gray-100 text-gray-600",
   Cancelled: "bg-red-50 text-red-600",
 };
-// const STATUS_STYLE = {
-//   Pending: "bg-amber-50 text-amber-600",
-//   Accepted: "bg-violet-50 text-violet-600",
-//   Preparing: "bg-blue-50 text-blue-600",
-//   Ready: "bg-blue-50 text-blue-600", // legacy — no longer created
-//   Served: "bg-green-50 text-green-600",
-//   Completed: "bg-gray-100 text-gray-600",
-//   Cancelled: "bg-red-50 text-red-600",
-// };
 
 // Order flow: Pending → Accepted → Preparing → Served → Completed.
 const BASE_STATUSES = ["Pending", "Accepted", "Preparing", "Served", "Completed", "Cancelled"];
@@ -413,12 +404,23 @@ export default function Orders() {
             const edge = isCancelled
               ? "border-red-500/25 bg-red-50/40 opacity-80"
               : order.status === "Pending"
-                ? "border-amber-500/40 bg-white"
+                ? "border-gray-200 bg-white"
                 : order.status === "Accepted"
-                  ? "border-violet-500/40 bg-white"
+                  ? "border-gray-200 bg-white"
                   : isCashPending
-                    ? "border-green-500/40 bg-white"
+                    ? "border-gray-200 bg-white"
                     : "border-gray-200 bg-white";
+
+
+            // const edge = isCancelled
+            //   ? "border-red-500/25 bg-red-50/40 opacity-80"
+            //   : order.status === "Pending"
+            //     ? "border-amber-500/40 bg-white"
+            //     : order.status === "Accepted"
+            //       ? "border-violet-500/40 bg-white"
+            //       : isCashPending
+            //         ? "border-green-500/40 bg-white"
+            //         : "border-gray-200 bg-white";
 
             return (
               <div key={order._id} className={`rounded-2xl border p-5 transition-all ${edge}`}>
