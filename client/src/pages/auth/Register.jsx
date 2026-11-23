@@ -90,11 +90,11 @@ return (
 
       {/* Right Side */}
       <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10">
-        <div className="w-full max-w-md text-center mb-9">
+        <div className="w-full max-w-md mb-9">
 
             {/* Logo — mobile only (desktop shows it in the left panel) */}
             <h1
-              className="lg:hidden text-4xl font-extrabold tracking-tight"
+              className="lg:hidden text-4xl font-extrabold tracking-tight text-center"
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
               <span className="text-[#171717]">Din</span>
