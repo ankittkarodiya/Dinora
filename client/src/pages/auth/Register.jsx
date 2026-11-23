@@ -86,9 +86,21 @@ return (
           </div>
         </div>
       </div>
+
+
       {/* Right Side */}
       <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10">
         <div className="w-full max-w-md">
+
+            {/* Logo — mobile only (desktop shows it in the left panel) */}
+            <h1
+              className="lg:hidden text-4xl font-extrabold tracking-tight mb-4"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              <span className="text-[#171717]">Din</span>
+              <span className="text-[#E34F36]">ora</span>
+            </h1>
+
           <div className="mb-8 text-center lg:text-left">
             <h2 className="text-3xl font-bold text-gray-900">
               Create account
