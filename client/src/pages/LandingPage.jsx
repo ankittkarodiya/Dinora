@@ -659,7 +659,7 @@ export default function LandingPage() {
             </div>
 
             {/* Legal */}
-            <div>
+            {/* <div>
               <h4 className="text-white font-semibold text-sm mb-4 font-mono tracking-wide uppercase">
                 Legal
               </h4>
@@ -689,7 +689,12 @@ export default function LandingPage() {
                   Contact Us
                 </button>
               </div>
-            </div>
+            </div> */}
+
+
+
+
+
 
             {/* Contact */}
             <div>
