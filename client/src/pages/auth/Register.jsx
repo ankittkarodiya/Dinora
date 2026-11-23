@@ -94,7 +94,7 @@ return (
 
             {/* Logo — mobile only (desktop shows it in the left panel) */}
             <h1
-              className="lg:hidden text-4xl font-extrabold tracking-tight mb-4"
+              className="lg:hidden text-4xl font-extrabold tracking-tight mb-4 text-center"
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
               <span className="text-[#171717]">Din</span>
