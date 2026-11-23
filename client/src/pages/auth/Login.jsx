@@ -67,6 +67,7 @@ const handleSubmit = async (e) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-2xl">
+        
         <div className="text-center mb-8">
           <h1
             className="text-4xl font-extrabold tracking-tight"
