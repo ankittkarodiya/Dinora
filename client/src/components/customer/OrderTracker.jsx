@@ -68,9 +68,17 @@ const ACCEPTED_DISPLAY_MS = 2 * 60 * 1000; // 2 minutes
 const getDisplayStatus = (order) => {
   if (
     order.status === "Preparing" &&
-    order.acceptedAt
+    // order.acceptedAt
+
+    // new
+    order.slipPrintedAt
+
   ) {
-    const elapsed = Date.now() - new Date(order.acceptedAt).getTime();
+    // const elapsed = Date.now() - new Date(order.acceptedAt).getTime();
+
+    // new
+    const elapsed = Date.now() - new Date(order.slipPrintedAt).getTime();
+
     if (elapsed < ACCEPTED_DISPLAY_MS) return "Accepted";
   }
   return order.status;
@@ -106,9 +114,16 @@ export default function OrderTracker({ sessionId, isOpen, onClose }) {
   useEffect(() => {
     const timers = [];
     orders.forEach((order) => {
-      if (order.status === "Preparing" && order.acceptedAt) {
+      // if (order.status === "Preparing" && order.acceptedAt) {
+      //   const remaining =
+      //     ACCEPTED_DISPLAY_MS - (Date.now() - new Date(order.acceptedAt).getTime());
+
+      // new
+      if (order.status === "Preparing" && order.slipPrintedAt) {
         const remaining =
-          ACCEPTED_DISPLAY_MS - (Date.now() - new Date(order.acceptedAt).getTime());
+          ACCEPTED_DISPLAY_MS - (Date.now() - new Date(order.slipPrintedAt).getTime());
+
+
         if (remaining > 0) {
           timers.push(setTimeout(() => forceUpdate((n) => n + 1), remaining + 100));
         }

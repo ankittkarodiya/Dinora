@@ -18,8 +18,14 @@ const CARD_CLASS_CANCELLED = "border-gray-200 bg-white opacity-80";
 // Show "Accepted" for 2 min after restaurant accepts, even if backend moved to Preparing
 const ACCEPTED_DISPLAY_MS = 2 * 60 * 1000;
 const getDisplayStatus = (order) => {
-  if (order.status === "Preparing" && order.acceptedAt) {
-    const elapsed = Date.now() - new Date(order.acceptedAt).getTime();
+  // if (order.status === "Preparing" && order.acceptedAt) {
+  //   const elapsed = Date.now() - new Date(order.acceptedAt).getTime();
+
+    // new
+    if (order.status === "Preparing" && order.slipPrintedAt) {
+    const elapsed = Date.now() - new Date(order.slipPrintedAt).getTime();
+
+
     if (elapsed < ACCEPTED_DISPLAY_MS) return "Accepted";
   }
   return order.status;
