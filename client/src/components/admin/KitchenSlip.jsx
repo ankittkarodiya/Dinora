@@ -17,8 +17,11 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
 
   const now = new Date();
   const receiptNo = `INV-${now.getFullYear()}-${order._id.slice(-4).toUpperCase()}`;
-  const customerName = order.customerId?.username || "Walk-in Guest";
-  const customerPhone = order.customerId?.phone?.replace(/^\+?91/, "") || ""; // ← strips the +91 prefix for display only
+  // const customerName = order.customerId?.username || "Walk-in Guest";
+  const customerName = order.customerId?.username || order.guestName || "Walk-in Guest"
+
+  // const customerPhone = order.customerId?.phone?.replace(/^\+?91/, "") || ""; // ← strips the +91 prefix for display only
+  const customerPhone = (order.customerId?.phone || order.guestPhone)?.replace(/^\+?91/, "") || ""; // ← strips the +91 prefix for display only
 
   const paymentMode = order.paymentMethod === "online" ? "Online" : "Cash";
   const cgstPercent = order.gstPercent / 2;
@@ -53,9 +56,7 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
         <div class="divider"></div>
         <table>
           <tr><td>Date: ${now.toLocaleDateString("en-IN")}</td><td class="right">Time: ${now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td></tr>
-          // <tr><td>Table:</td><td class="right bold">${order.tableId?.name || "—"}</td></tr>
-
-          // new for name
+          
           <tr><td>Order Point:</td><td class="right bold">${order.tableId?.name || "—"}</td></tr>
         </table>
         <div class="divider"></div>

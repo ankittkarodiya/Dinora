@@ -447,9 +447,20 @@ export default function Orders() {
                         )}
                       </div>
                       <div className="text-gray-600 text-xs mt-0.5">
-                        {order.customerId?.username || "Guest"}
+                        {/* {order.customerId?.username || "Guest"} */}
+
+                        {/* new */}
+                        {/* {order.customerId?.username || order.guestName || "Guest"}
+
                         {order.customerId?.phone && (
-                          <span className="text-gray-400"> · {order.customerId.phone.replace(/^\+?91/, "")}</span>
+                          <span className="text-gray-400"> · {order.customerId.phone.replace(/^\+?91/, "")}</span> */}
+
+                        {/* new */}
+                        {order.customerId?.username || order.guestName || "Guest"}
+                        {(order.customerId?.phone || order.guestPhone) && (
+                          <span className="text-gray-400"> · {(order.customerId?.phone || order.guestPhone).replace(/^\+?91/, "")}</span>
+                        
+
                         )}{" "}
                         · {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} at{" "}
                         {new Date(order.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}

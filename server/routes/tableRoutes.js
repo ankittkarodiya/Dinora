@@ -1,7 +1,7 @@
 // after kiosk
 const express = require("express");
 const router = express.Router();
-const { getTables, createTable, setTableKiosk, deleteTable } = require("../controllers/tableController");
+const { getTables, createTable, setTableKiosk, generateKioskTable, deleteTable } = require("../controllers/tableController");
 const { protect } = require("../middlewares/authMiddleware");
 const { authorize } = require("../middlewares/roleMiddleware");
 
@@ -14,7 +14,11 @@ router.use(checkSubscription); // ← add this after authorize ← must run befo
 
 router.get("/", getTables);
 router.post("/", createTable);
-router.patch("/:id/kiosk", setTableKiosk); // ← new: Pro-only self-ordering kiosk toggle
+// router.patch("/:id/kiosk", setTableKiosk); // ← new: Pro-only self-ordering kiosk toggle
+
+// new
+router.post("/kiosk", generateKioskTable);
+
 router.delete("/:id", deleteTable);
 
 module.exports = router;

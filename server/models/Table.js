@@ -12,10 +12,10 @@ const tableSchema = new mongoose.Schema(
       required: [true, "Table name is required"],
       trim: true,
     },
-    capacity: {
-      type: Number,
-      default: 4,
-    },
+    // capacity: {
+    //   type: Number,
+    //   default: 4,
+    // },
     isOccupied: {
       type: Boolean,
       default: false,
@@ -25,6 +25,13 @@ const tableSchema = new mongoose.Schema(
     // refuses cash for its orders. Existing tables default to false, so
     // nothing changes for them.
     isKiosk: {
+      type: Boolean,
+      default: false,
+    },
+
+    // The ONE dedicated self-ordering kiosk of a restaurant. Permanent marker:
+    // stays true even if the kiosk is switched off on a plan downgrade.
+    isKioskTable: {
       type: Boolean,
       default: false,
     },

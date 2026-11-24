@@ -16,8 +16,14 @@ export const deleteTableApi = async (id) => {
   return res.data;
 };
 
-export const setTableKioskApi = async (id, isKiosk) => {
-  const res = await axiosInstance.patch(`/tables/${id}/kiosk`, { isKiosk });
+// export const setTableKioskApi = async (id, isKiosk) => {
+//   const res = await axiosInstance.patch(`/tables/${id}/kiosk`, { isKiosk });
+//   return res.data;
+// };
+
+// new
+export const generateKioskApi = async () => {
+  const res = await axiosInstance.post("/tables/kiosk");
   return res.data;
 };
 

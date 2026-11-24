@@ -110,9 +110,11 @@ export default function CounterOrder() {
 
     const name = customerName.trim();
     const phone = customerPhone.replace(/\D/g, "");
-    if ((name && !phone) || (!name && phone)) {
-      return toast.error("Enter both name and phone, or leave both empty");
-    }
+
+    // if ((name && !phone) || (!name && phone)) {
+    //   return toast.error("Enter both name and phone, or leave both empty");
+    // }
+
     if (phone && phone.length !== 10) {
       return toast.error("Phone number must be 10 digits");
     }
@@ -329,7 +331,10 @@ export default function CounterOrder() {
 
           {/* customer (optional) */}
           <div className="mt-5 space-y-2">
-            <div className="text-xs font-medium text-gray-600">Customer (optional)</div>
+            <div className="text-xs font-medium text-gray-600">
+                Customer (optional)
+                {/* Customer (optional: name, phone, both, or leave empty) */}
+            </div>
             <input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}

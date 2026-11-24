@@ -49,6 +49,12 @@ const orderSchema = new mongoose.Schema(
     // self-ordering-kiosk orders are created hidden and revealed to the kitchen
     // only after the payment is verified
     visibleToKitchen: { type: Boolean, default: true },
+
+    // new
+    // counter orders: name typed at the counter when no phone was given
+    guestName: { type: String, default: "", trim: true },
+    guestPhone: { type: String, default: "", trim: true },
+
   },
   { timestamps: true }
 );

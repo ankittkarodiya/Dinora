@@ -259,30 +259,55 @@ const createCounterOrder = async (req, res) => {
     // the restaurant's hidden "Counter" table (created on first use)
     const table = await Table.findOneAndUpdate(
       { restaurantId, isCounter: true },
-      { $setOnInsert: { restaurantId, name: "Counter", capacity: 1, isCounter: true } },
+      // { $setOnInsert: { restaurantId, name: "Counter", capacity: 1, isCounter: true } },
+      { $setOnInsert: { name: "Counter", } },
+
       { upsert: true, new: true },
     );
 
     // optional customer (same matching rules as the QR flow)
+    // let customerId = null;
+    // if (customerName?.trim() && customerPhone?.trim()) {
+    //   const cleanPhone = customerPhone.trim().replace(/\D/g, "").slice(-10);
+    //   let customer = await Customer.findOne({
+    //     $or: [
+    //       { phone: cleanPhone, restaurantId },
+    //       { phone: `+91${cleanPhone}`, restaurantId },
+    //       { phone: `91${cleanPhone}`, restaurantId },
+    //     ],
+    //   });
+    //   if (!customer) {
+    //     customer = await Customer.create({
+    //       username: customerName.trim(),
+    //       phone: cleanPhone,
+    //       restaurantId,
+    //     });
+    //   }
+    //   customerId = customer._id;
+    // }
+
+    // new
+    // optional customer details: name, phone, both, or neither
+    const cleanName = (customerName || "").trim();
+    const cleanPhone = (customerPhone || "").replace(/\D/g, "").slice(-10);
+    if (cleanPhone && cleanPhone.length !== 10) {
+      return res.status(400).json({ success: false, message: "Phone number must be 10 digits" });
+    }
+
+    // Link to an EXISTING customer only. A counter order never creates one.
     let customerId = null;
-    if (customerName?.trim() && customerPhone?.trim()) {
-      const cleanPhone = customerPhone.trim().replace(/\D/g, "").slice(-10);
-      let customer = await Customer.findOne({
+    if (cleanPhone) {
+      const existing = await Customer.findOne({
         $or: [
           { phone: cleanPhone, restaurantId },
           { phone: `+91${cleanPhone}`, restaurantId },
           { phone: `91${cleanPhone}`, restaurantId },
         ],
       });
-      if (!customer) {
-        customer = await Customer.create({
-          username: customerName.trim(),
-          phone: cleanPhone,
-          restaurantId,
-        });
-      }
-      customerId = customer._id;
+      if (existing) customerId = existing._id;
     }
+
+
 
     const now = new Date();
 
@@ -301,6 +326,12 @@ const createCounterOrder = async (req, res) => {
       sessionId: session._id,
       tableId: table._id,
       customerId,
+
+      // new
+      // guestName,
+      guestName: cleanName,
+      guestPhone: cleanPhone,
+
       items: orderItems,
       subtotal,
       gstPercent,

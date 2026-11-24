@@ -5,7 +5,8 @@ import {
   getTablesApi,
   createTableApi,
   deleteTableApi,
-  setTableKioskApi,
+  // setTableKioskApi,
+  generateKioskApi,
 } from "../../api/tableApi";
 import { getMyRestaurantApi } from "../../api/restaurantApi";
 import { useSubscription } from "../../hooks/useSubscription";
@@ -26,6 +27,10 @@ export default function Tables() {
   });
   const tables = tablesData || []; // ← always a safe array, even before the first fetch resolves
 
+  // new for genrating a one kiosk
+  const kioskTable = tables.find((t) => t.isKioskTable) || null;
+  const regularTables = tables.filter((t) => !t.isKioskTable);
+
   // ── Fetch restaurant profile ────────────────────────────────────────
   // Cached under ["restaurant"] — a SHARED key. Settings.jsx and
   // RestaurantLayout.jsx will use this exact same key too, so all three
@@ -45,7 +50,8 @@ export default function Tables() {
   const loading = tablesLoading || restaurantLoading;
 
   // ── Local UI-only state (not fetched data — stays as normal useState) ─
-  const [form, setForm] = useState({ name: "", capacity: "" });
+  // const [form, setForm] = useState({ name: "", capacity: "" });
+  const [form, setForm] = useState({ name: "" });
   const [qrTable, setQrTable] = useState(null); // which table's QR modal is currently open, if any
   const [adding, setAdding] = useState(false); // true while "Add Table" request is in flight
   const [deleteModal, setDeleteModal] = useState(null); // which table's delete-confirmation modal is open, if any
@@ -59,13 +65,14 @@ export default function Tables() {
 
   // ── Add a new table ──────────────────────────────────────────────────
   const handleAdd = async () => {
-    if (!form.name.trim() || !form.capacity) return;
+    // if (!form.name.trim() || !form.capacity) return;
+    if ( !form.name.trim() ) return;
     if (adding) return; // guard against double-clicks while a request is already in flight
     setAdding(true);
     try {
       const data = await createTableApi({
         name: form.name,
-        capacity: Number(form.capacity),
+        // capacity: Number(form.capacity),
       });
       // ← patches the cached ["tables"] list directly — every component
       // reading this query (just this page, for now) sees the new table
@@ -74,7 +81,8 @@ export default function Tables() {
         ...(old || []),
         data.table,
       ]);
-      setForm({ name: "", capacity: "" });
+      // setForm({ name: "", capacity: "" });
+      setForm({ name: "" });
       toast.success("Table added");
     } catch (error) {
       // special-cased error: hitting the plan's table limit gets its own message
@@ -95,20 +103,44 @@ export default function Tables() {
   // login, online payment only, shows a token and resets for the next
   // customer. The server refuses to enable it unless online payments
   // actually work (Razorpay linked on a paid plan).
-  const [togglingKioskId, setTogglingKioskId] = useState(null);
-  const handleToggleKiosk = async (table) => {
-    if (togglingKioskId) return;
-    setTogglingKioskId(table._id);
+
+  // const [togglingKioskId, setTogglingKioskId] = useState(null);
+  // const handleToggleKiosk = async (table) => {
+  //   if (togglingKioskId) return;
+  //   setTogglingKioskId(table._id);
+  //   try {
+  //     const data = await setTableKioskApi(table._id, !table.isKiosk);
+  //     queryClient.setQueryData(["tables"], (old) => (old || []).map((t) => (t._id === table._id ? data.table : t)));
+  //     toast.success(data.table.isKiosk ? "Self-ordering kiosk mode ON" : "Back to normal table QR");
+  //   } catch (error) {
+  //     toast.error(error.response?.data?.message || "Could not change mode");
+  //   } finally {
+  //     setTogglingKioskId(null);
+  //   }
+  // };
+
+
+  // new for one kiosk
+  // ── Self kiosk: one per restaurant, created/re-enabled from its own card ──
+  const [generatingKiosk, setGeneratingKiosk] = useState(false);
+  const handleGenerateKiosk = async () => {
+    if (generatingKiosk) return;
+    setGeneratingKiosk(true);
     try {
-      const data = await setTableKioskApi(table._id, !table.isKiosk);
-      queryClient.setQueryData(["tables"], (old) => (old || []).map((t) => (t._id === table._id ? data.table : t)));
-      toast.success(data.table.isKiosk ? "Self-ordering kiosk mode ON" : "Back to normal table QR");
+      const data = await generateKioskApi();
+      queryClient.setQueryData(["tables"], (old) => [
+        ...(old || []).filter((t) => t._id !== data.table._id),
+        data.table,
+      ]);
+      toast.success("Self kiosk is ready");
+      setQrTable(data.table); // open its QR right away
     } catch (error) {
-      toast.error(error.response?.data?.message || "Could not change mode");
+      toast.error(error.response?.data?.message || "Could not set up the kiosk");
     } finally {
-      setTogglingKioskId(null);
+      setGeneratingKiosk(false);
     }
   };
+
 
   // ── Delete flow — click opens confirmation modal, confirm actually deletes ─
   const handleDeleteClick = (table) => {
@@ -291,7 +323,10 @@ export default function Tables() {
         <h2 className="font-display text-gray-900 font-semibold text-3xl">Tables & QR Codes</h2>
         <p className="text-gray-600 text-sm mt-1">
           Add tables and generate QR codes for customers to scan ·{" "}
-          {tables.length} tables
+          {/* {tables.length} tables */}
+
+          {/* new for one kiosk other than tables */}
+          {regularTables.length} tables
         </p>
       </div>
 
@@ -312,7 +347,8 @@ export default function Tables() {
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600 disabled:opacity-50"
             />
           </div>
-          <div className="w-32">
+
+          {/* <div className="w-32">
             <label className="block text-gray-600 text-xs font-bold uppercase tracking-wide mb-2">
               Capacity
             </label>
@@ -326,7 +362,8 @@ export default function Tables() {
               disabled={adding}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600 disabled:opacity-50"
             />
-          </div>
+          </div> */}
+
           <button
             onClick={handleAdd}
             disabled={adding}
@@ -337,15 +374,57 @@ export default function Tables() {
         </div>
       </div>
 
+      {/* new for one kiosk */}
+      {/* self-ordering kiosk — one per restaurant, can't be deleted */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="text-4xl">🖥️</div>
+        <div className="flex-1">
+          <h3 className="text-gray-900 font-bold text-base">Self-ordering Kiosk</h3>
+          <p className="text-gray-600 text-sm mt-1">
+            One QR for your counter or entrance. Customers order and pay online on their own, no table needed.
+          </p>
+          {!isPro && (
+            <p className="text-gray-400 text-xs mt-1">Pro feature. Upgrade in Settings to use it.</p>
+          )}
+        </div>
+        {isPro &&
+          (kioskTable?.isKiosk ? (
+            <button
+              onClick={() => setQrTable(kioskTable)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98]"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>View Kiosk QR</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleGenerateKiosk}
+              disabled={generatingKiosk}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:opacity-50"
+            >
+              {generatingKiosk
+                ? "Please wait..."
+                : kioskTable
+                  ? "Turn kiosk back on"
+                  : "Generate Self Kiosk"}
+            </button>
+          ))}
+      </div>
+
+
+
+
       {/* tables grid — empty state, or a card per table */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tables.length === 0 ? (
+        {/* {tables.length === 0 ? ( */}
+        {regularTables.length === 0 ? (
           <div className="col-span-3 rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-600">
             <div className="font-semibold">No tables yet</div>
             <div className="text-sm mt-1">Add your first table above</div>
           </div>
         ) : (
-          tables.map((table) => (
+          // tables.map((table) => (
+          regularTables.map((table) => (
             <div
               key={table._id}
               className="rounded-2xl border border-gray-200 bg-white p-5 text-center"
@@ -354,21 +433,21 @@ export default function Tables() {
               <div className="text-gray-900 font-bold text-lg">{table.name}</div>
 
               <div className="text-gray-600 text-sm mt-1 mb-4">
-                Capacity: {table.capacity} people
+                {/* Capacity: {table.capacity} people */}
               </div>
 
-              {isPro && table.isKiosk && (
+              {/* {isPro && table.isKiosk && (
                 <div className="inline-block mb-3 text-[11px] font-bold uppercase tracking-wide text-blue-600 bg-blue-50 rounded-full px-3 py-1">
                   Self-ordering kiosk
                 </div>
-              )}
+              )} */}
 
               <div className="text-gray-400 text-xs mb-4 break-all bg-gray-50 rounded-lg px-3 py-2">
                 /menu/{restaurant?.slug}/{table._id}
               </div>
 
               {/* kiosk toggle — Pro only */}
-              {isPro && (
+              {/* {isPro && (
                 <button
                   onClick={() => handleToggleKiosk(table)}
                   disabled={togglingKioskId === table._id}
@@ -380,7 +459,7 @@ export default function Tables() {
                       ? "Switch back to table QR"
                       : "Use as self-ordering kiosk"}
                 </button>
-              )}
+              )} */}
 
               <div className="flex gap-2">
 
@@ -419,7 +498,8 @@ export default function Tables() {
               {qrTable.name}
             </h3>
             <p className="text-gray-600 text-sm mb-6">
-              Capacity: {qrTable.capacity} people · Scan to open menu
+              {/* Capacity: {qrTable.capacity} people · Scan to open menu */}
+              Scan to open menu
             </p>
             <div className="bg-white rounded-2xl p-4 inline-block mb-6">
               <img

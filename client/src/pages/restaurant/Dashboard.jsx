@@ -147,7 +147,10 @@ export default function Dashboard() {
   );
   const topItemEntry = Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0] || null;
 
-  const regularTables = tables.filter((t) => !t.isKiosk);
+  // const regularTables = tables.filter((t) => !t.isKiosk);
+  // new
+  const regularTables = tables.filter((t) => !t.isKioskTable);
+
   const occupiedIds = new Set(
     orders.filter((o) => LIVE_STATUSES.includes(o.status)).map((o) => o.tableId?._id || o.tableId),
   );
