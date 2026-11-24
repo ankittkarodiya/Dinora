@@ -1,7 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import { getMyRestaurantApi } from "../../api/restaurantApi";
 
-export default function KitchenSlip({ order, onClose, onPrinted }) {
+// export default function KitchenSlip({ order, onClose, onPrinted }) {
+
+// new for counter orders
+export default function KitchenSlip({ order, onClose, onPrinted, hideNote = false, closeLabel = "Cancel" }) {
+
   const [restaurant, setRestaurant] = useState(null);
   const iframeRef = useRef(null);
 
@@ -49,7 +53,10 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
         <div class="divider"></div>
         <table>
           <tr><td>Date: ${now.toLocaleDateString("en-IN")}</td><td class="right">Time: ${now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</td></tr>
-          <tr><td>Table:</td><td class="right bold">${order.tableId?.name || "—"}</td></tr>
+          // <tr><td>Table:</td><td class="right bold">${order.tableId?.name || "—"}</td></tr>
+
+          // new for name
+          <tr><td>Order Point:</td><td class="right bold">${order.tableId?.name || "—"}</td></tr>
         </table>
         <div class="divider"></div>
         <table>
@@ -131,7 +138,9 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
               <span>Time: {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
             </div>
             <div className="flex justify-between">
-              <span>Table:</span>
+              {/* <span>Table:</span> */}
+
+              <span>Order Point:</span>
               <span className="font-bold">{order.tableId?.name || "—"}</span>
             </div>
             <div className="border-t border-dashed border-black my-2" />
@@ -195,7 +204,10 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
             onClick={onClose}
             className="flex-1 py-3 border border-white/20 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm"
           >
-            Cancel
+            {/* Cancel */}
+
+            {/* new for counter orders */}
+            {closeLabel}
           </button>
 
           <button
@@ -218,9 +230,18 @@ export default function KitchenSlip({ order, onClose, onPrinted }) {
 </button>
 
         </div>
-        <p className="text-center text-slate-500 text-xs mt-3">
+
+        {/* <p className="text-center text-slate-500 text-xs mt-3">
           Printing moves order to "Preparing"
-        </p>
+        </p> */}
+
+        {/* new for counter orders */}
+        {!hideNote && (
+          <p className="text-center text-slate-500 text-xs mt-3">
+            Printing moves order to "Preparing"
+          </p>
+        )}
+
       </div>
     </div>
   );

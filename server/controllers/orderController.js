@@ -1,6 +1,15 @@
 const Order = require("../models/Order");
 const Restaurant = require("../models/Restaurant");
 
+// new for counter orders
+const Table = require("../models/Table");
+const Session = require("../models/Session");
+const MenuItem = require("../models/MenuItem");
+const Customer = require("../models/Customer");
+
+
+
+
 const getRestaurantId = async (userId) => {
   const restaurant = await Restaurant.findOne({ userId });
   return restaurant?._id || null;
@@ -184,4 +193,141 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-module.exports = { getOrders, acceptOrder, markSlipPrinted, acceptAndPrint, updateOrderStatus, cancelOrder };
+
+// new for counter orders
+// POST /api/orders/counter
+// Admin places a walk-in order at the counter. It is created already
+// Completed + paid, so it counts in revenue and needs no accept/serve steps.
+// body: { items: [{ menuItemId, qty, portion }], customerName?, customerPhone?,
+//         paymentMethod: "cash" | "online" }
+const createCounterOrder = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ userId: req.user._id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: "Restaurant not found" });
+    }
+    const restaurantId = restaurant._id;
+
+    const { items, customerName, customerPhone, paymentMethod } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "No items in order" });
+    }
+    for (const i of items) {
+      if (!i.menuItemId || !Number.isInteger(i.qty) || i.qty < 1 || i.qty > 50) {
+        return res.status(400).json({ success: false, message: "Invalid item in order" });
+      }
+    }
+
+    const payMethod = paymentMethod === "online" ? "online" : "cash";
+
+    // real prices from the DB — never trust the client
+    const dbItems = await MenuItem.find({
+      _id: { $in: items.map((i) => i.menuItemId) },
+      restaurantId,
+    });
+    const dbItemMap = new Map(dbItems.map((m) => [m._id.toString(), m]));
+
+    const orderItems = [];
+    for (const i of items) {
+      const dbItem = dbItemMap.get(String(i.menuItemId));
+      if (!dbItem) {
+        return res.status(400).json({ success: false, message: "An item in the order no longer exists" });
+      }
+      if (dbItem.isAvailable === false) {
+        return res.status(400).json({ success: false, message: `${dbItem.name} is currently unavailable` });
+      }
+      const portion = i.portion === "half" || i.portion === "full" ? i.portion : null;
+      const price =
+        portion === "half" && dbItem.halfPrice != null ? dbItem.halfPrice : dbItem.price;
+
+      orderItems.push({
+        menuItemId: dbItem._id,
+        name: dbItem.name,
+        price,
+        qty: i.qty,
+        isVeg: dbItem.isVeg,
+        portion,
+      });
+    }
+
+    const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const gstPercent = restaurant.gstPercent ?? 5;
+    const gstAmount = Math.round(((subtotal * gstPercent) / 100) * 100) / 100;
+    const totalAmount = Math.round((subtotal + gstAmount) * 100) / 100;
+
+    // the restaurant's hidden "Counter" table (created on first use)
+    const table = await Table.findOneAndUpdate(
+      { restaurantId, isCounter: true },
+      { $setOnInsert: { restaurantId, name: "Counter", capacity: 1, isCounter: true } },
+      { upsert: true, new: true },
+    );
+
+    // optional customer (same matching rules as the QR flow)
+    let customerId = null;
+    if (customerName?.trim() && customerPhone?.trim()) {
+      const cleanPhone = customerPhone.trim().replace(/\D/g, "").slice(-10);
+      let customer = await Customer.findOne({
+        $or: [
+          { phone: cleanPhone, restaurantId },
+          { phone: `+91${cleanPhone}`, restaurantId },
+          { phone: `91${cleanPhone}`, restaurantId },
+        ],
+      });
+      if (!customer) {
+        customer = await Customer.create({
+          username: customerName.trim(),
+          phone: cleanPhone,
+          restaurantId,
+        });
+      }
+      customerId = customer._id;
+    }
+
+    const now = new Date();
+
+    const session = await Session.create({
+      restaurantId,
+      tableId: table._id,
+      status: "completed",
+      totalAmount,
+      paymentMethod: payMethod,
+      paymentStatus: "paid",
+      paidAt: now,
+    });
+
+    const order = await Order.create({
+      restaurantId,
+      sessionId: session._id,
+      tableId: table._id,
+      customerId,
+      items: orderItems,
+      subtotal,
+      gstPercent,
+      gstAmount,
+      totalAmount,
+      status: "Completed",
+      acceptedAt: now,
+      slipPrintedAt: now,
+      paymentMethod: payMethod,
+      paymentStatus: "paid",
+      tokenNumber: null,
+      tokenActive: false,
+      visibleToKitchen: true,
+    });
+
+    await order.populate("tableId", "name capacity");
+    await order.populate("customerId", "username phone");
+
+    res.status(201).json({ success: true, order });
+  } catch (error) {
+    console.error("COUNTER ORDER ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message,
+    });
+  }
+};
+
+
+module.exports = { getOrders, acceptOrder, markSlipPrinted, acceptAndPrint, updateOrderStatus, cancelOrder, createCounterOrder };

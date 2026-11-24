@@ -15,6 +15,7 @@ import {
   Folders,
   QrCode,
   ClipboardList,
+  Store,
   ChartColumnIncreasing,
   Settings,
   Star,
@@ -218,7 +219,8 @@ function LayoutContent({ children }) {
 
         {/* bottom actions */}
         <div className="px-3 py-4 space-y-1" style={{ borderTop: "1px solid #e4e4e4" }}>
-          {restaurant && previewTableId ? (
+
+          {/* {restaurant && previewTableId ? (
             <a
               href={`/menu/${restaurant.slug}/${previewTableId}`}
               target="_blank"
@@ -235,7 +237,36 @@ function LayoutContent({ children }) {
               <TabletSmartphone className="w-4.5 h-4.5" style={{ color: "#ccc" }} />
               <span>Preview (Setup first)</span>
             </div>
-          )}
+          )} */}
+
+          {/* new for counter orders */}
+            <NavLink
+            to="/restaurant/counter"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer hover:bg-gray-100 active:scale-[0.98]"
+            style={({ isActive }) =>
+              isActive
+                ? { backgroundColor: "#2563eb", color: "#fff" }
+                : { color: "#555" }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Store
+                  className="w-4.5 h-4.5"
+                  style={{ color: isActive ? "#fff" : "#2563eb" }}
+                />
+                <span>Counter Order</span>
+                <ChevronRight
+                  className="w-4 h-4 ml-auto"
+                  style={{ color: isActive ? "#fff" : "#ccc" }}
+                />
+              </>
+            )}
+          </NavLink>
+
+
+
           <button
             onClick={() => setShowLogoutConfirm(true)}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-red-50"

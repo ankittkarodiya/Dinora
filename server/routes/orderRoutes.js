@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getOrders, acceptOrder, markSlipPrinted, acceptAndPrint,
-  updateOrderStatus, cancelOrder,
+  updateOrderStatus, cancelOrder, createCounterOrder,
 } = require("../controllers/orderController");
 
 const { confirmCashPayment } = require("../controllers/paymentController");
@@ -17,6 +17,10 @@ router.use(authorize("restaurant_admin"));
 router.use(checkSubscription); // ← add this after authorize
 
 router.get("/", getOrders);
+
+// new for counter orders
+router.post("/counter", createCounterOrder);
+
 router.patch("/:id/accept", acceptOrder);
 router.patch("/:id/print", markSlipPrinted);
 router.patch("/:id/accept-print", acceptAndPrint); // ← new: Print Bill = accept + send to kitchen

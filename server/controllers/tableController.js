@@ -15,7 +15,11 @@ const getTables = async (req, res) => {
       return res.status(404).json({ success: false, message: "Restaurant not found" });
     }
 
-    const tables = await Table.find({ restaurantId }).sort({ createdAt: 1 });
+    // const tables = await Table.find({ restaurantId }).sort({ createdAt: 1 });
+
+    // new for counter order
+    const tables = await Table.find({ restaurantId, isCounter: { $ne: true } }).sort({ createdAt: 1 });
+
     res.json({ success: true, tables });
   } catch (error) {
     res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
@@ -31,7 +35,11 @@ const createTable = async (req, res) => {
     }
 
     // enforce plan's table limit
-    const currentCount = await Table.countDocuments({ restaurantId });
+    // const currentCount = await Table.countDocuments({ restaurantId });
+
+    // new for counter orders
+    const currentCount = await Table.countDocuments({ restaurantId, isCounter: { $ne: true } });
+
     const maxAllowed = req.planLimits?.maxTables ?? 5;
 
     if (currentCount >= maxAllowed) {

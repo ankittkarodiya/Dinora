@@ -17,6 +17,10 @@ import Categories from "../pages/restaurant/Categories";
 import MenuManager from "../pages/restaurant/MenuManager";
 import Tables from "../pages/restaurant/Tables";
 import Orders from "../pages/restaurant/Orders";
+
+// new for ocunter orders
+import CounterOrder from "../pages/restaurant/CounterOrder";
+
 import Reviews from "../pages/restaurant/Reviews";
 import RestaurantLayout from "../layouts/RestaurantLayout";
 import RestaurantSetup from "../pages/restaurant/RestaurantSetup";
@@ -91,6 +95,10 @@ export default function AppRoutes() {
                 <Route path="menu" element={<MenuManager />} />
                 <Route path="tables" element={<Tables />} />
                 <Route path="orders" element={<Orders />} />
+
+                {/* new for counter orders */}
+                <Route path="counter" element={<CounterOrder />} />
+
                 <Route path="reviews" element={<Reviews />} />
                 {/* new 👇*/}
                 <Route path="analytics" element={<Analytics />} />

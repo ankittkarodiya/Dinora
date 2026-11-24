@@ -28,6 +28,12 @@ const tableSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // new for counter order
+    isCounter: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

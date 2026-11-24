@@ -40,6 +40,14 @@ export const confirmCashPaymentApi = async (orderId) => {
 };
 
 
+// new for counter orders
+// admin places a counter (walk-in) order — created already Completed + paid
+export const createCounterOrderApi = async (payload) => {
+  const res = await axiosInstance.post("/orders/counter", payload);
+  return res.data;
+};
+
+
 
 
 
