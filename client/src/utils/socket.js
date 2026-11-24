@@ -1,5 +1,12 @@
 import { io } from "socket.io-client";
 
+// new
+import { getToken } from "./authStorage";
+
+
+
+
+
 // Socket.io attaches directly to the raw HTTP server, not through an
 // Express route — so it connects to the server's root, not the "/api"
 // prefix your normal REST calls use. This strips a trailing "/api" off
@@ -13,7 +20,12 @@ let socket = null;
 // for server-side auth.
 export const getSocket = () => {
   if (!socket) {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
+
+    // new
+    const token = getToken();
+
+
     socket = io(SOCKET_URL, {
       withCredentials: true,
       autoConnect: true,

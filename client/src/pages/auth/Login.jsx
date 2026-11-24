@@ -10,6 +10,11 @@ import { FcGoogle } from "react-icons/fc";
 
 import PasswordInput from "../../components/common/PasswordInput";
 
+// new
+import { saveSession, setPendingSession, clearPendingSession } from "../../utils/authStorage";
+
+
+
 function Login() {
   const navigate = useNavigate();
 
@@ -28,6 +33,43 @@ function Login() {
   };
 
   // handlesubmit
+// const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   if (submitting) return; // ← hard guard: a click while already in-flight does nothing
+//   setSubmitting(true);
+
+//   try {
+//     const data = await loginApi(formData);
+//     if (data.success) {
+//       localStorage.setItem("token", data.accessToken);
+//       localStorage.setItem("user", JSON.stringify(data.user));
+//       if (data.user.role === "customer") {
+//         navigate("/customer");
+//       } else if (data.user.role === "restaurant_admin") {
+//         try {
+//           const res = await getMyRestaurantApi();
+//           if (res.restaurant) {
+//             toast.success(data.message);
+//             navigate("/restaurant/dashboard");
+//           }
+//           else navigate("/restaurant/setup");
+
+//         } catch {
+//           navigate("/restaurant/setup");
+//         }
+//       }
+//     } else {
+//       toast.error(data.message || "Login failed");
+//     }
+//   } catch (error) {
+//     toast.error(error.response?.data?.message || "Something went wrong");
+//     console.error(error);
+//   } finally {
+//     setSubmitting(false); // ← always reset, success or failure
+//   }
+// };
+
+// new handleSubmit for restro link with name
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (submitting) return; // ← hard guard: a click while already in-flight does nothing
@@ -36,23 +78,32 @@ const handleSubmit = async (e) => {
   try {
     const data = await loginApi(formData);
     if (data.success) {
-      localStorage.setItem("token", data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const token = data.accessToken;
+      // until we know which restaurant this is, API calls use this in-memory token
+      setPendingSession(token, data.user);
+
       if (data.user.role === "customer") {
         navigate("/customer");
+      } else if (data.user.role === "superadmin") {
+        saveSession("superadmin", token, data.user);
+        navigate("/superadmin/dashboard");
       } else if (data.user.role === "restaurant_admin") {
         try {
           const res = await getMyRestaurantApi();
           if (res.restaurant) {
+            saveSession(res.restaurant.slug, token, data.user);
             toast.success(data.message);
-            navigate("/restaurant/dashboard");
+            navigate(`/${res.restaurant.slug}/dashboard`);
+          } else {
+            saveSession("setup", token, data.user);
+            navigate("/setup");
           }
-          else navigate("/restaurant/setup");
-
         } catch {
-          navigate("/restaurant/setup");
+          saveSession("setup", token, data.user);
+          navigate("/setup");
         }
       }
+      clearPendingSession();
     } else {
       toast.error(data.message || "Login failed");
     }
@@ -64,10 +115,13 @@ const handleSubmit = async (e) => {
   }
 };
 
+
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 shadow-2xl">
-        
+
         <div className="text-center mb-8">
           <h1
             className="text-4xl font-extrabold tracking-tight"

@@ -1,19 +1,75 @@
 import { Navigate } from "react-router-dom";
+import { getToken, getUser } from "../utils/authStorage";
 
 export default function ProtectedRoute({ children, role }) {
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  // both are looked up by the restaurant name in the current URL
+  const token = getToken();
+  const user = getUser();
 
   if (!token || !user) return <Navigate to="/login" replace />;
 
   if (role && user.role !== role) {
     if (user.role === "superadmin") return <Navigate to="/superadmin/dashboard" replace />;
-    if (user.role === "restaurant_admin") return <Navigate to="/restaurant/dashboard" replace />;
     return <Navigate to="/login" replace />;
   }
 
   return children;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { Navigate } from "react-router-dom";
+
+// export default function ProtectedRoute({ children, role }) {
+//   const token = localStorage.getItem("token");
+//   const user = JSON.parse(localStorage.getItem("user") || "null");
+
+//   if (!token || !user) return <Navigate to="/login" replace />;
+
+//   if (role && user.role !== role) {
+//     if (user.role === "superadmin") return <Navigate to="/superadmin/dashboard" replace />;
+//     if (user.role === "restaurant_admin") return <Navigate to="/restaurant/dashboard" replace />;
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   return children;
+// }
 
 
 

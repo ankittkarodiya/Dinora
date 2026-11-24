@@ -3,6 +3,9 @@ import toast from "react-hot-toast";
 
 import { navigateTo } from "../utils/navigation"; // ← new, at the top of the file
 
+// new
+import { getToken, getPendingToken, clearSession, copySessionToSetup } from "../utils/authStorage";
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
@@ -30,7 +33,12 @@ axiosInstance.interceptors.request.use(
         config.headers.Authorization = `Bearer ${customerToken}`;
       }
     } else {
-      const adminToken = localStorage.getItem("token");
+      // const adminToken = localStorage.getItem("token");
+
+      // new
+      const adminToken = getToken() || getPendingToken();
+
+
       if (adminToken) {
         config.headers.Authorization = `Bearer ${adminToken}`;
       }
@@ -45,12 +53,26 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     // subscription expiry — redirect to renew, unrelated to session/token logic
+    // if (error.response?.data?.code === "SUBSCRIPTION_EXPIRED") {
+    //   if (window.location.pathname !== "/restaurant/setup") {
+    //     navigateTo("/restaurant/setup?renew=true");
+    //   }
+    //   return Promise.reject(error);
+    // }
+
+    // new
     if (error.response?.data?.code === "SUBSCRIPTION_EXPIRED") {
-      if (window.location.pathname !== "/restaurant/setup") {
-        navigateTo("/restaurant/setup?renew=true");
+      if (window.location.pathname !== "/setup") {
+        copySessionToSetup(); // carry the login over to the setup page
+        navigateTo("/setup?renew=true");
       }
       return Promise.reject(error);
     }
+
+
+
+
+
     // a genuine, confirmed second-device login — always a real logout,
     // never subject to retry, since this means another session took over
     if (error.response?.data?.code === "SESSION_INVALIDATED") {
@@ -64,8 +86,10 @@ axiosInstance.interceptors.response.use(
       }
       sessionInvalidatedHandled = true;
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("user");
+      // now this below
+      clearSession();
 
       // clear anything currently showing, then show ONLY this one message
       toast.dismiss();
@@ -97,8 +121,10 @@ axiosInstance.interceptors.response.use(
       }
       sessionInvalidatedHandled = true;
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("user");
+      // now this below
+      clearSession();
 
       toast.dismiss();
       toast.error("Your account has been deactivated. Contact support if you believe this is a mistake.");
@@ -140,8 +166,12 @@ axiosInstance.interceptors.response.use(
         } catch (retryError) {
           // retry failed too — this is very likely a genuine expired/invalid
           // token, fall through to the real logout below
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
+          // localStorage.removeItem("token");
+          // localStorage.removeItem("user");
+          // now this below
+          clearSession();
+
+
           if (!window.location.pathname.includes("/login")) {
             navigateTo("/login");
           }
@@ -150,8 +180,12 @@ axiosInstance.interceptors.response.use(
       }
       // safety net — should rarely be reached given the retry above
       // already handles both outcomes, but kept as a fallback
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("user");
+      // now this below
+      clearSession();
+
+
       if (!window.location.pathname.includes("/login")) {
         navigateTo("/login");
       }

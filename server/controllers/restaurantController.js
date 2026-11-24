@@ -21,7 +21,30 @@ const createRestaurant = async (req, res) => {
       return res.status(400).json({ success: false, message: "You already have a restaurant" });
     }
 
-    const slugTaken = await Restaurant.findOne({ slug });
+
+    // new
+    // the URL name must be clean, and can't clash with the app's own pages
+    const RESERVED_SLUGS = [
+      "login", "register", "register-verification", "verification",
+      "forgot-password", "verify-email", "change-password", "menu",
+      "customer", "superadmin", "restaurant", "setup", "api", "admin",
+      "dashboard", "settings", "orders", "tables", "analytics", "reviews",
+      "categories", "counter", "about", "pricing", "contact", "terms",
+      "privacy", "help", "support", "assets", "static", "new", "www",
+    ];
+    const cleanSlug = String(slug || "").trim().toLowerCase();
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cleanSlug)) {
+      return res.status(400).json({ success: false, message: "Use only letters, numbers and hyphens in the URL name" });
+    }
+    if (RESERVED_SLUGS.includes(cleanSlug)) {
+      return res.status(400).json({ success: false, message: "This URL name is reserved, please pick another" });
+    }
+
+
+    // const slugTaken = await Restaurant.findOne({ slug });
+    // new
+    const slugTaken = await Restaurant.findOne({ slug: cleanSlug });
+
     if (slugTaken) {
       return res.status(400).json({ success: false, message: "Slug already taken" });
     }
@@ -37,7 +60,15 @@ const createRestaurant = async (req, res) => {
 
     const restaurant = await Restaurant.create({
       userId: req.user._id,
-      name, slug, description, phone, address,
+      name,
+
+      // slug,
+      // new
+      slug: cleanSlug,
+      
+      description,
+      phone,
+      address,
       gstPercent: gstPercent ? Number(gstPercent) : 5,
       cgstPercent: finalGstPercent / 2,
       sgstPercent: finalGstPercent / 2,

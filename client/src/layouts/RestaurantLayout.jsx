@@ -28,15 +28,33 @@ import {
 
 import toast from "react-hot-toast";
 
+// new
+import { adminPath, getUser, clearSession } from "../utils/authStorage";
+
+
+
+
+// const navItems = [
+//   { to: "/restaurant/dashboard",  icon: LayoutDashboard,       label: "Dashboard" },
+//   { to: "/restaurant/categories", icon: Folders,               label: "Categories" },
+//   { to: "/restaurant/menu",       icon: UtensilsCrossed,       label: "Menu Items" },
+//   { to: "/restaurant/tables",     icon: QrCode,                label: "Tables & QR" },
+//   { to: "/restaurant/orders",     icon: ClipboardList,         label: "Orders" },
+//   { to: "/restaurant/reviews",    icon: Star,                  label: "Reviews" },
+//   { to: "/restaurant/analytics",  icon: ChartColumnIncreasing, label: "Analytics" },
+//   { to: "/restaurant/settings",   icon: Settings,              label: "Settings" },
+// ];
+
+// new
 const navItems = [
-  { to: "/restaurant/dashboard",  icon: LayoutDashboard,       label: "Dashboard" },
-  { to: "/restaurant/categories", icon: Folders,               label: "Categories" },
-  { to: "/restaurant/menu",       icon: UtensilsCrossed,       label: "Menu Items" },
-  { to: "/restaurant/tables",     icon: QrCode,                label: "Tables & QR" },
-  { to: "/restaurant/orders",     icon: ClipboardList,         label: "Orders" },
-  { to: "/restaurant/reviews",    icon: Star,                  label: "Reviews" },
-  { to: "/restaurant/analytics",  icon: ChartColumnIncreasing, label: "Analytics" },
-  { to: "/restaurant/settings",   icon: Settings,              label: "Settings" },
+  { to: "dashboard",  icon: LayoutDashboard,       label: "Dashboard" },
+  { to: "categories", icon: Folders,               label: "Categories" },
+  { to: "menu",       icon: UtensilsCrossed,       label: "Menu Items" },
+  { to: "tables",     icon: QrCode,                label: "Tables & QR" },
+  { to: "orders",     icon: ClipboardList,         label: "Orders" },
+  { to: "reviews",    icon: Star,                  label: "Reviews" },
+  { to: "analytics",  icon: ChartColumnIncreasing, label: "Analytics" },
+  { to: "settings",   icon: Settings,              label: "Settings" },
 ];
 
 // ── Outer export — wraps in real-time orders provider ──
@@ -68,7 +86,12 @@ function LayoutContent({ children }) {
   const { orders } = useOrders();
   const pendingCount = orders.filter((o) => o.status === "Pending").length;
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+  // const user = JSON.parse(localStorage.getItem("user") || "null");
+  // new
+  const user = getUser();
+
+
+
 
   // useEffect(() => {
   //   const fetchRestaurant = async () => {
@@ -115,8 +138,12 @@ function LayoutContent({ children }) {
   useEffect(() => {
     const status = restaurantError?.response?.status;
     if (status === 404 || status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("user");
+      // new
+      clearSession();
+
       navigate("/login");
     }
   }, [restaurantError, navigate]);
@@ -129,8 +156,13 @@ function LayoutContent({ children }) {
     } catch {
       // clear local state regardless
     }
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+
+    // localStorage.removeItem("token");
+    // localStorage.removeItem("user");
+    // new
+    clearSession();
+
+
     setTimeout(() => navigate("/login"), 300);
     navigate("/login");
   };
@@ -185,7 +217,11 @@ function LayoutContent({ children }) {
             return (
               <NavLink
                 key={item.to}
-                to={item.to}
+
+                // to={item.to}
+                // new
+                to={adminPath(item.to)}
+
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
@@ -241,7 +277,11 @@ function LayoutContent({ children }) {
 
           {/* new for counter orders */}
             <NavLink
-            to="/restaurant/counter"
+
+            // to="/restaurant/counter"
+            // new
+            to={adminPath("counter")}
+
             onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer hover:bg-gray-100 active:scale-[0.98]"
             style={({ isActive }) =>

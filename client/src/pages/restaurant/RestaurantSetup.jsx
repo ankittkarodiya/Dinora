@@ -13,6 +13,10 @@ import {
 } from "../../api/subscriptionApi";
 import toast from "react-hot-toast";
 
+// new
+import { promoteSetupSession } from "../../utils/authStorage";
+
+
 const PLANS = [
   {
     id: "basic",
@@ -124,7 +128,12 @@ export default function RestaurantSetup() {
           // let them choose a plan to reactivate, instead of bouncing
           // back to a dashboard that will just reject them again.
           if (data.restaurant.subscriptionStatus === "active") {
-            navigate("/restaurant/dashboard");
+
+            // navigate("/restaurant/dashboard");
+            // new
+            promoteSetupSession(data.restaurant.slug);
+            navigate(`/${data.restaurant.slug}/dashboard`);
+
             return;
           }
           setIsRenewal(true);
@@ -221,7 +230,13 @@ export default function RestaurantSetup() {
       queryClient.setQueryData(["restaurant"], data.restaurant); // ← seeds the cache Tables.jsx/Settings.jsx share, so their first visit is instant
       sessionStorage.removeItem("restaurantSetupForm"); // ← draft no longer needed once setup is done
       toast.success("10-day free trial started!");
-      navigate("/restaurant/dashboard");
+
+
+      // navigate("/restaurant/dashboard");
+      // new
+      promoteSetupSession(data.restaurant.slug);
+      navigate(`/${data.restaurant.slug}/dashboard`);
+
     } catch (error) {
       toast.error(error.response?.data?.message || "Could not start trial");
     } finally {
@@ -288,7 +303,13 @@ export default function RestaurantSetup() {
                 ? "Subscription renewed! Welcome back to Dinora"
                 : "You're all set! Your Dinora subscription is now active.",
             );
-            navigate("/restaurant/dashboard");
+
+
+            // navigate("/restaurant/dashboard");
+            // new
+            promoteSetupSession(restaurantData.restaurant.slug);
+            navigate(`/${restaurantData.restaurant.slug}/dashboard`);
+
           } catch (err) {
             toast.error(
               err.response?.data?.message ||

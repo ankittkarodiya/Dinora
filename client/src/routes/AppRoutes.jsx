@@ -76,7 +76,9 @@ export default function AppRoutes() {
       />
       {/* <Route path="/menu/:restaurantSlug/:tableId" element={<div>Customer Menu — Week 4</div>} /> */}
       <Route
-        path="/restaurant/setup"
+        // path="/restaurant/setup"
+        // new
+        path="/setup"
         element={
           <ProtectedRoute role="restaurant_admin">
             <RestaurantSetup />
@@ -85,7 +87,9 @@ export default function AppRoutes() {
       />
       {/* Restaurant Admin — all wrapped in layout */}
       <Route
-        path="/restaurant/*"
+        // path="/restaurant/*"
+        // new
+        path="/:slug/*"
         element={
           <ProtectedRoute role="restaurant_admin">
             <RestaurantLayout>

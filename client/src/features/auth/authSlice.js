@@ -1,12 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginApi, getMeApi } from "../../api/authApi";
 
+// new
+import { getToken, clearSession, setPendingSession } from "../../utils/authStorage";
+
+
+
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials, thunkAPI) => {
     try {
       const data = await loginApi(credentials);
-      localStorage.setItem("token", data.accessToken);
+      // localStorage.setItem("token", data.accessToken);
+
+      // new
+      setPendingSession(data.accessToken, data.user);
+
       return data.user;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -20,7 +29,11 @@ export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, thunkAPI) => {
     try {
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
+
+      // new
+      const token = getToken();
+
       if (!token) return thunkAPI.rejectWithValue("No token");
       const data = await getMeApi();
       return data.user;
@@ -34,7 +47,12 @@ export const loadUser = createAsyncThunk(
     catch (error) {
       // Only a real 401 means the session is dead
       if (error.response?.status === 401) {
-        localStorage.removeItem("token");
+
+        // localStorage.removeItem("token");
+
+        // new
+        clearSession();
+
         return thunkAPI.rejectWithValue("Session expired");
       }
       return thunkAPI.rejectWithValue("Could not verify session");
@@ -53,7 +71,12 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      localStorage.removeItem("token");
+      
+      // localStorage.removeItem("token");
+
+      // new
+      clearSession();
+
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;

@@ -1,5 +1,9 @@
 import { useNavigate } from "react-router-dom";
 
+// new
+import { adminPath } from "../../utils/authStorage";
+
+
 export default function UpgradeToProCard({ featureName = "This feature" }) {
   const navigate = useNavigate();
   return (
@@ -10,7 +14,13 @@ export default function UpgradeToProCard({ featureName = "This feature" }) {
         {featureName} is available on the Pro plan. Upgrade to unlock it.
       </p>
       <button
-        onClick={() => navigate("/restaurant/settings")}
+        onClick={() => 
+
+          // navigate("/restaurant/settings")
+          // new
+          navigate(adminPath("settings"))
+
+        }
         className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
       >
         Upgrade to Pro →

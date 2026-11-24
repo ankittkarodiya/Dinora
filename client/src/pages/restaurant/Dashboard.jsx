@@ -8,6 +8,10 @@ import { getReviewsApi } from "../../api/reviewApi";
 import { useSubscription } from "../../hooks/useSubscription";
 import { useOrders } from "../../context/OrdersContext";
 
+// new
+import { adminPath } from "../../utils/authStorage";
+
+
 import {
   HandCoins,
   Receipt,
@@ -321,7 +325,11 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-gray-900 font-bold text-base">Recent Orders</h3>
           <Link
-            to="/restaurant/orders"
+
+            // to="/restaurant/orders"
+            // new
+            to={adminPath("orders")}
+
             className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors"
           >
             View all →
