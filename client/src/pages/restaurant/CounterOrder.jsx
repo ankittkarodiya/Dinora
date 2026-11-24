@@ -376,7 +376,9 @@ export default function CounterOrder() {
             disabled={placing || cart.length === 0}
             className="mt-5 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {placing ? "Placing order..." : `Place order & print bill · ₹${total.toFixed(2)}`}
+            {/* {placing ? "Placing order..." : `Place order & print bill · ₹${total.toFixed(2)}`} */}
+
+            {placing ? "Placing order..." : `Place order`}
           </button>
         </div>
       </div>
