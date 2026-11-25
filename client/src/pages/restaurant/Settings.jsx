@@ -29,7 +29,7 @@ import { registerServiceWorker, subscribeToPush, unsubscribeFromPush } from "../
 import { subscribePushApi, unsubscribePushApi } from "../../api/pushApi";
 
 // new for plans
-import "../../config/plans"
+import { PLAN_NAMES, PLAN_FEATURES } from "../../config/plans"
 
 
 const PLANS = [
