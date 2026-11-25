@@ -1,6 +1,6 @@
 // after kiosk
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -29,6 +29,7 @@ import toast from "react-hot-toast";
 
 // new
 import { adminPath, getUser, clearSession } from "../utils/authStorage";
+import { disconnectSocket } from "../utils/socket";
 
 
 
@@ -88,6 +89,9 @@ function LayoutContent({ children }) {
   // const user = JSON.parse(localStorage.getItem("user") || "null");
   // new
   const user = getUser();
+
+  // new so other restro data cant be seen by any other restro
+  const queryClient = useQueryClient();
 
 
 
@@ -160,6 +164,10 @@ function LayoutContent({ children }) {
     // localStorage.removeItem("user");
     // new
     clearSession();
+
+    // new
+    queryClient.clear(); // forget this restaurant's cached data
+    disconnectSocket(); // leave this restaurant's live-order room
 
 
     setTimeout(() => navigate("/login"), 300);

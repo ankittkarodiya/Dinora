@@ -130,10 +130,19 @@ export default function Dashboard() {
   const todaysOrderCount = todaysOrders.length;
   const todaysCancelled = orders.filter((o) => isToday(o.createdAt) && o.status === "Cancelled").length;
 
+  // const avgOrderValue =
+  //   todaysOrderCount > 0
+  //     ? Math.round(todaysOrders.reduce((s, o) => s + o.totalAmount, 0) / todaysOrderCount)
+  //     : 0;
+
+  // new
+    // only orders that are actually Completed count towards the average
+  const completedToday = orders.filter((o) => o.status === "Completed" && isToday(o.createdAt));
   const avgOrderValue =
-    todaysOrderCount > 0
-      ? Math.round(todaysOrders.reduce((s, o) => s + o.totalAmount, 0) / todaysOrderCount)
+    completedToday.length > 0
+      ? Math.round(completedToday.reduce((s, o) => s + o.totalAmount, 0) / completedToday.length)
       : 0;
+      
 
   const pendingOrders = orders.filter((o) => o.status === "Pending").length;
   const preparingOrders = orders.filter((o) => o.status === "Preparing").length;

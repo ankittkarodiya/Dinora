@@ -12,6 +12,8 @@ import PasswordInput from "../../components/common/PasswordInput";
 
 // new
 import { saveSession, setPendingSession, clearPendingSession } from "../../utils/authStorage";
+import { useQueryClient } from "@tanstack/react-query";
+import { disconnectSocket } from "../../utils/socket";
 
 
 
@@ -24,6 +26,9 @@ function Login() {
   });
 
   const [submitting, setSubmitting] = useState(false);
+
+  // new
+  const queryClient = useQueryClient();
 
   const handleChange = (e) => {
     setFormData({
@@ -78,6 +83,10 @@ const handleSubmit = async (e) => {
   try {
     const data = await loginApi(formData);
     if (data.success) {
+      // new
+      queryClient.clear(); // never show the previous restaurant's data
+      disconnectSocket();
+
       const token = data.accessToken;
       // until we know which restaurant this is, API calls use this in-memory token
       setPendingSession(token, data.user);

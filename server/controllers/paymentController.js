@@ -172,7 +172,11 @@ const verifyPayment = async (req, res) => {
           .populate("tableId", "name capacity")
           .populate("customerId", "username phone");
         if (notifyOrder) {
-          getIO().to(`restaurant-${notifyOrder.restaurantId}`).emit("newOrder", notifyOrder);
+
+          // getIO().to(`restaurant-${notifyOrder.restaurantId}`).emit("newOrder", notifyOrder);
+          // new
+          await notifyNewOrder(notifyOrder);
+
         }
       } catch (notifyErr) {
         console.error("Kiosk order notify failed:", notifyErr.message);

@@ -1,3 +1,5 @@
+const Restaurant = require("../models/Restaurant");
+
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 
@@ -30,9 +32,22 @@ const initSocket = (httpServer, allowedOrigins) => {
   });
 
   io.on("connection", (socket) => {
-    socket.on("join-restaurant", (restaurantId) => {
-      if (restaurantId) socket.join(`restaurant-${restaurantId}`);
+
+    // socket.on("join-restaurant", (restaurantId) => {
+    //   if (restaurantId) socket.join(`restaurant-${restaurantId}`);
+    // });
+
+    // new
+      socket.on("join-restaurant", async (restaurantId) => {
+      try {
+        // only the restaurant's own owner may listen to its orders
+        const owns = await Restaurant.exists({ _id: restaurantId, userId: socket.userId });
+        if (owns) socket.join(`restaurant-${restaurantId}`);
+      } catch {
+        /* invalid id etc. — just don't join */
+      }
     });
+
   });
 
   return io;

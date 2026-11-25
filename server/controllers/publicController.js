@@ -10,6 +10,10 @@ const Review = require("../models/Review");
 
 const Customer = require("../models/Customer");
 
+// new
+const { sendNewOrderPush } = require("../utils/notifyKitchen");
+
+
 const getMenu = async (req, res) => {
   try {
     const { slug, tableId } = req.params;
@@ -216,34 +220,42 @@ const placeOrder = async (req, res) => {
       }
 
       // web-push notification (normal tables only)
-      try {
-        const webpush = require("../config/webPush");
-        const PushSubscription = require("../models/PushSubscription");
-        const subscriptions = await PushSubscription.find({ restaurantId });
+      // try {
+      //   const webpush = require("../config/webPush");
+      //   const PushSubscription = require("../models/PushSubscription");
+      //   const subscriptions = await PushSubscription.find({ restaurantId });
 
-        const payload = JSON.stringify({
-          title: "New Order!",
-          body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
-          image: "https://www.dinora.in/icons/notification-banner.jpg",
-        });
+      //   const payload = JSON.stringify({
+      //     title: "New Order!",
+      //     body: `${orderItems.length} item${orderItems.length !== 1 ? "s" : ""} · ${table?.name || "Unknown Table"}`,
+      //     image: "https://www.dinora.in/icons/notification-banner.jpg",
+      //   });
 
-        await Promise.allSettled(
-          subscriptions.map((sub) =>
-            webpush
-              .sendNotification(
-                { endpoint: sub.endpoint, keys: sub.keys },
-                payload,
-              )
-              .catch(async (err) => {
-                if (err.statusCode === 410) {
-                  await PushSubscription.deleteOne({ endpoint: sub.endpoint });
-                }
-              }),
-          ),
-        );
-      } catch (pushErr) {
-        console.error("Push notification failed:", pushErr.message);
-      }
+      //   await Promise.allSettled(
+      //     subscriptions.map((sub) =>
+      //       webpush
+      //         .sendNotification(
+      //           { endpoint: sub.endpoint, keys: sub.keys },
+      //           payload,
+      //         )
+      //         .catch(async (err) => {
+      //           if (err.statusCode === 410) {
+      //             await PushSubscription.deleteOne({ endpoint: sub.endpoint });
+      //           }
+      //         }),
+      //     ),
+      //   );
+      // } catch (pushErr) {
+      //   console.error("Push notification failed:", pushErr.message);
+      // }
+
+      // new
+      await sendNewOrderPush({
+        restaurantId,
+        itemCount: orderItems.length,
+        tableName: table?.name,
+      });
+
     }
 
     res.status(201).json({ success: true, order });
