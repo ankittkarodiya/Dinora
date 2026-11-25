@@ -1,6 +1,5 @@
 // after kiosk
 
-// 
 import { useQuery } from "@tanstack/react-query";
 
 import { useState, useEffect } from "react";
@@ -332,7 +331,20 @@ function LayoutContent({ children }) {
           >
             <Menu size={22} />
           </button>
-          <h1 className="font-bold text-lg" style={{ color: "#1a1a1a" }}>Dinora</h1>
+
+          {/* <h1 className="font-bold text-lg" style={{ color: "#1a1a1a" }}>Dinora</h1> */}
+          <h1
+            // className="font-bold text-lg"
+            className="font-bold text-xl tracking-tight"
+            style={{ 
+              // color: "#1a1a1a",
+              color: "#171717",
+              fontFamily: "'Outfit', sans-serif",
+            }}
+          >
+            {restaurant?.name || "Dinora"}
+          </h1>
+
           {pendingCount > 0 ? (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
               {pendingCount} new
