@@ -158,10 +158,37 @@ export default function Orders() {
     .filter((o) => o.status === "Completed" && o.paymentStatus === "paid")
     .reduce((s, o) => s + o.totalAmount, 0);
 
-  const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  // const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  // new
+  const pendingOrders = orders.filter((o) => o.status === "Pending");
+  const pendingCount = pendingOrders.length;
+
   const cashPendingOrders = orders.filter(
     (o) => o.paymentMethod === "cash" && o.paymentStatus !== "paid" && o.status === "Served",
   );
+
+  // new
+  // Jump to a banner's orders using the smallest date range that shows them all:
+  // only today's orders → "Today"; anything older (or a mix) → "All Time".
+  const showBannerOrders = (list, status) => {
+    const now = new Date();
+    const isTodayOrder = (o) => {
+      const d = new Date(o.createdAt);
+      return (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+      );
+    };
+    setStatusFilter(status);
+    if (list.every(isTodayOrder)) {
+      setPickedDate(getLocalDateString());
+      setDateMode("pick");
+    } else {
+      setDateMode("all");
+    }
+  };
+
 
   // tokens currently held by live orders; if they've outgrown the limit the
   // owner gets a heads-up (customers are never turned away)
@@ -292,10 +319,16 @@ export default function Orders() {
             </span>
           </div>
           <button
-            onClick={() => {
-              setStatusFilter("Pending");
-              setDateMode("all"); // so the banner's count and the visible list always match
-            }}
+            // onClick={() => {
+            //   setStatusFilter("Pending");
+            //   setDateMode("all"); // so the banner's count and the visible list always match
+            // }}
+
+            // new
+            onClick={() => 
+              showBannerOrders(pendingOrders, "Pending")
+            }
+
             className="text-amber-600 text-xs font-semibold"
           >
             View →
@@ -314,10 +347,16 @@ export default function Orders() {
             </span>
           </div>
           <button
-            onClick={() => {
-              setStatusFilter("Served");
-              setDateMode("all");
-            }}
+            // onClick={() => {
+            //   setStatusFilter("Served");
+            //   setDateMode("all");
+            // }}
+
+            // new
+            onClick={() => 
+              showBannerOrders(cashPendingOrders, "Served")
+            }
+
             className="text-green-600 text-xs font-semibold"
           >
             View →
