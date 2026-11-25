@@ -347,13 +347,29 @@ export default function MenuManager() {
           </p>
         </div>
         <button
+          // onClick={() => {
+          //   setShowForm(!showForm);
+          //   if (editing) handleCancel();
+          // }}
+          // new onClick
           onClick={() => {
-            setShowForm(!showForm);
-            if (editing) handleCancel();
+            if (showForm) {
+              handleCancel();
+            } else {
+              setEditing(null);
+              setForm(BLANK);
+              setImageFile(null);
+              setImagePreview(null);
+              setRemoveExistingImage(false);
+              setShowForm(true);
+            }
           }}
+
+
           className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
         >
-          {showForm && !editing ? "✕ Cancel" : "+ Add Item"}
+          {/* {showForm && !editing ? 'Cancel' : "Add Item"} */}
+          {showForm && !editing ? 'Add Item' : "Add Item"}
         </button>
       </div>
 
@@ -361,8 +377,15 @@ export default function MenuManager() {
         // <div className="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
         
         // {/* new to open a form and stop scrolling */}
-        <div className={editing ? "fixed inset-0 z-100 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" : ""}>
-        <div className={`rounded-2xl border border-gray-200 bg-white p-6 space-y-5 ${editing ? "w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" : ""}`}>
+        // <div className={editing ? "fixed inset-0 z-100 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" : ""}>
+        // new
+        <div className="fixed inset-0 z-100 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+
+
+        {/* <div className={`rounded-2xl border border-gray-200 bg-white p-6 space-y-5 ${editing ? "w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl" : ""}`}> */}
+        {/* new */}
+        <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 space-y-5 shadow-2xl">
+
 
           <h3 className="text-gray-900 font-bold text-base">
             {editing ? "Edit Item" : "New Menu Item"}

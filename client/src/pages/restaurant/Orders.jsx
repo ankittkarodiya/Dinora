@@ -114,7 +114,7 @@ export default function Orders() {
     try {
       const data = await confirmCashPaymentApi(orderId);
       updateOrderInList(orderId, data.order);
-      toast.success("Cash payment confirmed");
+      toast.success("Payment Received");
     } catch {
       toast.error("Failed to confirm");
     } finally {
@@ -628,7 +628,8 @@ export default function Orders() {
                         disabled={busy}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold disabled:opacity-50"
                       >
-                        {busy ? "Confirming..." : "Confirm Cash Received"}
+                        {busy ? "Confirming..." : "Confirm Payment"}
+
                       </button>
                     )}
                   </div>

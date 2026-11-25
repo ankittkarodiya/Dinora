@@ -514,7 +514,7 @@ export default function CartDrawer({
                     </svg>
                   </div>
                   <div className="text-left">
-                    <div className="text-ink font-bold text-sm">{payingOnline ? "Processing..." : "Pay Online"}</div>
+                    <div className="text-ink font-bold text-sm">{payingOnline ? "Processing..." : "Pay Now"}</div>
                     <div className="text-muted text-xs">UPI · Card · Net Banking</div>
                   </div>
                 </div>
@@ -530,7 +530,7 @@ export default function CartDrawer({
                 >
                   <div className="w-11 h-11 rounded-xl bg-ok-soft text-ok flex items-center justify-center text-xl font-bold">₹</div>
                   <div className="text-left">
-                    <div className="text-ink font-bold text-sm">{payingCash ? "Processing..." : "Pay with Cash"}</div>
+                    <div className="text-ink font-bold text-sm">{payingCash ? "Processing..." : "Pay Later"}</div>
                     <div className="text-muted text-xs">Hand over ₹{finalTotal.toFixed(2)} to staff</div>
                   </div>
                 </button>
