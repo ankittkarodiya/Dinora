@@ -134,7 +134,7 @@ function HeroVisual() {
     { n: "Garlic Naan", p: 60, veg: true, q: 0 },
   ];
   return (
-    <div className="relative mx-auto w-full max-w-md h-[460px] sm:h-[520px]">
+    <div className="relative mx-auto w-full max-w-md h-115 sm:h-130">
       <div className="absolute inset-x-8 top-10 bottom-0 rounded-[3rem] bg-blue-600/10 blur-3xl" />
 
       {/* phone */}
@@ -531,7 +531,7 @@ export default function LandingPage() {
 
       {/* ───────── final cta ───────── */}
       <section className="px-5 pb-20">
-        <div className="max-w-6xl mx-auto rounded-[2rem] bg-linear-to-br from-blue-600 to-blue-800 px-8 py-14 sm:py-16 text-center text-white">
+        <div className="max-w-6xl mx-auto rounded-4xl bg-linear-to-br from-blue-600 to-blue-800 px-8 py-14 sm:py-16 text-center text-white">
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight" style={HEAD}>Ready for your first QR order?</h2>
           <p className="mt-4 text-blue-100 text-lg max-w-xl mx-auto">
             Join the first {FOUNDING_OFFER.spots} restaurants and get {PLAN_NAMES.pro} free.
