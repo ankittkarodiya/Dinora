@@ -542,10 +542,12 @@ export default function Tables() {
             >
               🔗 Copy Link
             </button>
+            
             <div className="bg-blue-50 rounded-xl px-4 py-3 text-blue-600 text-xs text-left mb-6">
               💡 Print this QR and place it on {qrTable.name}. Customers scan to
               open the menu directly — no app needed.
             </div>
+            
             <div className="flex gap-3">
               <button
                 onClick={handlePrintQr}

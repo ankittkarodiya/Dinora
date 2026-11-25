@@ -24,7 +24,7 @@ export default function ContactUs() {
             </div>
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</div>
             {href ? (
-              <a href={href} className="mt-1 block font-semibold text-gray-900 hover:text-blue-600 break-words">
+              <a href={href} className="mt-1 block font-semibold text-gray-900 hover:text-blue-600 wrap-break-word">
                 {value}
               </a>
             ) : (
