@@ -227,7 +227,7 @@ export default function CounterOrder() {
                         </div>
                       </div>
 
-                      <div className="mt-2 text-[13px] font-semibold text-gray-900 leading-tight line-clamp-2 min-h-[2rem]">
+                      <div className="mt-2 text-[13px] font-semibold text-gray-900 leading-tight line-clamp-2 min-h-8">
                         {item.name}
                       </div>
 
@@ -254,7 +254,7 @@ export default function CounterOrder() {
                         ) : (
                           <>
                             <span className="text-sm font-bold text-gray-900 mr-auto pl-0.5">₹{item.price}</span>
-                            <div className="w-[88px] flex">
+                            <div className="w-22 flex">
                               <QtyControl
                                 qty={qtyMap[fullKey] || 0}
                                 label="Add"
@@ -284,7 +284,7 @@ export default function CounterOrder() {
             <h2 className="font-bold text-gray-900">Current order</h2>
           </div>
 
-          <div className="max-h-80 lg:max-h-none lg:flex-1 lg:min-h-[96px] overflow-y-auto pr-1">
+          <div className="max-h-80 lg:max-h-none lg:flex-1 lg:min-h-24 overflow-y-auto pr-1">
             {cart.length === 0 ? (
               <div className="text-sm text-gray-400 py-6 text-center">Tap Add on an item to start</div>
             ) : (
@@ -393,7 +393,8 @@ export default function CounterOrder() {
               disabled={placing || cart.length === 0}
               className="mt-4 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {placing ? "Placing order..." : `Place order & print bill · ₹${total.toFixed(2)}`}
+              {/* {placing ? "Placing order..." : `Place order & print bill · ₹${total.toFixed(2)}`} */}
+              {placing ? "Placing order..." : `Place order`}
             </button>
           </div>
         </div>
