@@ -2,6 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { LEGAL } from "../../config/legal";
 
+import { useLayoutEffect } from "react";
+
+
 const LINKS = [
   { to: "/privacy-policy", label: "Privacy Policy" },
   { to: "/terms-and-conditions", label: "Terms & Conditions" },
@@ -10,6 +13,11 @@ const LINKS = [
 ];
 
 export function Section({ title, children }) {
+
+    useLayoutEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, []);
+
   return (
     <section className="mt-9">
       <h2 className="text-xl font-bold text-gray-900 mb-3">{title}</h2>

@@ -1,7 +1,15 @@
 import LegalLayout, { Section, UL } from "./LegalLayout";
 import { LEGAL } from "../../config/legal";
 
+// import { useLayoutEffect } from "react";
+
 export default function PrivacyPolicy() {
+
+    // useLayoutEffect(() => {
+    //     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    // }, []);
+
+
   return (
     <LegalLayout
       title="Privacy Policy"

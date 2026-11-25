@@ -2,6 +2,9 @@ import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import LegalLayout from "./LegalLayout";
 import { LEGAL } from "../../config/legal";
 
+import { useLayoutEffect } from "react";
+
+
 const ROWS = [
   { icon: Mail, label: "Email", value: LEGAL.supportEmail, href: `mailto:${LEGAL.supportEmail}` },
   { icon: Phone, label: "Phone", value: LEGAL.supportPhone, href: `tel:${LEGAL.supportPhone.replace(/\s/g, "")}` },
@@ -10,6 +13,11 @@ const ROWS = [
 ];
 
 export default function ContactUs() {
+
+    useLayoutEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, []);
+
   return (
     <LegalLayout
       title="Contact Us"
