@@ -149,7 +149,8 @@ export default function Settings() {
       phone: restaurant.phone || "",
       address: restaurant.address || "",
       gstNumber: restaurant.gstNumber || "",
-      gstPercent: String(restaurant.gstPercent || "5"),
+      // gstPercent: String(restaurant.gstPercent || "5"),
+      gstPercent: String(restaurant.gstPercent ?? "5"),
     });
     if (restaurant.razorpayKeyId) {
       setRazorpayForm({ keyId: restaurant.razorpayKeyId, keySecret: "" });
@@ -458,6 +459,10 @@ export default function Settings() {
                       setProfileForm((p) => ({ ...p, gstPercent: e.target.value }))
                     }
                     className={inputCls}
+
+                    // new
+                    min="0"
+                    step="any"
                   />
                 </div>
               </div>

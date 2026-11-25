@@ -29,6 +29,10 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
   const cgstAmount = order.gstAmount / 2;
   const sgstAmount = order.gstAmount / 2;
 
+  // new
+  const hasGst = Number(order.gstPercent) > 0;
+
+
   const receiptHTML = `
     <!DOCTYPE html>
     <html>
@@ -67,7 +71,9 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
 
 
           <tr><td>PAYMENT MODE</td><td class="right">${paymentMode}</td></tr>
-          ${restaurant?.gstNumber ? `<tr><td>GSTIN</td><td class="right">${restaurant.gstNumber}</td></tr>` : ""}
+
+          ${restaurant?.gstNumber && hasGst ? `<tr><td>GSTIN</td><td class="right">${restaurant.gstNumber}</td></tr>` : ""}
+
         </table>
         <div class="divider"></div>
         <table>
@@ -75,9 +81,12 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
         </table>
         <div class="divider"></div>
         <table>
+
+          ${hasGst ? `
           <tr><td>SUBTOTAL</td><td class="right">₹${order.subtotal.toFixed(2)}</td></tr>
           <tr><td>CGST (${cgstPercent}%)</td><td class="right">₹${cgstAmount.toFixed(2)}</td></tr>
-          <tr><td>SGST (${sgstPercent}%)</td><td class="right">₹${sgstAmount.toFixed(2)}</td></tr>
+          <tr><td>SGST (${sgstPercent}%)</td><td class="right">₹${sgstAmount.toFixed(2)}</td></tr>` : ""}
+
           <tr class="bold large"><td>TOTAL</td><td class="right">₹${order.totalAmount.toFixed(2)}</td></tr>
         </table>
         <div class="divider"></div>
@@ -164,7 +173,9 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
               <span>PAYMENT MODE</span>
               <span>{paymentMode}</span>
             </div>
-            {restaurant?.gstNumber && (
+            {/* {restaurant?.gstNumber && ( */}
+            {/* new */}
+            {restaurant?.gstNumber && hasGst && (
               <div className="flex justify-between">
                 <span>GSTIN</span>
                 <span>{restaurant.gstNumber}</span>
@@ -178,18 +189,25 @@ export default function KitchenSlip({ order, onClose, onPrinted, hideNote = fals
               </div>
             ))}
             <div className="border-t border-dashed border-black my-2" />
-            <div className="flex justify-between">
-              <span>SUBTOTAL</span>
-              <span>₹{order.subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>CGST ({cgstPercent}%)</span>
-              <span>₹{cgstAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>SGST ({sgstPercent}%)</span>
-              <span>₹{sgstAmount.toFixed(2)}</span>
-            </div>
+
+
+            {hasGst && ( <>
+              <div className="flex justify-between">
+                <span>SUBTOTAL</span>
+                <span>₹{order.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>CGST ({cgstPercent}%)</span>
+                <span>₹{cgstAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>SGST ({sgstPercent}%)</span>
+                <span>₹{sgstAmount.toFixed(2)}</span>
+              </div>
+            </> )}
+
+            
+
             <div className="flex justify-between font-bold text-sm mt-1">
               <span>TOTAL</span>
               <span>₹{order.totalAmount.toFixed(2)}</span>

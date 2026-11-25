@@ -1,8 +1,7 @@
 import { Navigate } from "react-router-dom";
-import { getToken, getUser } from "../utils/authStorage";
+import { getToken, getUser, getAdminSlug, rememberSlug } from "../utils/authStorage";
 
 export default function ProtectedRoute({ children, role }) {
-  // both are looked up by the restaurant name in the current URL
   const token = getToken();
   const user = getUser();
 
@@ -13,8 +12,65 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
+  rememberSlug(getAdminSlug()); // so the installed app reopens this restaurant
   return children;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { Navigate } from "react-router-dom";
+// import { getToken, getUser } from "../utils/authStorage";
+
+// export default function ProtectedRoute({ children, role }) {
+//   // both are looked up by the restaurant name in the current URL
+//   const token = getToken();
+//   const user = getUser();
+
+//   if (!token || !user) return <Navigate to="/login" replace />;
+
+//   if (role && user.role !== role) {
+//     if (user.role === "superadmin") return <Navigate to="/superadmin/dashboard" replace />;
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   return children;
+// }
 
 
 

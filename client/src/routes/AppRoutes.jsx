@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
@@ -43,6 +43,18 @@ const RestaurantDashboard = () => (
   </div>
 );
 
+
+// new
+// QR codes printed before the URL change still work: /menu/restro/table → /restro/menu/table
+function LegacyMenuRedirect() {
+  const { restaurantSlug, tableId } = useParams();
+  const { search } = useLocation();
+  return <Navigate to={`/${restaurantSlug}/menu/${tableId}${search}`} replace />;
+}
+
+
+
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -53,11 +65,19 @@ export default function AppRoutes() {
       <Route path="/verify-email/:email" element={<VerifyEmail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/change-password/:email" element={<ChangePassword />} />
+
+
       {/* <Route path="/customer" element={<CustomerDashboard />} /> */}
-      <Route
+      {/* <Route
         path="/menu/:restaurantSlug/:tableId"
         element={<CustomerMenuPage />}
-      />
+      /> */}
+
+      {/* new */}
+      <Route path="/:restaurantSlug/menu/:tableId" element={<CustomerMenuPage />} />
+      <Route path="/menu/:restaurantSlug/:tableId" element={<LegacyMenuRedirect />} />
+
+
       {/* <Route path="/restaurant-admin" element={<RestaurantAdminDashboard />} /> */}
       {/* <Route path="/dashboard" element={<Dashboard />} /> */}
       // add these routes — public, no ProtectedRoute needed

@@ -56,7 +56,9 @@ const createRestaurant = async (req, res) => {
       return res.status(400).json({ success: false, message: "A plan must be selected" });
     }
 
-    const finalGstPercent = gstPercent ? Number(gstPercent) : 5;
+    // const finalGstPercent = gstPercent ? Number(gstPercent) : 5;
+    // new
+    const finalGstPercent = gstPercent !== undefined && gstPercent !== "" ? Number(gstPercent) : 5;
 
     const restaurant = await Restaurant.create({
       userId: req.user._id,
@@ -65,11 +67,14 @@ const createRestaurant = async (req, res) => {
       // slug,
       // new
       slug: cleanSlug,
-      
+
       description,
       phone,
       address,
-      gstPercent: gstPercent ? Number(gstPercent) : 5,
+      // gstPercent: gstPercent ? Number(gstPercent) : 5,
+      // new
+      gstPercent: finalGstPercent,
+
       cgstPercent: finalGstPercent / 2,
       sgstPercent: finalGstPercent / 2,
       gstNumber: gstNumber || "",
@@ -92,6 +97,12 @@ const updateRestaurant = async (req, res) => {
     const updateData = { name, description, phone, address, gstNumber };
     if (gstPercent !== undefined && gstPercent !== "") {
       const gst = Number(gstPercent);
+
+      // new
+      if (isNaN(gst) || gst < 0 || gst > 100) {
+        return res.status(400).json({ success: false, message: "GST must be between 0 and 100" });
+      }
+
       updateData.gstPercent = gst;
       updateData.cgstPercent = gst / 2;
       updateData.sgstPercent = gst / 2;

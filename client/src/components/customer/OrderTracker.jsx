@@ -278,8 +278,15 @@ export default function OrderTracker({ sessionId, isOpen, onClose }) {
                     </div>
 
                     {/* Subtotal / GST / Total grid */}
-                    <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                      <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                    {/* <div className="grid grid-cols-3 gap-2 mb-3 text-xs"> */}
+                    {/* new */}
+                    <div className={`grid ${Number(order.gstPercent) > 0 ? "grid-cols-3" : "grid-cols-1"} gap-2 mb-3 text-xs`}>
+
+                      {Number(order.gstPercent) > 0 && (
+                        <>
+                          {/* Subtotal cell */}
+                          {/* CGST+SGST cell */}
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                         <div className="text-gray-400">Subtotal</div>
                         <div className="text-gray-900 font-semibold">₹{(order.subtotal ?? order.totalAmount ?? 0).toFixed(2)}</div>
                       </div>
@@ -287,6 +294,14 @@ export default function OrderTracker({ sessionId, isOpen, onClose }) {
                         <div className="text-gray-400">CGST+SGST{order.gstPercent ? ` (${order.gstPercent}%)` : ""}</div>
                         <div className="text-gray-900 font-semibold">₹{(order.gstAmount ?? 0).toFixed(2)}</div>
                       </div>
+                        </>
+                      )}
+
+
+                      
+
+
+
                       <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                         <div className="text-gray-400">Total</div>
                         <div className="text-gray-900 font-bold">₹{(order.totalAmount ?? 0).toFixed(2)}</div>

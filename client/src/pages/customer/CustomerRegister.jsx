@@ -46,7 +46,12 @@ export default function CustomerRegister() {
         toast.success(`Welcome, ${data.customer.username}!`);
         const returnUrl = sessionStorage.getItem("menuReturnUrl");
         sessionStorage.removeItem("menuReturnUrl");
-        navigate(returnUrl && returnUrl.startsWith("/menu/") ? returnUrl : "/");
+
+        // navigate(returnUrl && returnUrl.startsWith("/menu/") ? returnUrl : "/");
+
+        // new
+        navigate(returnUrl && (returnUrl.startsWith("/menu/") || /^\/[^/]+\/menu\/[^/]+/.test(returnUrl)) ? returnUrl : "/");
+
       } else {
         toast.error(data.message);
       }

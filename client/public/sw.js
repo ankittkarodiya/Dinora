@@ -39,13 +39,17 @@ self.addEventListener("notificationclick", (event) => {
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       // if the admin app is already open in some tab/window, just focus it
       for (const client of clientList) {
-        if (client.url.includes("/restaurant/") && "focus" in client) {
+        // if (client.url.includes("/restaurant/") && "focus" in client) {
+
+        // new
+        if (/^\/[^/]+\/(dashboard|categories|menu|tables|orders|counter|reviews|analytics|settings)\/?$/.test(new URL(client.url).pathname) && "focus" in client) {
           return client.focus();
         }
       }
       // otherwise, open a fresh tab straight to Orders
       if (clients.openWindow) {
-        return clients.openWindow("/restaurant/orders");
+        // return clients.openWindow("/restaurant/orders");
+        return clients.openWindow("/app?to=orders");
       }
     })
   );

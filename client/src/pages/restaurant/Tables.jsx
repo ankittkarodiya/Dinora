@@ -169,12 +169,18 @@ export default function Tables() {
   // builds the actual scannable QR image URL for a given table, via a free third-party QR generation API
   const qrUrl = (tableId) =>
     `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`,
+      // `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`,
+
+      // new
+      `${window.location.origin}/${restaurant?.slug}/menu/${tableId}`,
+
     )}&bgcolor=ffffff&color=1d1a17&margin=10`;
 
   // the actual customer-facing menu URL that QR code points to
   const menuUrl = (tableId) =>
-    `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`;
+    // `${window.location.origin}/menu/${restaurant?.slug}/${tableId}`;
+    // new
+    `${window.location.origin}/${restaurant?.slug}/menu/${tableId}`;
 
   // ── QR printing ──────────────────────────────────────────────────────
   // Same invisible-iframe technique used for the kitchen slip elsewhere in
@@ -443,7 +449,10 @@ export default function Tables() {
               )} */}
 
               <div className="text-gray-400 text-xs mb-4 break-all bg-gray-50 rounded-lg px-3 py-2">
-                /menu/{restaurant?.slug}/{table._id}
+                {/* /menu/{restaurant?.slug}/{table._id} */}
+
+                {/* new */}
+                /{restaurant?.slug}/menu/{table._id}
               </div>
 
               {/* kiosk toggle — Pro only */}

@@ -62,6 +62,9 @@ export default function CartDrawer({
   const pendingRef = useRef(null); // { order, signature }
 
   // ── Single source of truth for the GST breakdown ──
+  // new
+  const hasGst = Number(gstPercent) > 0;
+
   const cgstPercent = gstPercent / 2;
   const sgstPercent = gstPercent / 2;
   const cgstAmount = (total * cgstPercent) / 100;
@@ -400,7 +403,9 @@ export default function CartDrawer({
             {items.length > 0 && (
               <div className="px-5 pt-4 pb-6 border-t border-line shrink-0">
                 <div className="bg-page border border-line rounded-2xl p-4 mb-4">
-                  <div className="flex justify-between text-muted text-sm mb-1.5">
+
+                  {hasGst && ( <>
+                    <div className="flex justify-between text-muted text-sm mb-1.5">
                     <span>Subtotal</span>
                     <span>₹{total.toFixed(2)}</span>
                   </div>
@@ -412,6 +417,15 @@ export default function CartDrawer({
                     <span>SGST ({sgstPercent}%)</span>
                     <span>₹{sgstAmount.toFixed(2)}</span>
                   </div>
+                  </> )}
+
+
+
+                  
+
+
+
+
                   <div className="flex justify-between text-ink font-bold text-base pt-2 border-t border-line">
                     <span>To Pay</span>
                     <span>₹{finalTotal.toFixed(2)}</span>
@@ -457,7 +471,9 @@ export default function CartDrawer({
                     <span className="text-ink font-semibold">₹{item.price * item.qty}</span>
                   </div>
                 ))}
-                <div className="flex justify-between text-muted text-xs mt-2 pt-2 border-t border-line">
+
+                {hasGst && ( <>
+                  <div className="flex justify-between text-muted text-xs mt-2 pt-2 border-t border-line">
                   <span>Subtotal</span>
                   <span>₹{total.toFixed(2)}</span>
                 </div>
@@ -469,6 +485,14 @@ export default function CartDrawer({
                   <span>SGST ({sgstPercent}%)</span>
                   <span>₹{sgstAmount.toFixed(2)}</span>
                 </div>
+                </> )}
+
+
+                
+
+
+
+
                 <div className="flex justify-between text-ink font-bold text-base pt-2 border-t border-line mt-1">
                   <span>Total</span>
                   <span>₹{finalTotal.toFixed(2)}</span>

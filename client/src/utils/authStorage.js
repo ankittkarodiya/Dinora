@@ -7,6 +7,16 @@ const USER_KEY = (slug) => `dinora_user:${slug}`;
 
 // URL names that belong to the app itself. A restaurant can never use these.
 // Keep this list identical to RESERVED_SLUGS on the server.
+// export const RESERVED_SEGMENTS = [
+//   "login", "register", "register-verification", "verification",
+//   "forgot-password", "verify-email", "change-password", "menu",
+//   "customer", "superadmin", "restaurant", "setup", "api", "admin",
+//   "dashboard", "settings", "orders", "tables", "analytics", "reviews",
+//   "categories", "counter", "about", "pricing", "contact", "terms",
+//   "privacy", "help", "support", "assets", "static", "new", "www",
+// ];
+
+// new
 export const RESERVED_SEGMENTS = [
   "login", "register", "register-verification", "verification",
   "forgot-password", "verify-email", "change-password", "menu",
@@ -14,7 +24,10 @@ export const RESERVED_SEGMENTS = [
   "dashboard", "settings", "orders", "tables", "analytics", "reviews",
   "categories", "counter", "about", "pricing", "contact", "terms",
   "privacy", "help", "support", "assets", "static", "new", "www",
+  "app", "privacy-policy", "terms-and-conditions", "refund-policy",
 ];
+
+
 
 // "/pizza-hub/orders" -> "pizza-hub"   ("/setup" -> "setup")
 export const getAdminSlug = () => window.location.pathname.split("/")[1] || "";
@@ -23,11 +36,23 @@ export const getAdminSlug = () => window.location.pathname.split("/")[1] || "";
 export const adminPath = (page = "dashboard", slug = getAdminSlug()) => `/${slug}/${page}`;
 
 // true for "/pizza-hub/..." and "/setup", false for login, menu, landing...
+// export const isAdminPath = (pathname) => {
+//   const seg = pathname.split("/")[1];
+//   if (!seg) return false;
+//   return seg === "setup" || !RESERVED_SEGMENTS.includes(seg);
+// };
+
+
+// new
 export const isAdminPath = (pathname) => {
-  const seg = pathname.split("/")[1];
+  const parts = pathname.split("/");
+  const seg = parts[1];
   if (!seg) return false;
+  if (parts[2] === "menu" && parts.length > 3) return false; // customer menu: /restro/menu/<table>
   return seg === "setup" || !RESERVED_SEGMENTS.includes(seg);
 };
+
+
 
 export const getToken = (slug = getAdminSlug()) =>
   slug ? localStorage.getItem(TOKEN_KEY(slug)) : null;
@@ -71,4 +96,27 @@ export const promoteSetupSession = (slug) => {
   const user = getUser("setup");
   if (token && user) saveSession(slug, token, user);
   clearSession("setup");
+};
+
+
+
+// new
+// ── remembers the restaurant used last, so the installed app can reopen it ──
+const LAST_KEY = "dinora_last_slug";
+
+export const rememberSlug = (slug) => {
+  if (slug && slug !== "setup" && slug !== "superadmin") localStorage.setItem(LAST_KEY, slug);
+};
+
+export const findStartSlug = () => {
+  const last = localStorage.getItem(LAST_KEY);
+  if (last && getToken(last) && getUser(last)) return last;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("dinora_token:")) {
+      const s = k.slice("dinora_token:".length);
+      if (s !== "setup" && s !== "superadmin" && getUser(s)) return s;
+    }
+  }
+  return null;
 };

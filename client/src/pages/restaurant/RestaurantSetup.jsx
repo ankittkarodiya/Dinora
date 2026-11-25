@@ -144,7 +144,8 @@ export default function RestaurantSetup() {
             phone: data.restaurant.phone || "",
             address: data.restaurant.address || "",
             gstNumber: data.restaurant.gstNumber || "",
-            gstPercent: String(data.restaurant.gstPercent || "5"),
+            // gstPercent: String(data.restaurant.gstPercent || "5"),
+            gstPercent: String(data.restaurant.gstPercent ?? "5"),
           });
           setStep("plan"); // skip straight to plan selection — their info is already known
         }
@@ -209,8 +210,9 @@ export default function RestaurantSetup() {
     }
 
     const gstPercentNum = Number(form.gstPercent);
-    if (isNaN(gstPercentNum) || gstPercentNum < 0 || gstPercentNum > 28) {
-      toast.error("Enter a valid GST % (0–28)");
+    if (isNaN(gstPercentNum) || gstPercentNum < 0 || gstPercentNum > 100) {
+      // toast.error("Enter a valid GST % (0–28)");
+      toast.error("Enter a valid GST % (0–100)");
       return;
     }
     // gstNumber intentionally has NO check here — it's the one optional field
@@ -426,7 +428,10 @@ export default function RestaurantSetup() {
                 className="flex rounded-xl border border-gray-200 bg-gray-50 overflow-hidden text-gray-900 placeholder-gray-400 outline-none focus-within:border-blue-600 focus-within:ring-0"
                 >
                   <span className="px-3 py-3 text-gray-400 text-sm border-r border-gray-200 bg-gray-100">
-                    /menu/
+                    {/* /menu/ */}
+
+                    {/* new */}
+                    dinora.in/
                   </span>
                   <input
                     type="text"
