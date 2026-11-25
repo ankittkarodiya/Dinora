@@ -51,6 +51,10 @@ const uploadRoutes = require("./routes/uploadRoutes");
 // for web-push notifications
 const pushRoutes = require("./routes/pushRoutes");
 
+// new for demo request
+const demoRoutes = require("./routes/demoRoutes");
+
+
 app.use("/api/auth", authRoutes);
 app.use("/api/restaurant", restaurantRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -64,6 +68,10 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/push", pushRoutes);
+
+// new for demo request
+app.use("/api/demo-requests", demoRoutes);
+
 
 // ── Health Check ──────────────────────────────────────────
 app.get("/", (req, res) => {

@@ -31,6 +31,12 @@ import Analytics from "../pages/restaurant/Analytics";
 import Settings from "../pages/restaurant/Settings";
 
 import LandingPage from "../pages/LandingPage";
+// new for policies
+import PrivacyPolicy from "../pages/legal/PrivacyPolicy";
+import TermsAndConditions from "../pages/legal/TermsAndConditions";
+import RefundPolicy from "../pages/legal/RefundPolicy";
+import ContactUs from "../pages/legal/ContactUs";
+import AppEntry from "../pages/AppEntry";
 
 const SuperAdminDashboard = () => (
   <div style={{ color: "#fff", padding: 40 }}>
@@ -65,6 +71,13 @@ export default function AppRoutes() {
       <Route path="/verify-email/:email" element={<VerifyEmail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/change-password/:email" element={<ChangePassword />} />
+
+      {/* new */}
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      <Route path="/refund-policy" element={<RefundPolicy />} />
+      <Route path="/contact" element={<ContactUs />} />
+      <Route path="/app" element={<AppEntry />} />
 
 
       {/* <Route path="/customer" element={<CustomerDashboard />} /> */}

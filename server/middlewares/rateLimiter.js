@@ -33,7 +33,21 @@ const generalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { authLimiter, paymentLimiter, generalLimiter };
+
+// new
+// Demo requests from the landing page: a few per hour per visitor is plenty
+const demoLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  skip: skipPreflight,
+  message: { success: false, message: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { authLimiter, paymentLimiter, generalLimiter, demoLimiter };
+
+// module.exports = { authLimiter, paymentLimiter, generalLimiter };
 
 
 

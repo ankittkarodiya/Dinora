@@ -30,7 +30,7 @@ const createRestaurant = async (req, res) => {
       "customer", "superadmin", "restaurant", "setup", "api", "admin",
       "dashboard", "settings", "orders", "tables", "analytics", "reviews",
       "categories", "counter", "about", "pricing", "contact", "terms",
-      "privacy", "help", "support", "assets", "static", "new", "www",
+      "privacy", "help", "support", "assets", "static", "new", "www", "app", "privacy-policy", "terms-and-conditions", "refund-policy",
     ];
     const cleanSlug = String(slug || "").trim().toLowerCase();
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cleanSlug)) {
