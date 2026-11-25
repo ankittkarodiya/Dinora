@@ -15,62 +15,29 @@ import toast from "react-hot-toast";
 
 // new
 import { promoteSetupSession } from "../../utils/authStorage";
+import { PLAN_NAMES, PLAN_FEATURES } from "../../config/plans";
 
 
 const PLANS = [
   {
     id: "basic",
-    name: "Basic",
+    name: PLAN_NAMES.basic,
     monthlyPrice: 699,
     yearlyPrice: 6999,
     color: "border-blue-200 bg-blue-50",
     selectedColor: "border-blue-600 bg-blue-50",
     badge: null,
-    // features: [
-    //   "QR ordering system",
-    //   "Menu management",
-    //   "Up to 10 tables",
-    //   "Order management",
-    //   "Bill printing",
-    //   "Order tracking for customers",
-    //   "Cash & online payments",
-    // ],
-    features: [
-      "QR code generation for every table",
-      "Digital menu with categories and photos",
-      "Veg/Non-veg tagging and bestseller marking",
-      "Real-time order tracking for kitchen and customers",
-      "Kitchen order dashboard",
-      "Printable kitchen slips with GST breakdown",
-      "Table management",
-      "Order history with date-range filtering",
-      "Cash and online payments (your own Razorpay)",
-      "Up to 15 tables",
-    ],
+    features: PLAN_FEATURES.basic,
   },
   {
     id: "pro",
-    name: "Pro",
+    name: PLAN_NAMES.pro,
     monthlyPrice: 1299,
     yearlyPrice: 12999,
     color: "border-purple-200 bg-purple-50",
     selectedColor: "border-purple-600 bg-purple-50",
     badge: "Most Popular",
-    // features: [
-    //   "Everything in Basic",
-    //   "Analytics dashboard",
-    //   "Customer reviews",
-    //   "Up to 30 tables",
-    // ],
-    features: [
-    "Everything in Basic",
-    "Customer reviews and dish ratings",
-    "Top-rated dishes ranking",
-    "Revenue and order trend charts for 7/14/30 days or custom range",
-    "Payment method breakdown (cash vs online)",
-    "Overall rating summary with star distribution",
-    "Up to 30 tables",
-    ],
+    features: PLAN_FEATURES.pro,
   },
 ];
 

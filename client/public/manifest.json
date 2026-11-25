@@ -5,9 +5,11 @@
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#1d1a17",
-  "theme_color": "#1d1a17",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait-primary",
+  "handle_links": "not-preferred",
+  
   "icons": [
     {
       "src": "/icons/favicon (1).png",

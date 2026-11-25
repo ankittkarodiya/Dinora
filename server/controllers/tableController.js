@@ -62,7 +62,7 @@ const createTable = async (req, res) => {
 
     // const table = await Table.create({ restaurantId, name, capacity });
     const table = await Table.create({ restaurantId, name });
-    
+
     res.status(201).json({ success: true, table });
   } catch (error) {
     res.status(500).json({ success: false, message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
@@ -86,7 +86,7 @@ const createTable = async (req, res) => {
 //         return res.status(403).json({
 //           success: false,
 //           code: "PRO_REQUIRED",
-//           message: "Self-ordering kiosk is a Pro feature. Upgrade your plan in Settings to use it.",
+//           message: "Self-ordering kiosk is a Prime feature. Upgrade your plan in Settings to use it.",
 //         });
 //       }
 //       // 2) a kiosk has NO cash option, so online payments must genuinely work
@@ -130,7 +130,7 @@ const generateKioskTable = async (req, res) => {
       return res.status(403).json({
         success: false,
         code: "PRO_REQUIRED",
-        message: "Self-ordering kiosk is a Pro feature. Upgrade your plan in Settings to use it.",
+        message: "Self-ordering kiosk is a Prime feature. Upgrade your plan in Settings to use it.",
       });
     }
     if (!restaurant.razorpayLinked) {

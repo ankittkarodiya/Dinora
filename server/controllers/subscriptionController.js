@@ -14,12 +14,12 @@ const { encrypt } = require("../utils/encryption");
 
 const PLANS = {
   basic: {
-    monthly: { price: 699, days: 30, name: "Basic (Monthly)" },
-    yearly:  { price: 6999, days: 365, name: "Basic (Yearly)" },
+    monthly: { price: 699, days: 30, name: "Starter (Monthly)" },
+    yearly:  { price: 6999, days: 365, name: "Starter (Yearly)" },
   },
   pro: {
-    monthly: { price: 1299, days: 30, name: "Pro (Monthly)" },
-    yearly:  { price: 12999, days: 365, name: "Pro (Yearly)" },
+    monthly: { price: 1299, days: 30, name: "Prime (Monthly)" },
+    yearly:  { price: 12999, days: 365, name: "Prime (Yearly)" },
   },
 };
 

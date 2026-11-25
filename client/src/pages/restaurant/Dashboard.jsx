@@ -142,7 +142,7 @@ export default function Dashboard() {
     completedToday.length > 0
       ? Math.round(completedToday.reduce((s, o) => s + o.totalAmount, 0) / completedToday.length)
       : 0;
-      
+
 
   const pendingOrders = orders.filter((o) => o.status === "Pending").length;
   const preparingOrders = orders.filter((o) => o.status === "Preparing").length;
@@ -294,14 +294,14 @@ export default function Dashboard() {
         <StatCard
           icon={<Star className="w-5 h-5" />}
           label="Avg Rating"
-          value={isPro ? overallAvg : "Pro"}
+          value={isPro ? overallAvg : "Prime"}
           sub={isPro ? `${reviews.length} review${reviews.length !== 1 ? "s" : ""}` : "Upgrade to unlock"}
           tone="warn"
         />
         <StatCard
           icon={<MessageSquare className="w-5 h-5" />}
           label="Total Reviews"
-          value={isPro ? reviews.length : "Pro"}
+          value={isPro ? reviews.length : "Prime"}
           sub={isPro ? (reviews.length > 0 ? `avg ${overallAvg} ★` : "no reviews yet") : "Upgrade to unlock"}
           tone="info"
         />

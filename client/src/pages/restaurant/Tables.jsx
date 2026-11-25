@@ -390,7 +390,7 @@ export default function Tables() {
             One QR for your counter or entrance. Customers order and pay online on their own, no table needed.
           </p>
           {!isPro && (
-            <p className="text-gray-400 text-xs mt-1">Pro feature. Upgrade in Settings to use it.</p>
+            <p className="text-gray-400 text-xs mt-1">Prime feature. Upgrade in Settings to use it.</p>
           )}
         </div>
         {isPro &&

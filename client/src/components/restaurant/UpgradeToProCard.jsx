@@ -9,9 +9,9 @@ export default function UpgradeToProCard({ featureName = "This feature" }) {
   return (
     <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-10 text-center">
       <div className="text-4xl mb-3">🔒</div>
-      <div className="text-white font-bold text-lg mb-2">Pro Feature</div>
+      <div className="text-white font-bold text-lg mb-2">Prime Feature</div>
       <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
-        {featureName} is available on the Pro plan. Upgrade to unlock it.
+        {featureName} is available on the Prime plan. Upgrade to unlock it.
       </p>
       <button
         onClick={() => 
@@ -23,7 +23,7 @@ export default function UpgradeToProCard({ featureName = "This feature" }) {
         }
         className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
       >
-        Upgrade to Pro →
+        Upgrade to Prime →
       </button>
     </div>
   );

@@ -38,7 +38,7 @@ const requireFeature = (featureKey) => (req, res, next) => {
   if (!req.planLimits?.[featureKey]) {
     return res.status(403).json({
       success: false,
-      message: `This feature requires the Pro plan.`,
+      message: `This feature requires the Prime plan.`,
       code: "FEATURE_LOCKED",
     });
   }

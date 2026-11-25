@@ -28,43 +28,25 @@ import { SOUND_PRESETS, playSound } from "../../utils/notificationSounds";
 import { registerServiceWorker, subscribeToPush, unsubscribeFromPush } from "../../utils/pushNotifications";
 import { subscribePushApi, unsubscribePushApi } from "../../api/pushApi";
 
+// new for plans
+import "../../config/plans"
+
 
 const PLANS = [
   {
     id: "basic",
-    name: "Basic",
+    name: PLAN_NAMES.basic,
     monthlyPrice: 699,
     yearlyPrice: 6999,
-    features: [
-      "QR code generation for every table",
-      "Digital menu with categories and photos",
-      "Veg/Non-veg tagging and bestseller marking",
-      "Real-time order tracking for kitchen and customers",
-      "Kitchen order dashboard",
-      "Printable kitchen slips with GST breakdown",
-      "Auto-assigned order tokens (recycles completed numbers)",
-      "Table management",
-      "Order history with date-range filtering",
-      "Cash and online payments (your own Razorpay)",
-      "Up to 15 tables",
-    ],
+    features: PLAN_FEATURES.basic,
   },
   {
     id: "pro",
-    name: "Pro",
+    name: PLAN_NAMES.pro,
     monthlyPrice: 1299,
     yearlyPrice: 12999,
     badge: "Most Popular",
-    features: [
-      "Everything in Basic",
-      "Self-ordering kiosk mode (customers order & pay at the counter)",
-      "Customer reviews and dish ratings",
-      "Top-rated dishes ranking",
-      "Revenue and order trend charts for 7/14/30 days or custom range",
-      "Payment method breakdown (cash vs online)",
-      "Overall rating summary with star distribution",
-      "Up to 30 tables",
-    ],
+    features: PLAN_FEATURES.pro,
   },
 ];
 
@@ -661,7 +643,7 @@ export default function Settings() {
             </div>
             <p className="text-gray-600 text-xs leading-relaxed mb-4">
               Link your own Razorpay account so customer payments go straight to
-              you, not through us. Required for the Pro self-ordering kiosk.
+              you, not through us. Required for the Prime self-ordering kiosk.
             </p>
             <form onSubmit={handleSaveRazorpay} className="space-y-3">
               <input
@@ -745,7 +727,8 @@ export default function Settings() {
                 Play sound for new orders
                 {!notificationSoundAllowed && (
                   <span className="block text-gray-400 text-xs font-normal mt-0.5">
-                    Upgrade to Pro to enable
+                    {/* Upgrade to Pro to enable */}
+                    Upgrade to Prime to enable
                   </span>
                 )}
               </span>
