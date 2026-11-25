@@ -350,7 +350,7 @@ function LayoutContent({ children }) {
               fontFamily: "'Outfit', sans-serif",
             }}
           >
-            {restaurant?.name || "Dinora"}
+            {/* {restaurant?.name || "Dinora"} */}
           </h1>
 
           {pendingCount > 0 ? (
