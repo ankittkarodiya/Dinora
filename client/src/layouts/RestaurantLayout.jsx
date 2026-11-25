@@ -28,7 +28,7 @@ import {
 import toast from "react-hot-toast";
 
 // new
-import { adminPath, getUser, clearSession } from "../utils/authStorage";
+import { adminPath, getUser, clearSession, getAdminSlug } from "../utils/authStorage";
 import { disconnectSocket } from "../utils/socket";
 
 
@@ -93,6 +93,20 @@ function LayoutContent({ children }) {
   // new so other restro data cant be seen by any other restro
   const queryClient = useQueryClient();
 
+
+  // new for pwa fix
+  // Give this restaurant's admin pages their own installable app (scope: /<slug>/).
+  // Leaving the admin area removes it, so the landing page is never installable/captured.
+  useEffect(() => {
+    const slug = getAdminSlug();
+    if (!slug) return;
+    const link = document.createElement("link");
+    link.rel = "manifest";
+    link.crossOrigin = "anonymous";
+    link.href = `${import.meta.env.VITE_API_URL}/public/manifest/${slug}`;
+    document.head.appendChild(link);
+    return () => link.remove();
+  }, []);
 
 
 

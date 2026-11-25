@@ -12,7 +12,7 @@ const Customer = require("../models/Customer");
 
 // new
 const { sendNewOrderPush } = require("../utils/notifyKitchen");
-
+const allowedOrigins = require("../config/allowedOrigins");
 
 const getMenu = async (req, res) => {
   try {
@@ -452,6 +452,54 @@ const getCustomerOrderHistory = async (req, res) => {
   }
 };
 
+
+// new
+// GET /api/public/manifest/:slug
+// A per-restaurant web-app manifest. Its scope is only "/<slug>/", so the installed
+// app captures that restaurant's pages and NOT the landing page or other dinora.in links.
+const getRestaurantManifest = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({
+      slug: String(req.params.slug || "").toLowerCase(),
+    }).select("name slug");
+    if (!restaurant) return res.status(404).json({ message: "Not found" });
+
+    const origin = allowedOrigins.includes(req.headers.origin) ? req.headers.origin : "https://www.dinora.in";
+    const icon = (file, sizes, purpose = "any") => ({
+      src: `${origin}/icons/${encodeURI(file)}`,
+      sizes,
+      type: "image/png",
+      purpose,
+    });
+
+    res.set("Content-Type", "application/manifest+json");
+    res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    res.set("Cache-Control", "public, max-age=3600");
+    res.send(
+      JSON.stringify({
+        id: `${origin}/${restaurant.slug}/`,
+        name: `${restaurant.name} · Dinora`,
+        short_name: restaurant.name.slice(0, 12),
+        description: `Admin dashboard for ${restaurant.name}`,
+        start_url: `${origin}/${restaurant.slug}/dashboard`,
+        scope: `${origin}/${restaurant.slug}/`,
+        display: "standalone",
+        orientation: "portrait-primary",
+        background_color: "#ffffff",
+        theme_color: "#ffffff",
+        icons: [
+          icon("icon-192 (1).png", "192x192"),
+          icon("icon-512 (1).png", "512x512"),
+          icon("icon-maskable-512 (1).png", "512x512", "maskable"),
+        ],
+      }),
+    );
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+
 module.exports = {
   getMenu,
   createSession,
@@ -462,4 +510,5 @@ module.exports = {
   submitReview,
   getItemReviews,
   getCustomerOrderHistory,
+  getRestaurantManifest,
 };
