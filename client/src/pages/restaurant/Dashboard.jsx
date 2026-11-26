@@ -243,7 +243,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           icon={<HandCoins className="w-5 h-5" />}
-          label="Cash to Collect"
+          label="Payments to Collect"
           value={`₹${cashPendingAmount.toLocaleString()}`}
           sub={`${cashPending.length} order${cashPending.length !== 1 ? "s" : ""} served, unpaid`}
           tone="ok"

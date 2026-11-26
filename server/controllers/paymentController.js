@@ -27,14 +27,14 @@ const preflightCheck = async (req, res) => {
     if (restaurant.subscriptionPlan === "trial" || !restaurant.subscriptionPlan) {
       return res.status(400).json({
         success: false, code: "FEATURE_LOCKED",
-        message: "This restaurant hasn't activated online payments yet. Please pay by cash.",
+        message: "This restaurant hasn't activated online payments yet. Please choose Pay Later instead.",
       });
     }
 
     if (!restaurant.razorpayLinked || !restaurant.razorpayKeyId || !restaurant.razorpayKeySecret) {
       return res.status(400).json({
         success: false, code: "RAZORPAY_NOT_LINKED",
-        message: "This restaurant hasn't set up online payments yet. Please pay by cash.",
+        message: "This restaurant hasn't set up online payments yet. Please choose Pay Later instead.",
       });
     }
 
@@ -46,7 +46,7 @@ const preflightCheck = async (req, res) => {
       console.error("Preflight decrypt failed:", decErr.message);
       return res.status(400).json({
         success: false, code: "RAZORPAY_KEY_INVALID",
-        message: "This restaurant's payment setup needs attention. Please pay by cash.",
+        message: "This restaurant's payment setup needs attention. Please choose Pay Later instead.",
       });
     }
 
@@ -57,7 +57,7 @@ const preflightCheck = async (req, res) => {
       console.error("Preflight Razorpay auth failed:", rzErr?.error?.description || rzErr.message);
       return res.status(400).json({
         success: false, code: "RAZORPAY_KEY_INVALID",
-        message: "This restaurant's payment setup is currently invalid. Please pay by cash.",
+        message: "This restaurant's payment setup is currently invalid. Please choose Pay Later instead.",
       });
     }
 
@@ -79,10 +79,10 @@ const createPaymentOrder = async (req, res) => {
     }
 
     if (restaurant.subscriptionPlan === "trial" || !restaurant.subscriptionPlan) {
-      return res.status(400).json({ success: false, code: "FEATURE_LOCKED", message: "This restaurant hasn't activated online payments yet. Please pay by cash." });
+      return res.status(400).json({ success: false, code: "FEATURE_LOCKED", message: "This restaurant hasn't activated online payments yet. Please choose Pay Later instead." });
     }
     if (!restaurant.razorpayLinked || !restaurant.razorpayKeyId || !restaurant.razorpayKeySecret) {
-      return res.status(400).json({ success: false, code: "RAZORPAY_NOT_LINKED", message: "This restaurant hasn't set up online payments yet. Please pay by cash." });
+      return res.status(400).json({ success: false, code: "RAZORPAY_NOT_LINKED", message: "This restaurant hasn't set up online payments yet. Please choose Pay Later instead." });
     }
 
     let decryptedSecret;
@@ -91,7 +91,7 @@ const createPaymentOrder = async (req, res) => {
       if (!decryptedSecret) throw new Error("empty");
     } catch (decErr) {
       console.error("createPaymentOrder decrypt failed:", decErr.message);
-      return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "This restaurant's payment setup is invalid. Please pay by cash." });
+      return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "This restaurant's payment setup is invalid. Please choose Pay Later instead." });
     }
 
     // charge only for the specific order being paid — not all unpaid orders
@@ -118,7 +118,7 @@ const createPaymentOrder = async (req, res) => {
       });
     } catch (rzErr) {
       console.error("Razorpay order creation failed:", rzErr?.error?.description || rzErr.message);
-      return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "Payment setup is currently invalid. Please pay by cash." });
+      return res.status(400).json({ success: false, code: "RAZORPAY_KEY_INVALID", message: "Payment setup is currently invalid. Please choose Pay Later instead." });
     }
 
     res.json({ success: true, order, keyId: restaurant.razorpayKeyId });
@@ -197,7 +197,7 @@ const requestCashPayment = async (req, res) => {
       { sessionId, status: { $nin: ["Cancelled", "Completed"] } },
       { paymentMethod: "cash" }
     );
-    res.json({ success: true, message: "Cash payment requested" });
+    res.json({ success: true, message: "Pay Later requested" });
   } catch (error) {
     res.status(500).json({ success: false, code: "SERVER_ERROR", message: process.env.NODE_ENV === "production" ? "Something went wrong" : error.message });
   }

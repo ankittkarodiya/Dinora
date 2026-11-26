@@ -28,7 +28,7 @@ export default function PaymentModal({ sessionId, onClose, onSuccess }) {
     setPaying(true);
     try {
       if (total < 1) {
-        toast.error("Total must be at least ₹1 to pay online.");
+        toast.error("Total must be at least ₹1 to pay now.");
         setPaying(false);
         return;
       }
@@ -86,7 +86,7 @@ export default function PaymentModal({ sessionId, onClose, onSuccess }) {
     setPaying(true);
     try {
       await requestCashPaymentApi({ sessionId });
-      toast.success("Cash payment recorded. Please pay at the counter.");
+      toast.success("Noted! Please pay after your meal.");
       onSuccess();
     } catch {
       toast.error("Something went wrong.");
@@ -147,7 +147,7 @@ export default function PaymentModal({ sessionId, onClose, onSuccess }) {
                 }`}
               >
                 <div className="text-2xl mb-1">💳</div>
-                <div className="text-white font-bold text-sm">Online</div>
+                <div className="text-white font-bold text-sm">Pay now</div>
                 <div className="text-slate-400 text-xs">UPI / Card / Net Banking</div>
               </button>
 
@@ -160,8 +160,8 @@ export default function PaymentModal({ sessionId, onClose, onSuccess }) {
                 }`}
               >
                 <div className="text-2xl mb-1">💵</div>
-                <div className="text-white font-bold text-sm">Cash</div>
-                <div className="text-slate-400 text-xs">Pay at counter</div>
+                <div className="text-white font-bold text-sm">Pay Later</div>
+                <div className="text-slate-400 text-xs">PAt the counter, after your meal</div>
               </button>
             </div>
 
@@ -171,21 +171,22 @@ export default function PaymentModal({ sessionId, onClose, onSuccess }) {
                 disabled={paying}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-base transition-all disabled:opacity-50"
               >
-                {paying ? "Opening payment..." : `Pay ₹${total} Online →`}
+                {paying ? "Opening payment..." : `Pay ₹${total} Now →`}
               </button>
             )}
 
             {payMethod === "cash" && (
               <div className="space-y-3">
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-amber-300 text-sm text-center">
-                  Please visit the counter to pay ₹{total} in cash
+                  {/* Please visit the counter to pay ₹{total} in cash */}
+                  Please pay ₹{total} after your meal
                 </div>
                 <button
                   onClick={handleCashPayment}
                   disabled={paying}
                   className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-base transition-all disabled:opacity-50"
                 >
-                  {paying ? "Recording..." : "Confirm Cash Payment →"}
+                  {paying ? "Recording..." : "Confirm Pay Later →"}
                 </button>
               </div>
             )}

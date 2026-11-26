@@ -161,7 +161,7 @@ export default function CartDrawer({
     try {
       const payData = await createPaymentOrderPreflightApi({ restaurantId, amount: finalTotal });
       if (!payData.success) {
-        const tail = isKiosk ? "Please ask the staff for help." : "Please pay by cash.";
+        const tail = isKiosk ? "Please ask the staff for help." : "Please choose Pay Later instead.";
         const messages = {
           FEATURE_LOCKED: `This restaurant hasn't activated online payments yet. ${tail}`,
           RAZORPAY_NOT_LINKED: `This restaurant hasn't set up online payments yet. ${tail}`,
@@ -531,7 +531,7 @@ export default function CartDrawer({
                   <div className="w-11 h-11 rounded-xl bg-ok-soft text-ok flex items-center justify-center text-xl font-bold">₹</div>
                   <div className="text-left">
                     <div className="text-ink font-bold text-sm">{payingCash ? "Processing..." : "Pay Later"}</div>
-                    <div className="text-muted text-xs">Hand over ₹{finalTotal.toFixed(2)} to staff</div>
+                    <div className="text-muted text-xs">Pay ₹{finalTotal.toFixed(2)} after your meal</div>
                   </div>
                 </button>
               )}

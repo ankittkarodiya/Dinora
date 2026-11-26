@@ -51,7 +51,8 @@ export default function TokenScreen({ token, amount, paid, tableName, seconds = 
         </div>
         {!paid && (
           <p className="text-muted text-xs leading-relaxed pt-2 border-t border-dashed border-line">
-            Please pay cash to the staff at your table or at the counter. Your bill closes once payment is confirmed.
+            {/* Please pay cash to the staff at your table or at the counter. Your bill closes once payment is confirmed. */}
+            Please pay after your meal. Your bill closes once the restaurant confirms your payment.
           </p>
         )}
       </div>

@@ -343,7 +343,7 @@ export default function Orders() {
               {cashPendingOrders.length}
             </div>
             <span className="text-gray-900 font-medium text-sm">
-              cash payment{cashPendingOrders.length > 1 ? "s" : ""} waiting confirmation
+              payment{cashPendingOrders.length > 1 ? "s" : ""} to collect
             </span>
           </div>
           <button

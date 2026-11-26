@@ -134,9 +134,9 @@ export default function Analytics() {
 
   const paymentData = data
     ? [
-        { name: "Online", value: data.paymentSplit.online },
-        { name: "Cash", value: data.paymentSplit.cash },
-        { name: "Unpaid", value: data.paymentSplit.unpaid },
+        { name: "Paid before dining", value: data.paymentSplit.online },
+        { name: "Paid after dining", value: data.paymentSplit.cash },
+        { name: "Awaiting payment", value: data.paymentSplit.unpaid },
       ].filter((d) => d.value > 0)
     : [];
 
@@ -303,9 +303,9 @@ export default function Analytics() {
 
             <StatCard
               icon={<CreditCard className="w-5 h-5" />}
-              label="Online Paid"
+              label="Paid before dining"
               value={data.paymentSplit.online}
-              sub={`${data.paymentSplit.cash} cash`}
+              sub={`${data.paymentSplit.cash} paid after dining`}
               tone="warn"
             />
           </div>
@@ -444,7 +444,8 @@ export default function Analytics() {
             {/* Payment Split */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5">
               <div className="text-gray-900 font-bold text-base mb-4">
-                Payment Methods
+                {/* Payment Methods */}
+                How guests paid
               </div>
 
               {paymentData.length === 0 ? (

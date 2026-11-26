@@ -55,7 +55,7 @@ const FEATURES = [
 
   { icon: Receipt, title: "GST-ready bills", desc: "Print bills with CGST and SGST. Don't charge GST? Set it to 0% and the bill drops every tax line." },
 
-  { icon: CreditCard, title: "Your money, your account", desc: "Link your own Razorpay. Online payments settle straight to you. Or they Pay Later at the counter." },
+  { icon: CreditCard, title: "Your money, your account", desc: "Link your own Razorpay. Online payments settle straight to you. Or they Pay Later after dining." },
 
   { icon: Link2, title: "A link of your own", desc: "Your restaurant gets its own address, like dinora.in/your-restaurant, to share anywhere." },
 
@@ -94,7 +94,7 @@ const FAQS = [
 
   { q: "Can I take orders at the counter too?", a: "Yes. The Counter Order screen lets your staff add items for a walk-in customer and print the bill. These orders count in your revenue like any other." },
 
-  { q: "How do online payments work?", a: "You link your own Razorpay account. Guests pay online and the money goes straight to you or Pay Later (they pay at the counter after their meal). Your dashboard keeps the two separate." },
+  { q: "How do payments work?", a: "You link your own Razorpay account. Guests pay online and the money goes straight to you or Pay Later (they pay at the counter after their meal). Your dashboard keeps the two separate." },
 
   { q: "I don't charge GST. Can I turn it off?", a: "Yes. Set GST to 0% in Settings and your bills will show no GST, CGST or SGST lines at all." },
 

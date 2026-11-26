@@ -16,6 +16,7 @@ export const PLAN_FEATURES = {
     "Auto-assigned order tokens",
     "Your own restaurant link: dinora.in/your-restaurant",
     "Cash and online payments (your own Razorpay)",
+    // "Online payments (your own Razorpay) or pay at the counter",
     "Order history with date filters",
     "Install as an app with push alerts for new orders",
   ],
@@ -25,7 +26,8 @@ export const PLAN_FEATURES = {
     "Customer reviews and dish ratings",
     "Top-rated dishes ranking",
     "Revenue and order trend analytics",
-    "Cash vs online payment breakdown",
+    // "Cash vs online payment breakdown",
+    "Paid before dining vs paid after dining breakdown",
     "Up to 30 tables",
   ],
 };
