@@ -43,17 +43,24 @@ const WAYS = [
     icon: MonitorSmartphone,
     title: "Self-order kiosk",
     desc: "One QR at your entrance. Guests order and pay online on their own and get a token number.",
+    // desc: "One QR at your entrance. Guests order and 'Pay Now' on their own and get a token number",
     pro: true,
   },
 ];
 
 const FEATURES = [
   { icon: UtensilsCrossed, title: "Menu with real photos", desc: "Categories, veg / non-veg tags, half and full portions and bestseller marks." },
+
   { icon: Zap, title: "Live kitchen tracking", desc: "New orders appear instantly with an alert. Guests watch their order move along." },
+
   { icon: Receipt, title: "GST-ready bills", desc: "Print bills with CGST and SGST. Don't charge GST? Set it to 0% and the bill drops every tax line." },
-  { icon: CreditCard, title: "Your money, your account", desc: "Link your own Razorpay. Online payments settle straight to you. Cash always works." },
+
+  { icon: CreditCard, title: "Your money, your account", desc: "Link your own Razorpay. Online payments settle straight to you. Or they Pay Later at the counter." },
+
   { icon: Link2, title: "A link of your own", desc: "Your restaurant gets its own address, like dinora.in/your-restaurant, to share anywhere." },
+
   { icon: Smartphone, title: "Install it like an app", desc: "Add Dinora to your phone's home screen and get push alerts for every new order." },
+
   { icon: BarChart3, title: "Reviews and analytics", desc: "See what sells, what guests rate highly and how revenue trends day by day.", pro: true },
 ];
 
@@ -84,17 +91,78 @@ const PLANS = [
 
 const FAQS = [
   { q: "Do my guests need to download an app?", a: "No. They scan the QR with their phone camera and the menu opens in the browser." },
+
   { q: "Can I take orders at the counter too?", a: "Yes. The Counter Order screen lets your staff add items for a walk-in customer and print the bill. These orders count in your revenue like any other." },
-  { q: "How do online payments work?", a: "You link your own Razorpay account. Guests pay online and the money goes straight to you. Guests can also pay by cash at the table." },
+
+  { q: "How do online payments work?", a: "You link your own Razorpay account. Guests pay online and the money goes straight to you or Pay Later (they pay at the counter after their meal). Your dashboard keeps the two separate." },
+
   { q: "I don't charge GST. Can I turn it off?", a: "Yes. Set GST to 0% in Settings and your bills will show no GST, CGST or SGST lines at all." },
+
   {
     q: `What is the founding offer?`,
     a: `The first ${FOUNDING_OFFER.spots} restaurants to join get the ${PLAN_NAMES.pro} plan free. It is not unlocked by signing up alone: book a demo and we will confirm the details and activate it for you.`,
   },
+
   { q: "Is there a free trial?", a: "Yes, you can start with a free trial before choosing a plan. No card is needed to start." },
 ];
 
 const fmt = (n) => "₹" + n.toLocaleString("en-IN");
+
+// new to showcase product
+// Product screenshot in a browser frame, with four callouts underneath
+function ProductShowcase() {
+  const points = [
+    { t: "Search and categories stay put", d: "Only the items scroll, so your staff never lose their place." },
+    { t: "Tap Add, then - 1 +", d: "Photo cards with half and full portions and the quantity right on the card." },
+    { t: "Pay now or Pay later", d: "Settle at the counter now, or serve first and confirm the payment later." },
+    { t: "Bill prints in one tap", d: "GST-ready, or no tax lines at 0%. It lands in your orders and revenue." },
+  ];
+  return (
+    <section id="product" className="scroll-mt-16 py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-5">
+        <div className="max-w-2xl">
+          <h2 className="text-4xl font-extrabold tracking-tight" style={HEAD}>Your whole counter, on one screen.</h2>
+          <p className="mt-3 text-gray-600 text-lg">
+            Photo menu on the left, the current order on the right. Built so a busy cashier can take an order in seconds.
+          </p>
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-gray-200 bg-gray-50 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)] overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 bg-white">
+            <span className="w-3 h-3 rounded-full bg-red-400" />
+            <span className="w-3 h-3 rounded-full bg-amber-400" />
+            <span className="w-3 h-3 rounded-full bg-green-400" />
+            <div className="ml-3 flex-1 max-w-md rounded-md bg-gray-100 text-xs text-gray-500 px-3 py-1.5 truncate">
+              app.dinora.in/your-restaurant/counter
+            </div>
+          </div>
+          <img
+            src="/landing/counter-order.webp"
+            alt="Dinora Counter Order screen: photo menu, categories, search and the current order"
+            width="2000"
+            height="1098"
+            loading="lazy"
+            className="w-full block"
+          />
+        </div>
+
+        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {points.map((p) => (
+            <div key={p.t} className="flex gap-3">
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-blue-600 shrink-0 flex items-center justify-center">
+                <Check className="w-3 h-3 text-white" strokeWidth={3} />
+              </span>
+              <div>
+                <div className="font-bold text-sm">{p.t}</div>
+                <p className="mt-1 text-sm text-gray-600 leading-relaxed">{p.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 // ─────────────────────────── small pieces ───────────────────────────
 function Logo({ size = "text-3xl" }) {
@@ -324,6 +392,7 @@ export default function LandingPage() {
   };
 
   const NAV = [
+    { id: "product", label: "Product" },
     { id: "ways", label: "How you sell" },
     { id: "features", label: "Features" },
     { id: "pricing", label: "Pricing" },
@@ -414,6 +483,11 @@ export default function LandingPage() {
           <HeroVisual />
         </div>
       </section>
+
+      {/* new for product showcase */}
+            <ProductShowcase />
+
+
 
       {/* ───────── three ways ───────── */}
       <section id="ways" className="scroll-mt-16 py-20 bg-[#f6f8fc]">

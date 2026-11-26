@@ -22,7 +22,13 @@ import {
   TabletSmartphone,
   LogOut,
   Menu,
+  // new to collapse side bar
+  PanelLeftClose,
+  PanelLeftOpen,
+  ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
@@ -77,6 +83,17 @@ function LayoutContent({ children }) {
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // new to collapse sidebar
+  // big screens: the sidebar can be hidden so pages get the full width (remembered)
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem("dinora_sidebar_collapsed") === "1");
+  const toggleCollapsed = () =>
+    setCollapsed((c) => {
+      localStorage.setItem("dinora_sidebar_collapsed", c ? "0" : "1");
+      return !c;
+    });
+
+
+
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // commenting them (both) out
@@ -204,15 +221,30 @@ function LayoutContent({ children }) {
           fixed top-0 left-0 h-full w-64 z-50 flex flex-col
           transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0
+          
+          ${collapsed ? "lg:-translate-x-full" : "lg:translate-x-0"}
         `}
+        // lg:translate-x-0
         style={{
           backgroundColor: "#ffffff",
           borderRight: "1px solid #e4e4e4",
         }}
       >
         {/* brand header */}
-        <div className="px-6 py-5" style={{ borderBottom: "1px solid #e4e4e4" }}>
+        {/* <div className="px-6 py-5" style={{ borderBottom: "1px solid #e4e4e4" }}> */}
+        {/* new */}
+        <div className="relative px-6 py-5" style={{ borderBottom: "1px solid #e4e4e4" }}>
+          <button
+            onClick={toggleCollapsed}
+            title="Hide sidebar"
+            aria-label="Hide sidebar"
+            className="hidden lg:flex absolute top-5 right-4 w-8 h-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 cursor-pointer transition-all duration-150"
+          >
+            {/* <PanelLeftClose className="w-5 h-5" /> */}
+            <ChevronsLeft className="w-5 h-5" />
+          </button>
+
+
           <h1
             className="text-2xl font-extrabold tracking-tight"
             style={{ fontFamily: "'Outfit', sans-serif" }}
@@ -340,7 +372,25 @@ function LayoutContent({ children }) {
       </aside>
 
       {/* ── MAIN CONTENT — light gray background ── */}
-      <div className="flex-1 flex flex-col min-h-screen min-w-0 lg:ml-64">
+      {/* <div className="flex-1 flex flex-col min-h-screen min-w-0 lg:ml-64"> */}
+      {/* new */}
+      <div className={`flex-1 flex flex-col min-h-screen min-w-0 transition-[margin] duration-300 ${collapsed ? "lg:ml-0" : "lg:ml-64"}`}>
+
+        {/* new to uncollapse sidebar */}
+        {collapsed && (
+          <button
+            onClick={toggleCollapsed}
+            title="Show sidebar"
+            aria-label="Show sidebar"
+            className="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 w-6 h-16 items-center justify-center rounded-r-xl bg-white border border-l-0 border-gray-200 shadow-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 cursor-pointer transition-all duration-150"
+          >
+            {/* <PanelLeftOpen className="w-4 h-4" /> */}
+            <ChevronsRight className="w-4 h-4" />
+          </button>
+        )}
+
+
+
         {/* mobile top bar — light theme */}
         <div
           className="lg:hidden sticky top-0 z-30 backdrop-blur-md px-4 py-3 flex items-center justify-between"
