@@ -219,7 +219,12 @@ const createCounterOrder = async (req, res) => {
       }
     }
 
-    const payMethod = paymentMethod === "online" ? "online" : "cash";
+    // const payMethod = paymentMethod === "online" ? "online" : "cash";
+    // new
+    // "online" = Pay now (paid right here at the counter)
+    // "cash"   = Pay later (served now, payment confirmed later from the Orders page)
+    const payLater = paymentMethod === "cash";
+    const payMethod = payLater ? "cash" : "online";
 
     // real prices from the DB — never trust the client
     const dbItems = await MenuItem.find({
@@ -314,11 +319,16 @@ const createCounterOrder = async (req, res) => {
     const session = await Session.create({
       restaurantId,
       tableId: table._id,
-      status: "completed",
+      // status: "completed",
+      // new
+      status: payLater ? "active" : "completed",
       totalAmount,
       paymentMethod: payMethod,
-      paymentStatus: "paid",
-      paidAt: now,
+      // paymentStatus: "paid",
+      // new
+      paymentStatus: payLater ? "pending" : "paid",
+      // paidAt: now,
+      paidAt: payLater ? null : now,
     });
 
     const order = await Order.create({
@@ -337,11 +347,14 @@ const createCounterOrder = async (req, res) => {
       gstPercent,
       gstAmount,
       totalAmount,
-      status: "Completed",
+      // status: "Completed",
+      // new
+      status: payLater ? "Served" : "Completed",
       acceptedAt: now,
       slipPrintedAt: now,
       paymentMethod: payMethod,
-      paymentStatus: "paid",
+      // paymentStatus: "paid",
+      paymentStatus: payLater ? "pending" : "paid",
       tokenNumber: null,
       tokenActive: false,
       visibleToKitchen: true,

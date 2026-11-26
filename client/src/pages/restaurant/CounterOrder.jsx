@@ -9,9 +9,14 @@ import { createCounterOrderApi } from "../../api/orderApi";
 import { useOrders } from "../../context/OrdersContext";
 import KitchenSlip from "../../components/admin/KitchenSlip";
 
+// const PAYMENT_OPTIONS = [
+//   { value: "cash", label: "Cash" },
+//   { value: "online", label: "UPI / Card" },
+// ];
+// new
 const PAYMENT_OPTIONS = [
-  { value: "cash", label: "Cash" },
-  { value: "online", label: "UPI / Card" },
+  { value: "online", label: "Pay now", hint: "Customer pays right now at the counter." },
+  { value: "cash", label: "Pay later", hint: "Served now. Confirm the payment later from the Orders page." },
 ];
 
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -78,7 +83,8 @@ export default function CounterOrder() {
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [payment, setPayment] = useState("cash");
+  // const [payment, setPayment] = useState("cash");
+  const [payment, setPayment] = useState("online");
   const [placing, setPlacing] = useState(false);
   const [billOrder, setBillOrder] = useState(null);
 
@@ -142,7 +148,8 @@ export default function CounterOrder() {
       setCart([]);
       setCustomerName("");
       setCustomerPhone("");
-      setPayment("cash");
+      // setPayment("cash");
+      setPayment("online");
       refetchOrders();
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not place the order");
@@ -370,7 +377,10 @@ export default function CounterOrder() {
             </div>
 
             <div className="mt-4">
-              <div className="text-xs font-medium text-gray-600 mb-2">Payment received via</div>
+              <div className="text-xs font-medium text-gray-600 mb-2">
+                {/* Payment received via */}
+                Payment
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {PAYMENT_OPTIONS.map((p) => (
                   <button
@@ -386,6 +396,13 @@ export default function CounterOrder() {
                   </button>
                 ))}
               </div>
+
+              {/* new */}
+              <p className="mt-2 text-xs text-gray-600">
+                {PAYMENT_OPTIONS.find((p) => p.value === payment)?.hint}
+              </p>
+
+
             </div>
 
             <button
