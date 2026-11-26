@@ -17,7 +17,7 @@ import KitchenSlip from "../../components/admin/KitchenSlip";
 const PAYMENT_OPTIONS = [
   { value: "online", label: "Pay now", hint: "Customer pays right now at the counter." },
 
-  { value: "cash", label: "Pay later", hint: "After the customer pays, confirm it from the Orders page." },
+  { value: "cash", label: "Pay later", hint: "Collect payment once the customer finishes dining." },
 ];
 
 const round2 = (n) => Math.round(n * 100) / 100;
