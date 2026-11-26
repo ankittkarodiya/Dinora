@@ -133,7 +133,7 @@ function ProductShowcase() {
             <span className="w-3 h-3 rounded-full bg-amber-400" />
             <span className="w-3 h-3 rounded-full bg-green-400" />
             <div className="ml-3 flex-1 max-w-md rounded-md bg-gray-100 text-xs text-gray-500 px-3 py-1.5 truncate">
-              app.dinora.in/your-restaurant/counter
+              dinora.in/your-restaurant/counter
             </div>
           </div>
           <img
