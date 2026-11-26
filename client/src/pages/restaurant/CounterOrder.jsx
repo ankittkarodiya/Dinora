@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Plus, Minus, Trash2, ShoppingCart } from "lucide-react";
+import { Search, Plus, Minus, Trash2, ShoppingCart, Info } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { getMenuItemsApi } from "../../api/menuItemApi";
@@ -16,7 +16,8 @@ import KitchenSlip from "../../components/admin/KitchenSlip";
 // new
 const PAYMENT_OPTIONS = [
   { value: "online", label: "Pay now", hint: "Customer pays right now at the counter." },
-  { value: "cash", label: "Pay later", hint: "Served now. Confirm the payment later from the Orders page." },
+
+  { value: "cash", label: "Pay later", hint: "After the customer pays, confirm it from the Orders page." },
 ];
 
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -86,6 +87,10 @@ export default function CounterOrder() {
   // const [payment, setPayment] = useState("cash");
   const [payment, setPayment] = useState("online");
   const [placing, setPlacing] = useState(false);
+
+  // new
+  const [hintFor, setHintFor] = useState(null); // which option's "i" is open (tap on phones)
+
   const [billOrder, setBillOrder] = useState(null);
 
   const visibleItems = useMemo(() => {
@@ -357,13 +362,16 @@ export default function CounterOrder() {
             </div>
 
             <div className="mt-4 space-y-2">
-              <div className="text-xs font-medium text-gray-600">Customer (optional: name, phone, both, or leave empty)</div>
+              <div className="text-xs font-medium text-gray-600">
+                {/* Customer (optional) */}
+                Customer <span className="font-normal text-gray-400">(optional)</span>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 <input
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Name"
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-600"
+                  className="w-full h-9 rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-600"
                 />
                 <input
                   value={customerPhone}
@@ -371,7 +379,7 @@ export default function CounterOrder() {
                   placeholder="Phone"
                   inputMode="numeric"
                   maxLength={13}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-600"
+                  className="w-full h-9 rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-600"
                 />
               </div>
             </div>
@@ -381,7 +389,8 @@ export default function CounterOrder() {
                 {/* Payment received via */}
                 Payment
               </div>
-              <div className="grid grid-cols-2 gap-2">
+
+              {/* <div className="grid grid-cols-2 gap-2">
                 {PAYMENT_OPTIONS.map((p) => (
                   <button
                     key={p.value}
@@ -397,18 +406,58 @@ export default function CounterOrder() {
                 ))}
               </div>
 
-              {/* new */}
+              {/* new 
               <p className="mt-2 text-xs text-gray-600">
                 {PAYMENT_OPTIONS.find((p) => p.value === payment)?.hint}
-              </p>
+              </p> */}
 
+              {/* newwww */}
+                <div className="grid grid-cols-2 gap-2">
+                {PAYMENT_OPTIONS.map((p) => (
+                  <div key={p.value} className="relative">
+                    <button
+                      onClick={() => setPayment(p.value)}
+                      className={`w-full h-9 rounded-md border pl-3 pr-8 text-sm font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] ${
+                        payment === p.value
+                          ? "bg-blue-600 border-blue-600 text-white"
+                          : "bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-100"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+
+                    {/* "i": hover (desktop) or tap (phone) to see what this option means */}
+                    <button
+                      type="button"
+                      aria-label={`What does ${p.label} mean?`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setHintFor((h) => (h === p.value ? null : p.value));
+                      }}
+                      onBlur={() => setHintFor(null)}
+                      className={`peer absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full cursor-pointer transition-colors ${
+                        payment === p.value ? "text-blue-100 hover:text-white" : "text-gray-500 hover:text-gray-900"
+                      }`}
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
+                    <div
+                      className={`pointer-events-none absolute bottom-full mb-2 w-56 rounded-md bg-gray-900 text-white text-xs leading-snug px-3 py-2 shadow-lg z-20 ${
+                        p.value === "online" ? "left-0" : "right-0"
+                      } ${hintFor === p.value ? "block" : "hidden"}`}
+                    >
+                      {p.hint}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
             </div>
 
             <button
               onClick={handlePlaceOrder}
               disabled={placing || cart.length === 0}
-              className="mt-4 w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 w-full py-3.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {/* {placing ? "Placing order..." : `Place order & print bill · ₹${total.toFixed(2)}`} */}
               {placing ? "Placing order..." : `Place order`}
